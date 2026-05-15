@@ -1,8 +1,9 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function PostReportPage() {
+  const router = useRouter();
   const [form, setForm] = useState({
     username: "",
     location: "",
@@ -17,10 +18,8 @@ export default function PostReportPage() {
 
   function handleCheckbox(e) {
     const value = e.target.value;
-
     setForm((prev) => {
       const exists = prev.issues.includes(value);
-
       return {
         ...prev,
         issues: exists
@@ -36,113 +35,77 @@ export default function PostReportPage() {
 
   function handleSubmit(e) {
     e.preventDefault();
-
-    console.log("SUBMITTED REPORT:", form);
-    alert("Report submitted!");
+    const params = new URLSearchParams({
+      username: form.username,
+      location: form.location,
+      description: form.description,
+      issues: form.issues.join(","),
+    });
+    router.push(`/post?${params}`);
   }
 
   return (
-    <div style={styles.wrapper}>
-      {/* Banner */}
-      <div style={styles.banner}>Post a Report</div>
+    <div className="page-column">
+      <div className="banner">Post a Report</div>
 
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <input
-          name="username"
-          placeholder="Username"
-          value={form.username}
-          onChange={handleChange}
-          style={styles.input}
-        />
-
-        <select
-          name="location"
-          value={form.location}
-          onChange={handleChange}
-          style={styles.input}
+      <div className="card">
+        <form
+          onSubmit={handleSubmit}
+          style={{ display: "flex", flexDirection: "column", gap: "12px" }}
         >
-          <option value="">Select location</option>
-          <option>Cape Town</option>
-          <option>Johannesburg</option>
-          <option>Durban</option>
-          <option>Pretoria</option>
-        </select>
+          <input
+            className="field"
+            name="username"
+            placeholder="Username"
+            value={form.username}
+            onChange={handleChange}
+          />
 
-        <textarea
-          name="description"
-          placeholder="Describe the scam"
-          value={form.description}
-          onChange={handleChange}
-          style={{ ...styles.input, height: "100px" }}
-        />
+          <select
+            className="field"
+            name="location"
+            value={form.location}
+            onChange={handleChange}
+          >
+            <option value="">Select location</option>
+            <option>Cape Town</option>
+            <option>Johannesburg</option>
+            <option>Durban</option>
+            <option>Pretoria</option>
+          </select>
 
-        <p>
-          <b>Did the scammer take any of the following?</b>
-        </p>
+          <textarea
+            className="field"
+            name="description"
+            placeholder="Describe the scam"
+            value={form.description}
+            onChange={handleChange}
+            style={{ height: "100px" }}
+          />
 
-        {["Money", "Bank Details", "Passwords", "Identity Info"].map((item) => (
-          <label key={item} style={styles.checkbox}>
-            <input type="checkbox" value={item} onChange={handleCheckbox} />
-            {item}
-          </label>
-        ))}
+          <p style={{ fontFamily: "Syne, sans-serif", fontWeight: 600 }}>
+            Did the scammer take any of the following?
+          </p>
 
-        <input type="file" onChange={handleFile} />
+          {["Money", "Bank Details", "Passwords", "Identity Info"].map(
+            (item) => (
+              <label
+                key={item}
+                style={{ display: "flex", gap: "10px", alignItems: "center" }}
+              >
+                <input type="checkbox" value={item} onChange={handleCheckbox} />
+                {item}
+              </label>
+            ),
+          )}
 
-        <button type="submit" style={styles.button}>
-          Submit
-        </button>
-      </form>
+          <input className="field" type="file" onChange={handleFile} />
+
+          <button className="btn-primary" type="submit">
+            Submit
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
-
-const styles = {
-  wrapper: {
-    maxWidth: "500px",
-    margin: "40px auto",
-    background: "white",
-    borderRadius: "15px",
-    overflow: "hidden",
-    fontFamily: "Arial",
-    boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-  },
-
-  banner: {
-    background: "#30C9E8",
-    padding: "20px",
-    color: "white",
-    fontSize: "24px",
-    textAlign: "center",
-    fontWeight: "bold",
-  },
-
-  form: {
-    padding: "20px",
-    display: "flex",
-    flexDirection: "column",
-    gap: "12px",
-  },
-
-  input: {
-    padding: "10px",
-    borderRadius: "8px",
-    border: "1px solid #ccc",
-  },
-
-  checkbox: {
-    display: "flex",
-    gap: "10px",
-    alignItems: "center",
-  },
-
-  button: {
-    background: "#30C9E8",
-    color: "white",
-    border: "none",
-    padding: "12px",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontWeight: "bold",
-  },
-};

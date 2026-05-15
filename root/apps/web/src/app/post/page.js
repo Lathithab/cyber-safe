@@ -1,67 +1,75 @@
 "use client";
 
 import { useState } from "react";
-
-const POST_DATA = {
-  user: {
-    name: "Amara Osei",
-    avatar: "AO",
-  },
-  content:
-    "Cape Town at golden hour never gets old. Table Mountain wrapped in clouds, the ocean turning copper — moments like these remind me why I never want to leave. 🌅",
-  location: "Cape Town, South Africa",
-  timestamp: "4:22 PM · May 15, 2026",
-  likes: 284,
-  comments: 37,
-};
-
-const HeartIcon = ({ filled }) => (
-  <svg
-    viewBox="0 0 24 24"
-    width="20"
-    height="20"
-    fill={filled ? "currentColor" : "none"}
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-  </svg>
-);
-
-const CommentIcon = () => (
-  <svg
-    viewBox="0 0 24 24"
-    width="20"
-    height="20"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-  </svg>
-);
-
-const PinIcon = () => (
-  <svg
-    viewBox="0 0 24 24"
-    width="14"
-    height="14"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-    <circle cx="12" cy="10" r="3" />
-  </svg>
-);
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function PostPage() {
+  const searchParams = useSearchParams();
+  const username = searchParams.get("username");
+  const location = searchParams.get("location");
+  const description = searchParams.get("description");
+  const issues = searchParams.get("issues")?.split(",") ?? [];
+  const timestamp = new Date();
+
+  const POST_DATA = {
+    user: {
+      username,
+      avatar: "AO",
+    },
+    description,
+    location,
+    timestamp: "4:22 PM · May 15, 2026",
+    likes: 284,
+    comments: 37,
+  };
+
+  const HeartIcon = ({ filled }) => (
+    <svg
+      viewBox="0 0 24 24"
+      width="20"
+      height="20"
+      fill={filled ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+    </svg>
+  );
+
+  const CommentIcon = () => (
+    <svg
+      viewBox="0 0 24 24"
+      width="20"
+      height="20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+
+  const PinIcon = () => (
+    <svg
+      viewBox="0 0 24 24"
+      width="14"
+      height="14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
+  );
+
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(POST_DATA.likes);
   const [showCommentBox, setShowCommentBox] = useState(false);
@@ -81,6 +89,8 @@ export default function PostPage() {
     setCommentCount((prev) => prev + 1);
     setShowCommentBox(false);
   };
+
+  const router = useRouter();
 
   return (
     <>
@@ -123,8 +133,8 @@ export default function PostPage() {
           width: 100%;
           max-width: 598px;
           min-height: 100vh;
-          border-left: 1px solid "white" #;
-          border-right: 1px solid "white";
+          border-left: 1px solid #ffffff;
+          border-right: 1px solid #ffffff;
           position: relative;
           z-index: 1;
         }
@@ -136,7 +146,7 @@ export default function PostPage() {
           z-index: 10;
           background: #ffffff;
           backdrop-filter: blur(16px);
-          border-bottom: 1px solid: #ffffff;
+          border-bottom: 1px solid #ffffff;
           padding: 14px 16px;
           display: flex;
           align-items: center;
@@ -146,7 +156,7 @@ export default function PostPage() {
         .back-btn {
           background: none;
           border: none;
-          color: #e8e8f0;
+          color: #000000;
           cursor: pointer;
           width: 36px;
           height: 36px;
@@ -171,8 +181,7 @@ export default function PostPage() {
           padding: 16px 16px 0;
           border-radius: 25px;
           border: 2px solid #1e1e2e;
-          width: 800px;
-          height: 300px;
+          width: 100%;
         }
 
         .post-header {
@@ -222,7 +231,7 @@ export default function PostPage() {
           font-family: 'Syne', sans-serif;
           font-weight: 700;
           font-size: 15px;
-          color: #1d9bf0;
+          color: #00000;
           white-space: nowrap;
         }
 
@@ -528,10 +537,10 @@ export default function PostPage() {
       <div className="page">
         <div className="bg-glow" />
 
-        <div className="feed-column">
+        <div className="page-column">
           {/* Top bar */}
           <div className="topbar">
-            <button className="back-btn" aria-label="Go back">
+            <button className="back-btn" onClick={() => router.back()}>
               <svg
                 viewBox="0 0 24 24"
                 width="20"
@@ -558,9 +567,14 @@ export default function PostPage() {
 
               <div className="user-info">
                 <div className="name-row">
-                  <span className="display-name">{POST_DATA.user.name}</span>
+                  <span className="display-name">
+                    {POST_DATA.user.username}
+                  </span>
                 </div>
-                <span className="handle">{POST_DATA.user.handle}</span>
+                <span className="location-badge">
+                  <PinIcon />
+                  {POST_DATA.location}
+                </span>
               </div>
 
               <button className="more-btn" aria-label="More options">
@@ -578,16 +592,12 @@ export default function PostPage() {
             </div>
 
             {/* Content */}
-            <p className="post-content">{POST_DATA.content}</p>
+            <p className="post-content">{POST_DATA.description}</p>
 
             {/* Meta */}
             <div className="meta-row">
               <span className="meta-text">{POST_DATA.timestamp}</span>
               <div className="meta-dot" />
-              <span className="location-badge">
-                <PinIcon />
-                {POST_DATA.location}
-              </span>
             </div>
 
             <div className="divider" />

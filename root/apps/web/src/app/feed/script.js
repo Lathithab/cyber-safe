@@ -1,7 +1,8 @@
+"use client";
 
+import { useState } from "react";
 
 const posts = [
-
   {
     name: "Sarah",
     time: "2m ago",
@@ -10,8 +11,7 @@ const posts = [
       "https://images.unsplash.com/photo-1563013544-824ae1b704d3?q=80&w=1200&auto=format&fit=crop",
     likes: 1400,
     comments: 128,
-    profile:
-      "https://i.pravatar.cc/150?img=47"
+    profile: "https://i.pravatar.cc/150?img=47",
   },
 
   {
@@ -22,8 +22,7 @@ const posts = [
       "https://images.unsplash.com/photo-1556740749-887f6717d7e4?q=80&w=1200&auto=format&fit=crop",
     likes: 2100,
     comments: 302,
-    profile:
-      "https://i.pravatar.cc/150?img=12"
+    profile: "https://i.pravatar.cc/150?img=12",
   },
 
   {
@@ -34,8 +33,7 @@ const posts = [
       "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200&auto=format&fit=crop",
     likes: 980,
     comments: 84,
-    profile:
-      "https://i.pravatar.cc/150?img=32"
+    profile: "https://i.pravatar.cc/150?img=32",
   },
 
   {
@@ -46,8 +44,7 @@ const posts = [
       "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1200&auto=format&fit=crop",
     likes: 760,
     comments: 49,
-    profile:
-      "https://i.pravatar.cc/150?img=22"
+    profile: "https://i.pravatar.cc/150?img=22",
   },
 
   {
@@ -58,8 +55,7 @@ const posts = [
       "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1200&auto=format&fit=crop",
     likes: 1200,
     comments: 175,
-    profile:
-      "https://i.pravatar.cc/150?img=48"
+    profile: "https://i.pravatar.cc/150?img=48",
   },
 
   {
@@ -70,8 +66,7 @@ const posts = [
       "https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=1200&auto=format&fit=crop",
     likes: 3400,
     comments: 601,
-    profile:
-      "https://i.pravatar.cc/150?img=18"
+    profile: "https://i.pravatar.cc/150?img=18",
   },
 
   {
@@ -82,10 +77,8 @@ const posts = [
       "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1200&auto=format&fit=crop",
     likes: 1800,
     comments: 233,
-    profile:
-      "https://i.pravatar.cc/150?img=25"
-  }
-
+    profile: "https://i.pravatar.cc/150?img=25",
+  },
 ];
 
 // Feed Container
@@ -94,14 +87,12 @@ const feed = document.querySelector(".feed");
 
 // Display Post
 
-function displayPosts(postArray){
-
+function displayPosts(postArray) {
   // Clear Feed
   feed.innerHTML = "";
 
   // Post
   postArray.forEach((post, index) => {
-
     // Create Card
     const card = document.createElement("div");
 
@@ -164,24 +155,19 @@ function displayPosts(postArray){
 
     // Add Feed Card
     feed.appendChild(card);
-
   });
 
-  // Enable 
+  // Enable
   activateLikeButtons();
-
 }
 
 // LIKE FUNCTION
 
-function activateLikeButtons(){
-
+function activateLikeButtons() {
   const likeButtons = document.querySelectorAll(".like-btn");
 
   likeButtons.forEach((button) => {
-
     button.addEventListener("click", () => {
-
       // get index
       const index = button.dataset.index;
 
@@ -190,37 +176,27 @@ function activateLikeButtons(){
 
       // Refresh Posts
       displayPosts(posts);
-
     });
-
   });
-
 }
 
-// Search 
+// Search
 
 const searchInput = document.querySelector(".search-box input");
 
 searchInput.addEventListener("keyup", () => {
-
   const value = searchInput.value.toLowerCase();
 
   // Filter Posts
   const filteredPosts = posts.filter((post) => {
-
     return (
-
       post.name.toLowerCase().includes(value) ||
-
       post.text.toLowerCase().includes(value)
-
     );
-
   });
 
   // Display Filtered
   displayPosts(filteredPosts);
-
 });
 
 // add post
@@ -228,17 +204,12 @@ searchInput.addEventListener("keyup", () => {
 const addPostButton = document.querySelector(".add-post");
 
 addPostButton.addEventListener("click", () => {
-
-  const userPost = prompt(
-    "Write your cybersecurity awareness post:"
-  );
+  const userPost = prompt("Write your cybersecurity awareness post:");
 
   // Check if user entered something
-  if(userPost){
-
-    // New post object 
+  if (userPost) {
+    // New post object
     const newPost = {
-
       name: "You",
 
       time: "Just now",
@@ -252,9 +223,7 @@ addPostButton.addEventListener("click", () => {
 
       comments: 0,
 
-      profile:
-        "https://i.pravatar.cc/150?img=15"
-
+      profile: "https://i.pravatar.cc/150?img=15",
     };
 
     // Add to Front
@@ -262,9 +231,7 @@ addPostButton.addEventListener("click", () => {
 
     // REFRESH POSTS
     displayPosts(posts);
-
   }
-
 });
 
 // Initial Display

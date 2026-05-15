@@ -1,26 +1,110 @@
-@import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap");
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "DM Sans", sans-serif;
+  background: #ffffff;
+  color: #000000;
+  min-height: 100vh;
+}
+
+/* Shared layout */
+.page-column {
+  width: 100%;
+  max-width: 598px;
+  margin: 0 auto;
+  min-height: 100vh;
+  border-left: 1px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb;
+}
+
+/* Shared topbar */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.topbar-title {
+  font-family: "Syne", sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: #000;
+}
+
+/* Shared card */
+.card {
+  margin: 16px;
+  padding: 20px;
+  border-radius: 25px;
+  border: 2px solid #1e1e2e;
+}
+
+/* Shared input */
+.field {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  font-family: "DM Sans", sans-serif;
+  font-size: 15px;
+  color: #000;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.field:focus {
+  border-color: #1d9bf0;
+}
+
+/* Shared button */
+.btn-primary {
+  background: #1d9bf0;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-family: "Syne", sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-primary:hover {
+  background: #1a8cd8;
+}
+
+/* Shared username display */
+.display-name {
+  font-family: "Syne", sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: #1d9bf0;
+}
+
+/* Shared banner */
+.banner {
+  background: #1d9bf0;
+  padding: 20px;
+  color: white;
+  font-family: "Syne", sans-serif;
+  font-size: 24px;
+  text-align: center;
+  font-weight: bold;
 }

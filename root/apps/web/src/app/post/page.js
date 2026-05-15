@@ -5,7 +5,6 @@ import { useState } from "react";
 const POST_DATA = {
   user: {
     name: "Amara Osei",
-    handle: "@amara_osei",
     avatar: "AO",
   },
   content:
@@ -14,7 +13,6 @@ const POST_DATA = {
   timestamp: "4:22 PM · May 15, 2026",
   likes: 284,
   comments: 37,
-  reposts: 61,
 };
 
 const HeartIcon = ({ filled }) => (
@@ -47,24 +45,6 @@ const CommentIcon = () => (
   </svg>
 );
 
-const RepostIcon = () => (
-  <svg
-    viewBox="0 0 24 24"
-    width="20"
-    height="20"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <polyline points="17 1 21 5 17 9" />
-    <path d="M3 11V9a4 4 0 0 1 4-4h14" />
-    <polyline points="7 23 3 19 7 15" />
-    <path d="M21 13v2a4 4 0 0 1-4 4H3" />
-  </svg>
-);
-
 const PinIcon = () => (
   <svg
     viewBox="0 0 24 24"
@@ -84,8 +64,6 @@ const PinIcon = () => (
 export default function PostPage() {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(POST_DATA.likes);
-  const [reposted, setReposted] = useState(false);
-  const [repostCount, setRepostCount] = useState(POST_DATA.reposts);
   const [showCommentBox, setShowCommentBox] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [commentCount, setCommentCount] = useState(POST_DATA.comments);
@@ -94,11 +72,6 @@ export default function PostPage() {
   const handleLike = () => {
     setLiked((prev) => !prev);
     setLikeCount((prev) => (liked ? prev - 1 : prev + 1));
-  };
-
-  const handleRepost = () => {
-    setReposted((prev) => !prev);
-    setRepostCount((prev) => (reposted ? prev - 1 : prev + 1));
   };
 
   const handleCommentSubmit = () => {
@@ -118,14 +91,14 @@ export default function PostPage() {
 
         body {
           font-family: 'DM Sans', sans-serif;
-          background: #0a0a0f;
+          background: #ffffff;
           min-height: 100vh;
-          color: #e8e8f0;
+          color: #000000;
         }
 
         .page {
           min-height: 100vh;
-          background: #0a0a0f;
+          background: #ffffff;
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -150,8 +123,8 @@ export default function PostPage() {
           width: 100%;
           max-width: 598px;
           min-height: 100vh;
-          border-left: 1px solid #1e1e2e;
-          border-right: 1px solid #1e1e2e;
+          border-left: 1px solid "white" #;
+          border-right: 1px solid "white";
           position: relative;
           z-index: 1;
         }
@@ -161,9 +134,9 @@ export default function PostPage() {
           position: sticky;
           top: 0;
           z-index: 10;
-          background: rgba(10,10,15,0.85);
+          background: #ffffff;
           backdrop-filter: blur(16px);
-          border-bottom: 1px solid #1e1e2e;
+          border-bottom: 1px solid: #ffffff;
           padding: 14px 16px;
           display: flex;
           align-items: center;
@@ -190,13 +163,16 @@ export default function PostPage() {
           font-weight: 700;
           font-size: 18px;
           letter-spacing: -0.3px;
-          color: #fff;
+          color: #000;
         }
 
         /* Post card */
         .post-card {
           padding: 16px 16px 0;
-          border-bottom: 1px solid #1e1e2e;
+          border-radius: 25px;
+          border: 2px solid #1e1e2e;
+          width: 800px;
+          height: 300px;
         }
 
         .post-header {
@@ -246,15 +222,10 @@ export default function PostPage() {
           font-family: 'Syne', sans-serif;
           font-weight: 700;
           font-size: 15px;
-          color: #fff;
+          color: #1d9bf0;
           white-space: nowrap;
         }
 
-        .handle {
-          font-size: 14px;
-          color: #6b7280;
-          font-weight: 400;
-        }
 
         .more-btn {
           margin-left: auto;
@@ -276,7 +247,7 @@ export default function PostPage() {
         .post-content {
           font-size: 17px;
           line-height: 1.55;
-          color: #e8e8f0;
+          color: #000000;
           font-weight: 400;
           margin-bottom: 14px;
           word-break: break-word;
@@ -312,13 +283,6 @@ export default function PostPage() {
           font-weight: 500;
         }
 
-        /* Divider */
-        .divider {
-          height: 1px;
-          background: #1e1e2e;
-          margin: 0 -16px;
-        }
-
         /* Stats row */
         .stats-row {
           display: flex;
@@ -339,15 +303,11 @@ export default function PostPage() {
           color: #fff;
         }
 
-        .stat-label {
-          font-size: 14px;
-          color: #6b7280;
-        }
 
         /* Action row */
         .action-row {
           display: flex;
-          justify-content: space-around;
+          justify-content: left ;
           padding: 4px 0 14px;
           border-top: 1px solid #1e1e2e;
         }
@@ -381,14 +341,6 @@ export default function PostPage() {
           background: rgba(249,24,128,0.08);
         }
 
-        .action-btn.reposted {
-          color: #00ba7c;
-        }
-
-        .action-btn.reposted:hover {
-          color: #00ba7c;
-          background: rgba(0,186,124,0.08);
-        }
 
         .like-icon {
           transition: transform 0.15s cubic-bezier(0.34,1.56,0.64,1);
@@ -593,7 +545,7 @@ export default function PostPage() {
                 <polyline points="15 18 9 12 15 6" />
               </svg>
             </button>
-            <span className="topbar-title">Post</span>
+            <span className="topbar-title">Scam Report</span>
           </div>
 
           {/* Post card */}
@@ -640,24 +592,6 @@ export default function PostPage() {
 
             <div className="divider" />
 
-            {/* Stats */}
-            <div className="stats-row">
-              <div className="stat-item">
-                <span className="stat-num">{repostCount}</span>
-                <span className="stat-label">Reposts</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-num">{likeCount}</span>
-                <span className="stat-label">Likes</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-num">{commentCount}</span>
-                <span className="stat-label">Replies</span>
-              </div>
-            </div>
-
-            <div className="divider" />
-
             {/* Actions */}
             <div className="action-row">
               <button
@@ -667,15 +601,6 @@ export default function PostPage() {
               >
                 <CommentIcon />
                 <span className="action-count">{commentCount}</span>
-              </button>
-
-              <button
-                className={`action-btn ${reposted ? "reposted" : ""}`}
-                onClick={handleRepost}
-                aria-label="Repost"
-              >
-                <RepostIcon />
-                <span className="action-count">{repostCount}</span>
               </button>
 
               <button

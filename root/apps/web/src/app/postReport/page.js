@@ -43,14 +43,10 @@ export default function PostReportPage() {
 
   return (
     <div style={styles.wrapper}>
-
       {/* Banner */}
-      <div style={styles.banner}>
-        Post a Report
-      </div>
+      <div style={styles.banner}>Post a Report</div>
 
       <form onSubmit={handleSubmit} style={styles.form}>
-
         <input
           name="username"
           placeholder="Username"
@@ -80,15 +76,13 @@ export default function PostReportPage() {
           style={{ ...styles.input, height: "100px" }}
         />
 
-        <p><b>Did the scammer take any of the following?</b></p>
+        <p>
+          <b>Did the scammer take any of the following?</b>
+        </p>
 
         {["Money", "Bank Details", "Passwords", "Identity Info"].map((item) => (
           <label key={item} style={styles.checkbox}>
-            <input
-              type="checkbox"
-              value={item}
-              onChange={handleCheckbox}
-            />
+            <input type="checkbox" value={item} onChange={handleCheckbox} />
             {item}
           </label>
         ))}
@@ -98,7 +92,6 @@ export default function PostReportPage() {
         <button type="submit" style={styles.button}>
           Submit
         </button>
-
       </form>
     </div>
   );

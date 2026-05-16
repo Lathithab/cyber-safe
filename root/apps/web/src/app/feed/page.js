@@ -226,8 +226,8 @@ const styles = {
   },
 
   logoSection: { textAlign: "center", flex: 1 },
-  logo: { margin: 0 },
-  sub: { margin: 0, fontSize: "12px", opacity: 0.9 },
+  logo: { margin: 0, fontSize: "28px", fontWeight: "bold" },
+  sub: { margin: 0, fontSize: "12px", opacity: 0.9, fontWeight: "bold"},
 
   icons: { display: "flex", gap: "10px" },
 
@@ -238,7 +238,7 @@ const styles = {
     cursor: "pointer",
   },
 
-  title: { marginTop: "15px" },
+  title: { marginTop: "18px", fontsize: "26px", fontWeight: "bold" },
 
   searchBox: {
     marginTop: "15px",
@@ -283,11 +283,13 @@ const styles = {
     borderRadius: "50%",
   },
 
-  name: { margin: 0, fontSize: "16px" },
+  name: { margin: 0, fontSize: "16px", color: "#000" },
   time: { margin: 0, fontSize: "12px", color: "gray" },
 
-  text: { marginTop: "10px" },
-
+  text: {
+  marginTop: "10px",
+  color: "#000",
+},
   image: {
     width: "100%",
     borderRadius: "12px",
@@ -296,8 +298,12 @@ const styles = {
 
   actions: {
     display: "flex",
-    justifyContent: "space-between",
-    marginTop: "10px",
+  alignItems: "center",
+  gap: "6px",
+  cursor: "pointer",
+  userSelect: "none",
+  WebkitUserSelect: "none",
+  touchAction: "manipulation",
   },
 
   leftActions: { display: "flex", gap: "15px" },
@@ -309,7 +315,9 @@ const styles = {
     cursor: "pointer",
   },
 
-  save: { cursor: "pointer" },
+  save: { cursor: "pointer",
+          userSelect: "none"
+  },
 
   navbar: {
     position: "fixed",

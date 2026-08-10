@@ -7,10 +7,24 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Node
 node_modules
 dist
 dist-ssr
 *.local
+.next
+
+# Python (backend)
+venv
+.venv
+__pycache__
+*.pyc
+*.egg-info
+
+# Environment variables (never commit secrets)
+.env
+.env.local
+.env.*.local
 
 # Editor directories and files
 .vscode/*

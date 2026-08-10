@@ -4,13 +4,90 @@ import { useState } from "react";
 
 export default function FeedPage() {
   const [posts, setPosts] = useState([
-    { name: "Sarah", time: "2m ago", text: "I almost got scammed by a fake banking SMS asking for account verification details.", image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?q=80&w=800&auto=format&fit=crop", likes: 1400, comments: 128, profile: "https://i.pravatar.cc/150?img=47", liked: false, saved: false },
-    { name: "Edward Chen", time: "5m ago", text: "Fake job offer emails are increasing. Never pay upfront fees for training.", image: "https://images.unsplash.com/photo-1556740749-887f6717d7e4?q=80&w=800&auto=format&fit=crop", likes: 2100, comments: 302, profile: "https://i.pravatar.cc/150?img=12", liked: false, saved: false },
-    { name: "Lerato", time: "10m ago", text: "Someone cloned my WhatsApp profile and tried scamming my family pretending to be me.", image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=800&auto=format&fit=crop", likes: 980, comments: 84, profile: "https://i.pravatar.cc/150?img=32", liked: false, saved: false },
-    { name: "James", time: "18m ago", text: "Be careful of fake WiFi networks in malls and airports. Hackers can steal login details.", image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=800&auto=format&fit=crop", likes: 760, comments: 49, profile: "https://i.pravatar.cc/150?img=22", liked: false, saved: false },
-    { name: "Aisha Khan", time: "30m ago", text: "Received a phishing email pretending to be Netflix asking me to update payment information.", image: "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop", likes: 1200, comments: 175, profile: "https://i.pravatar.cc/150?img=48", liked: false, saved: false },
-    { name: "Michael", time: "1h ago", text: "Scammers are now using AI voice calls pretending to be family members asking for money.", image: "https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=800&auto=format&fit=crop", likes: 3400, comments: 601, profile: "https://i.pravatar.cc/150?img=18", liked: false, saved: false },
-    { name: "Nomvula", time: "2h ago", text: "Always enable two-factor authentication. It saved my account after a password leak.", image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop", likes: 1800, comments: 233, profile: "https://i.pravatar.cc/150?img=25", liked: false, saved: false }
+    {
+      name: "Sarah",
+      time: "2m ago",
+      text: "I almost got scammed by a fake banking SMS asking for account verification details.",
+      image:
+        "https://images.unsplash.com/photo-1563013544-824ae1b704d3?q=80&w=800&auto=format&fit=crop",
+      likes: 1400,
+      comments: 128,
+      profile: "https://i.pravatar.cc/150?img=47",
+      liked: false,
+      saved: false,
+    },
+    {
+      name: "Edward Chen",
+      time: "5m ago",
+      text: "Fake job offer emails are increasing. Never pay upfront fees for training.",
+      image:
+        "https://images.unsplash.com/photo-1556740749-887f6717d7e4?q=80&w=800&auto=format&fit=crop",
+      likes: 2100,
+      comments: 302,
+      profile: "https://i.pravatar.cc/150?img=12",
+      liked: false,
+      saved: false,
+    },
+    {
+      name: "Lerato",
+      time: "10m ago",
+      text: "Someone cloned my WhatsApp profile and tried scamming my family pretending to be me.",
+      image:
+        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=800&auto=format&fit=crop",
+      likes: 980,
+      comments: 84,
+      profile: "https://i.pravatar.cc/150?img=32",
+      liked: false,
+      saved: false,
+    },
+    {
+      name: "James",
+      time: "18m ago",
+      text: "Be careful of fake WiFi networks in malls and airports. Hackers can steal login details.",
+      image:
+        "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=800&auto=format&fit=crop",
+      likes: 760,
+      comments: 49,
+      profile: "https://i.pravatar.cc/150?img=22",
+      liked: false,
+      saved: false,
+    },
+    {
+      name: "Aisha Khan",
+      time: "30m ago",
+      text: "Received a phishing email pretending to be Netflix asking me to update payment information.",
+      image:
+        "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop",
+      likes: 1200,
+      comments: 175,
+      profile: "https://i.pravatar.cc/150?img=48",
+      liked: false,
+      saved: false,
+    },
+    {
+      name: "Michael",
+      time: "1h ago",
+      text: "Scammers are now using AI voice calls pretending to be family members asking for money.",
+      image:
+        "https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=800&auto=format&fit=crop",
+      likes: 3400,
+      comments: 601,
+      profile: "https://i.pravatar.cc/150?img=18",
+      liked: false,
+      saved: false,
+    },
+    {
+      name: "Nomvula",
+      time: "2h ago",
+      text: "Always enable two-factor authentication. It saved my account after a password leak.",
+      image:
+        "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop",
+      likes: 1800,
+      comments: 233,
+      profile: "https://i.pravatar.cc/150?img=25",
+      liked: false,
+      saved: false,
+    },
   ]);
 
   const [activeNav, setActiveNav] = useState("feed");
@@ -22,7 +99,14 @@ export default function FeedPage() {
     const stroke = liked ? "#30C9E8" : "#bbb";
 
     return (
-      <svg width="17" height="17" viewBox="0 0 24 24" fill={fill} stroke={stroke} strokeWidth="2">
+      <svg
+        width="17"
+        height="17"
+        viewBox="0 0 24 24"
+        fill={fill}
+        stroke={stroke}
+        strokeWidth="2"
+      >
         <polygon points="12 2 22 8 12 22 2 8" />
       </svg>
     );
@@ -30,7 +114,14 @@ export default function FeedPage() {
 
   function commentSVG() {
     return (
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="2">
+      <svg
+        width="17"
+        height="17"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#bbb"
+        strokeWidth="2"
+      >
         <path d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4z" />
       </svg>
     );
@@ -41,7 +132,14 @@ export default function FeedPage() {
     const stroke = saved ? "#888" : "#bbb";
 
     return (
-      <svg width="17" height="17" viewBox="0 0 24 24" fill={fill} stroke={stroke} strokeWidth="2">
+      <svg
+        width="17"
+        height="17"
+        viewBox="0 0 24 24"
+        fill={fill}
+        stroke={stroke}
+        strokeWidth="2"
+      >
         <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
       </svg>
     );
@@ -49,7 +147,14 @@ export default function FeedPage() {
 
   function searchSVG() {
     return (
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="2">
+      <svg
+        width="17"
+        height="17"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#bbb"
+        strokeWidth="2"
+      >
         <circle cx="11" cy="11" r="7" />
         <path d="M21 21l-4.3-4.3" />
       </svg>
@@ -59,7 +164,7 @@ export default function FeedPage() {
   // ── ACTIONS ─────────────────────────────
 
   function likePost(i) {
-    setPosts(prev => {
+    setPosts((prev) => {
       const updated = [...prev];
       updated[i].liked = !updated[i].liked;
       updated[i].likes += updated[i].liked ? 1 : -1;
@@ -68,7 +173,7 @@ export default function FeedPage() {
   }
 
   function savePost(i) {
-    setPosts(prev => {
+    setPosts((prev) => {
       const updated = [...prev];
       updated[i].saved = !updated[i].saved;
       return updated;
@@ -79,7 +184,6 @@ export default function FeedPage() {
 
   return (
     <div style={styles.wrapper}>
-
       {/* HEADER */}
       <div style={styles.header}>
         <div style={styles.topBar}>
@@ -91,11 +195,23 @@ export default function FeedPage() {
           </div>
 
           <div style={styles.icons}>
-            <svg style={styles.icon} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+            <svg
+              style={styles.icon}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              strokeWidth="2"
+            >
               <path d="M15 17h5l-1.4-1.4C18.8 14.8 18 13.5 18 12V9a6 6 0 10-12 0v3c0 1.5-.8 2.8-1.6 3.6L3 17h5" />
             </svg>
 
-            <svg style={styles.icon} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+            <svg
+              style={styles.icon}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              strokeWidth="2"
+            >
               <path d="M12 5v14M5 12h14" />
             </svg>
           </div>
@@ -106,7 +222,10 @@ export default function FeedPage() {
         {/* SEARCH FIXED */}
         <div style={styles.searchBox}>
           {searchSVG()}
-          <input style={styles.searchInput} placeholder="Search posts, topics or users..." />
+          <input
+            style={styles.searchInput}
+            placeholder="Search posts, topics or users..."
+          />
         </div>
       </div>
 
@@ -114,7 +233,6 @@ export default function FeedPage() {
       <div style={styles.feed}>
         {posts.map((p, i) => (
           <div key={i} style={styles.card}>
-
             <div style={styles.postHeader}>
               <div style={styles.userInfo}>
                 <img src={p.profile} style={styles.profilePic} />
@@ -159,32 +277,60 @@ export default function FeedPage() {
             key={item}
             style={{
               ...styles.navItem,
-              color: activeNav === item ? "#30C9E8" : "#666"
+              color: activeNav === item ? "#30C9E8" : "#666",
             }}
             onClick={() => setActiveNav(item)}
           >
             <div style={styles.iconSmall}>
               {item === "home" && (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2h-4v-6H9v6H5a2 2 0 01-2-2z" />
                 </svg>
               )}
 
               {item === "feed" && (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
                   <circle cx="9" cy="7" r="4" />
                 </svg>
               )}
 
               {item === "learn" && (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <path d="M4 19.5V4.5A2.5 2.5 0 016.5 2h11A2.5 2.5 0 0120 4.5v15L12 15l-8 4.5z" />
                 </svg>
               )}
 
               {item === "post" && (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <path d="M12 5v14M5 12h14" />
                 </svg>
               )}
@@ -194,7 +340,6 @@ export default function FeedPage() {
           </div>
         ))}
       </div>
-
     </div>
   );
 }

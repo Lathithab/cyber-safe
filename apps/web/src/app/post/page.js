@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 
-export default function PostPage() {
+function PostPage() {
   const searchParams = useSearchParams();
   const username = searchParams.get("username");
   const location = searchParams.get("location");
@@ -677,5 +677,13 @@ export default function PostPage() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function PostPageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <PostPage />
+    </Suspense>
   );
 }

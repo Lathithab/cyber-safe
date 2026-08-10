@@ -100,11 +100,11 @@ export default function FeedPage() {
   function gemSVG(liked) {
     return (
       <svg
-        width="19"
-        height="19"
+        width="17"
+        height="17"
         viewBox="0 0 24 24"
-        fill={liked ? "#30C9E8" : "none"}
-        stroke={liked ? "#30C9E8" : "#000"}
+        fill={fill}
+        stroke={stroke}
         strokeWidth="2"
       >
         <polygon points="12 2 22 8 12 22 2 8" />
@@ -115,11 +115,11 @@ export default function FeedPage() {
   function commentSVG() {
     return (
       <svg
-        width="19"
-        height="19"
+        width="17"
+        height="17"
         viewBox="0 0 24 24"
         fill="none"
-        stroke="#000"
+        stroke="#bbb"
         strokeWidth="2"
       >
         <path d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4z" />
@@ -130,11 +130,11 @@ export default function FeedPage() {
   function bookmarkSVG(saved) {
     return (
       <svg
-        width="19"
-        height="19"
+        width="17"
+        height="17"
         viewBox="0 0 24 24"
-        fill={saved ? "#000" : "none"}
-        stroke="#000"
+        fill={fill}
+        stroke={stroke}
         strokeWidth="2"
       >
         <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
@@ -145,11 +145,11 @@ export default function FeedPage() {
   function searchSVG() {
     return (
       <svg
-        width="18"
-        height="18"
+        width="17"
+        height="17"
         viewBox="0 0 24 24"
         fill="none"
-        stroke="#555"
+        stroke="#bbb"
         strokeWidth="2"
       >
         <circle cx="11" cy="11" r="7" />
@@ -160,33 +160,21 @@ export default function FeedPage() {
 
   // ── ACTIONS ───────────────────────────
 
-  function likePost(index) {
-    setPosts((prev) =>
-      prev.map((post, i) =>
-        i === index
-          ? {
-              ...post,
-              liked: !post.liked,
-              likes: post.liked
-                ? post.likes - 1
-                : post.likes + 1,
-            }
-          : post
-      )
-    );
+  function likePost(i) {
+    setPosts((prev) => {
+      const updated = [...prev];
+      updated[i].liked = !updated[i].liked;
+      updated[i].likes += updated[i].liked ? 1 : -1;
+      return updated;
+    });
   }
 
-  function savePost(index) {
-    setPosts((prev) =>
-      prev.map((post, i) =>
-        i === index
-          ? {
-              ...post,
-              saved: !post.saved,
-            }
-          : post
-      )
-    );
+  function savePost(i) {
+    setPosts((prev) => {
+      const updated = [...prev];
+      updated[i].saved = !updated[i].saved;
+      return updated;
+    });
   }
 
   // ── UI ────────────────────────────────
@@ -230,7 +218,6 @@ export default function FeedPage() {
 
         <div style={styles.searchBox}>
           {searchSVG()}
-
           <input
             style={styles.searchInput}
             placeholder="Search posts, topics or users..."
@@ -262,13 +249,8 @@ export default function FeedPage() {
             <div style={styles.actions}>
               <div style={styles.leftActions}>
                 {/* LIKE */}
-                <div
-                  style={styles.action}
-                  onClick={() => likePost(i)}
-                >
-                  <div style={{ pointerEvents: "none" }}>
-                    {gemSVG(p.liked)}
-                  </div>
+                <div style={styles.action} onClick={() => likePost(i)}>
+                  <div style={{ pointerEvents: "none" }}>{gemSVG(p.liked)}</div>
 
                   <span
                     style={{
@@ -284,17 +266,12 @@ export default function FeedPage() {
                 <div style={styles.action}>
                   {commentSVG()}
 
-                  <span style={styles.commentText}>
-                    {p.comments}
-                  </span>
+                  <span style={styles.commentText}>{p.comments}</span>
                 </div>
               </div>
 
               {/* SAVE */}
-              <div
-                style={styles.save}
-                onClick={() => savePost(i)}
-              >
+              <div style={styles.save} onClick={() => savePost(i)}>
                 {bookmarkSVG(p.saved)}
               </div>
             </div>
@@ -309,10 +286,7 @@ export default function FeedPage() {
             key={item}
             style={{
               ...styles.navItem,
-              color:
-                activeNav === item
-                  ? "#30C9E8"
-                  : "#666",
+              color: activeNav === item ? "#30C9E8" : "#666",
             }}
             onClick={() => {
               setActiveNav(item);
@@ -326,8 +300,8 @@ export default function FeedPage() {
               {/* HOME */}
               {item === "home" && (
                 <svg
-                  width="20"
-                  height="20"
+                  width="18"
+                  height="18"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -340,8 +314,8 @@ export default function FeedPage() {
               {/* FEED */}
               {item === "feed" && (
                 <svg
-                  width="20"
-                  height="20"
+                  width="18"
+                  height="18"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -355,23 +329,22 @@ export default function FeedPage() {
               {/* LEARN */}
               {item === "learn" && (
                 <svg
-                  width="20"
-                  height="20"
+                  width="18"
+                  height="18"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
                 >
-                  <path d="M4 19a2 2 0 012-2h14" />
-                  <path d="M6 3h14v18H6a2 2 0 01-2-2V5a2 2 0 012-2z" />
+                  <path d="M4 19.5V4.5A2.5 2.5 0 016.5 2h11A2.5 2.5 0 0120 4.5v15L12 15l-8 4.5z" />
                 </svg>
               )}
 
               {/* POST */}
               {item === "post" && (
                 <svg
-                  width="20"
-                  height="20"
+                  width="18"
+                  height="18"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -383,8 +356,7 @@ export default function FeedPage() {
             </div>
 
             <span style={styles.navText}>
-              {item.charAt(0).toUpperCase() +
-                item.slice(1)}
+              {item.charAt(0).toUpperCase() + item.slice(1)}
             </span>
           </div>
         ))}

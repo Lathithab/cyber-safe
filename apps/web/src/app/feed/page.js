@@ -1,7 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+
+function loadReports() {
+  try {
+    const reports = JSON.parse(localStorage.getItem("cybersafeReports") || "[]");
+    const latest = JSON.parse(sessionStorage.getItem("cybersafeLatestReport") || "null");
+    sessionStorage.removeItem("cybersafeLatestReport");
+    return latest ? [latest, ...reports] : reports;
+  } catch {
+    return [];
+  }
+}
 
 export default function FeedPage() {
   const router = useRouter();
@@ -94,6 +105,22 @@ export default function FeedPage() {
   ]);
 
   const [activeNav, setActiveNav] = useState("feed");
+  const [openMenuId, setOpenMenuId] = useState(null);
+
+  useEffect(() => {
+    const reports = loadReports();
+    if (reports.length) {
+      setPosts((current) => {
+        const seenIds = new Set(current.map((post) => post.id).filter(Boolean));
+        const uniqueReports = reports.filter((report) => {
+          if (!report.id || seenIds.has(report.id)) return false;
+          seenIds.add(report.id);
+          return true;
+        });
+        return uniqueReports.length ? [...uniqueReports, ...current] : current;
+      });
+    }
+  }, []);
 
   // ── ICONS ─────────────────────────────
 
@@ -177,6 +204,23 @@ export default function FeedPage() {
     });
   }
 
+  function deleteReport(id) {
+    if (!window.confirm("Remove this report from your feed?")) return;
+
+    setPosts((current) => current.filter((post) => post.id !== id));
+    setOpenMenuId(null);
+
+    try {
+      const reports = JSON.parse(localStorage.getItem("cybersafeReports") || "[]");
+      localStorage.setItem(
+        "cybersafeReports",
+        JSON.stringify(reports.filter((report) => report.id !== id))
+      );
+    } catch {
+      // The visible feed has already been updated; storage may be unavailable.
+    }
+  }
+
   // ── UI ────────────────────────────────
 
   return (
@@ -228,10 +272,16 @@ export default function FeedPage() {
       {/* FEED */}
       <div style={styles.feed}>
         {posts.map((p, i) => (
-          <div key={i} style={styles.card}>
+          <div key={p.id || i} style={styles.card}>
             <div style={styles.postHeader}>
               <div style={styles.userInfo}>
-                <img src={p.profile} style={styles.profilePic} />
+                {p.profile ? (
+                  <img src={p.profile} alt="" style={styles.profilePic} />
+                ) : (
+                  <div style={{ ...styles.profilePic, display: "grid", placeItems: "center", background: "#dff7fb", color: "#126c80", fontWeight: "800" }}>
+                    {p.name.slice(0, 1).toUpperCase()}
+                  </div>
+                )}
 
                 <div>
                   <h3 style={styles.name}>{p.name}</h3>
@@ -239,12 +289,37 @@ export default function FeedPage() {
                 </div>
               </div>
 
-              <div style={styles.menu}>•••</div>
+              {p.id?.startsWith("report-") ? (
+                <div style={styles.menuWrap}>
+                  <button
+                    aria-label={`Options for ${p.name}'s report`}
+                    aria-expanded={openMenuId === p.id}
+                    style={styles.menuButton}
+                    type="button"
+                    onClick={() => setOpenMenuId((current) => (current === p.id ? null : p.id))}
+                  >
+                    •••
+                  </button>
+                  {openMenuId === p.id && (
+                    <div style={styles.menuPopup}>
+                      <button style={styles.deleteButton} type="button" onClick={() => deleteReport(p.id)}>
+                        Delete report
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div style={styles.menu}>•••</div>
+              )}
             </div>
 
             <div style={styles.text}>{p.text}</div>
 
-            <img src={p.image} style={styles.image} />
+            {p.location && <p style={styles.location}>📍 {p.location}</p>}
+
+            {p.incidentDate && <p style={styles.incidentDate}>Incident date: {p.incidentDate}</p>}
+
+            {p.image && <img src={p.image} alt="" style={styles.image} />}
 
             <div style={styles.actions}>
               <div style={styles.leftActions}>
@@ -281,7 +356,7 @@ export default function FeedPage() {
 
       {/* NAVBAR */}
       <div style={styles.navbar}>
-        {["home", "feed", "learn", "post"].map((item) => (
+        {["home", "feed", "post", "library", "help"].map((item) => (
           <div
             key={item}
             style={{
@@ -293,6 +368,12 @@ export default function FeedPage() {
 
               if (item === "post") {
                 router.push("/postReport");
+              } else if (item === "help") {
+                router.push("/help");
+              } else if (item === "library") {
+                router.push("/library");
+              } else if (item === "home") {
+                router.push("/");
               }
             }}
           >
@@ -326,8 +407,8 @@ export default function FeedPage() {
                 </svg>
               )}
 
-              {/* LEARN */}
-              {item === "learn" && (
+              {/* LIBRARY */}
+              {item === "library" && (
                 <svg
                   width="18"
                   height="18"
@@ -337,6 +418,22 @@ export default function FeedPage() {
                   strokeWidth="2"
                 >
                   <path d="M4 19.5V4.5A2.5 2.5 0 016.5 2h11A2.5 2.5 0 0120 4.5v15L12 15l-8 4.5z" />
+                </svg>
+              )}
+
+              {/* HELP */}
+              {item === "help" && (
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <circle cx="12" cy="12" r="9" />
+                  <circle cx="12" cy="12" r="3.2" />
+                  <path d="M4.9 4.9l4 4M15.1 15.1l4 4M19.1 4.9l-4 4M8.9 15.1l-4 4" />
                 </svg>
               )}
 
@@ -490,11 +587,67 @@ const styles = {
     color: "#000",
   },
 
+  menuWrap: {
+    position: "relative",
+  },
+
+  menuButton: {
+    padding: "0 4px",
+    border: 0,
+    background: "transparent",
+    color: "#000",
+    cursor: "pointer",
+    fontSize: "20px",
+    fontWeight: "700",
+    lineHeight: 1,
+  },
+
+  menuPopup: {
+    position: "absolute",
+    zIndex: 2,
+    top: "30px",
+    right: 0,
+    minWidth: "126px",
+    padding: "5px",
+    border: "1px solid #dbe3e9",
+    borderRadius: "10px",
+    background: "#fff",
+    boxShadow: "0 8px 20px rgba(14, 27, 36, 0.16)",
+  },
+
+  deleteButton: {
+    width: "100%",
+    padding: "9px 10px",
+    border: 0,
+    borderRadius: "7px",
+    background: "transparent",
+    color: "#b42318",
+    cursor: "pointer",
+    fontFamily: "Arial",
+    fontSize: "13px",
+    fontWeight: "700",
+    textAlign: "left",
+  },
+
   text: {
     marginTop: "12px",
     color: "#000",
     fontSize: "16px",
     lineHeight: "1.5",
+  },
+
+  location: {
+    margin: "10px 0 0",
+    color: "#5d727a",
+    fontSize: "13px",
+    fontWeight: "600",
+  },
+
+  incidentDate: {
+    margin: "5px 0 0",
+    color: "#5d727a",
+    fontSize: "13px",
+    fontWeight: "600",
   },
 
   image: {

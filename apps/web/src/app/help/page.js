@@ -99,13 +99,6 @@ export default function HelpPage() {
           </svg>
         </button>
         <span className="help-title">Get Help</span>
-        <button
-          className="exit-btn"
-          onClick={quickExit}
-          aria-label="Quick exit to a neutral page"
-        >
-          Quick exit
-        </button>
       </div>
 
       <div className="help-body">

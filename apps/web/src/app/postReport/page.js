@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import BottomNav from "../components/BottomNav";
 
 const LOSSES = ["Money", "Bank Details", "Passwords", "Identity Info"];
 
@@ -65,7 +66,9 @@ export default function PostReportPage() {
       try {
         image = await readImageAsDataUrl(form.file);
       } catch {
-        setSubmitError("We could not read that image. Please choose another PNG or JPG file.");
+        setSubmitError(
+          "We could not read that image. Please choose another PNG or JPG file.",
+        );
         return;
       }
     }
@@ -86,10 +89,17 @@ export default function PostReportPage() {
     };
 
     try {
-      const previous = JSON.parse(localStorage.getItem("cybersafeReports") || "[]");
-      localStorage.setItem("cybersafeReports", JSON.stringify([report, ...previous]));
+      const previous = JSON.parse(
+        localStorage.getItem("cybersafeReports") || "[]",
+      );
+      localStorage.setItem(
+        "cybersafeReports",
+        JSON.stringify([report, ...previous]),
+      );
     } catch {
-      setSubmitError("This image is too large to save on this device. Try a smaller image or post without an attachment.");
+      setSubmitError(
+        "This image is too large to save on this device. Try a smaller image or post without an attachment.",
+      );
       return;
     }
 
@@ -106,7 +116,16 @@ export default function PostReportPage() {
           aria-label="Go back"
           type="button"
         >
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            viewBox="0 0 24 24"
+            width="20"
+            height="20"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </button>
@@ -115,7 +134,8 @@ export default function PostReportPage() {
 
       <form className="report-body" onSubmit={handleSubmit}>
         <p className="intro">
-          Share what happened so others can spot the same scam. Only add details you're comfortable making public.
+          Share what happened so others can spot the same scam. Only add details
+          you're comfortable making public.
         </p>
 
         {/* Safety nudge → Help */}
@@ -124,11 +144,23 @@ export default function PostReportPage() {
           className="help-nudge"
           onClick={() => router.push("/help")}
         >
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            viewBox="0 0 24 24"
+            width="18"
+            height="18"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
-            <path d="M12 9v4" /><path d="M12 17h.01" />
+            <path d="M12 9v4" />
+            <path d="M12 17h.01" />
           </svg>
-          <span>Being scammed <strong>right now</strong>? Get help first →</span>
+          <span>
+            Being scammed <strong>right now</strong>? Get help first →
+          </span>
         </button>
 
         {/* Name */}
@@ -199,7 +231,9 @@ export default function PostReportPage() {
             rows={5}
           />
           {!canSubmit && form.description.length > 0 && (
-            <span className="hint">A little more detail helps others (min. 10 characters).</span>
+            <span className="hint">
+              A little more detail helps others (min. 10 characters).
+            </span>
           )}
         </div>
 
@@ -218,7 +252,16 @@ export default function PostReportPage() {
                   aria-pressed={active}
                 >
                   {active && (
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="14"
+                      height="14"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
                   )}
@@ -236,21 +279,50 @@ export default function PostReportPage() {
           </span>
           {!form.file ? (
             <label className="dropzone">
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                viewBox="0 0 24 24"
+                width="22"
+                height="22"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                 <polyline points="7 9 12 4 17 9" />
                 <line x1="12" y1="4" x2="12" y2="16" />
               </svg>
               <span className="dz-main">Tap to upload an image</span>
               <span className="dz-sub">PNG or JPG</span>
-              <input type="file" accept="image/png,image/jpeg" onChange={handleFile} hidden />
+              <input
+                type="file"
+                accept="image/png,image/jpeg"
+                onChange={handleFile}
+                hidden
+              />
             </label>
           ) : (
             <div className="file-pill">
               <span className="file-name">{form.file.name}</span>
-              <button type="button" className="file-remove" onClick={removeFile} aria-label="Remove file">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+              <button
+                type="button"
+                className="file-remove"
+                onClick={removeFile}
+                aria-label="Remove file"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
               </button>
             </div>
@@ -260,12 +332,18 @@ export default function PostReportPage() {
         <button className="submit" type="submit" disabled={!canSubmit}>
           Post report
         </button>
-        {submitError && <p className="submit-error" role="alert">{submitError}</p>}
+        {submitError && (
+          <p className="submit-error" role="alert">
+            {submitError}
+          </p>
+        )}
         <p className="privacy-note">
           Your report will appear in the community feed on this device. Don't
           include full card numbers, passwords or ID numbers.
         </p>
       </form>
+
+      <BottomNav />
 
       <style>{`
         .report-page {
@@ -276,7 +354,7 @@ export default function PostReportPage() {
           background: #f5f7fa;
           font-family: "DM Sans", Arial, sans-serif;
           color: #0e1b24;
-          padding-bottom: 40px;
+          padding-bottom: 104px;
         }
 
         /* Top bar */

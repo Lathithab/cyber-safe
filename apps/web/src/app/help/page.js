@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { emergency, banks, networks, geoLinks } from "./contacts";
+import BottomNav from "../components/BottomNav";
 
 export default function HelpPage() {
   const router = useRouter();
@@ -23,25 +24,42 @@ export default function HelpPage() {
 
   function openMaps(query) {
     const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-      query
+      query,
     )}`;
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
   // ── Icons ─────────────────────────────────────
   const PhoneIcon = () => (
-    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z" />
     </svg>
   );
 
   const PinIcon = () => (
-    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
       <circle cx="12" cy="10" r="3" />
     </svg>
   );
-
 
   const CallRow = ({ c, urgent }) => (
     <a className={`row ${urgent ? "row-urgent" : ""}`} href={`tel:${c.tel}`}>
@@ -62,13 +80,30 @@ export default function HelpPage() {
     <div className="help-page">
       {/* Top bar */}
       <div className="help-topbar">
-        <button className="back-btn" onClick={() => router.back()} aria-label="Go back">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <button
+          className="back-btn"
+          onClick={() => router.back()}
+          aria-label="Go back"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="20"
+            height="20"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </button>
         <span className="help-title">Get Help</span>
-        <button className="exit-btn" onClick={quickExit} aria-label="Quick exit to a neutral page">
+        <button
+          className="exit-btn"
+          onClick={quickExit}
+          aria-label="Quick exit to a neutral page"
+        >
           Quick exit
         </button>
       </div>
@@ -77,7 +112,16 @@ export default function HelpPage() {
         {/* Safety banner  */}
         <div className="alert">
           <div className="alert-head">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
               <path d="M12 9v4" />
               <path d="M12 17h.01" />
@@ -85,8 +129,8 @@ export default function HelpPage() {
             <span>Being scammed right now?</span>
           </div>
           <p className="alert-text">
-            <strong>Call your bank immediately</strong> if money is moving or someone
-            has your details.
+            <strong>Call your bank immediately</strong> if money is moving or
+            someone has your details.
           </p>
         </div>
 
@@ -98,14 +142,20 @@ export default function HelpPage() {
         </Section>
 
         {/* Banks */}
-        <Section title="Your bank's fraud line" hint="Tap to call — report fraud or stop a card">
+        <Section
+          title="Your bank's fraud line"
+          hint="Tap to call — report fraud or stop a card"
+        >
           {banks.map((c) => (
             <CallRow key={c.name} c={c} />
           ))}
         </Section>
 
         {/* Networks */}
-        <Section title="Mobile network" hint="Report SIM-swap fraud or a lost SIM">
+        <Section
+          title="Mobile network"
+          hint="Report SIM-swap fraud or a lost SIM"
+        >
           {networks.map((c) => (
             <CallRow key={c.name} c={c} />
           ))}
@@ -115,7 +165,11 @@ export default function HelpPage() {
         <Section title="Find help near you" hint="Opens your maps app ">
           <div className="geo-grid">
             {geoLinks.map((g) => (
-              <button key={g.label} className="geo-btn" onClick={() => openMaps(g.query)}>
+              <button
+                key={g.label}
+                className="geo-btn"
+                onClick={() => openMaps(g.query)}
+              >
                 <span className="geo-icon">
                   <PinIcon />
                 </span>
@@ -132,6 +186,8 @@ export default function HelpPage() {
         </p>
       </div>
 
+      <BottomNav />
+
       <style>{`
         .help-page {
           width: 100%;
@@ -141,7 +197,7 @@ export default function HelpPage() {
           background: #f5f7fa;
           font-family: "DM Sans", Arial, sans-serif;
           color: #0e1b24;
-          padding-bottom: 40px;
+          padding-bottom: 104px;
         }
 
         /* Top bar */

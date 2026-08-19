@@ -130,8 +130,8 @@ export default function FeedPage() {
         width="17"
         height="17"
         viewBox="0 0 24 24"
-        fill={fill}
-        stroke={stroke}
+        fill={liked ? "#30C9E8" : "none"}
+        stroke={liked ? "#30C9E8" : "#000"}
         strokeWidth="2"
       >
         <polygon points="12 2 22 8 12 22 2 8" />
@@ -160,8 +160,8 @@ export default function FeedPage() {
         width="17"
         height="17"
         viewBox="0 0 24 24"
-        fill={fill}
-        stroke={stroke}
+        fill={saved ? "#000" : "none"}
+        stroke="#000"
         strokeWidth="2"
       >
         <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />

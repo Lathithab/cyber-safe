@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import BottomNav from "../components/BottomNav";
-import { SEED_POSTS, loadCommentCounts } from "./posts";
-
+import { supabase } from "../../../lib/supabase";
 function loadReports() {
   try {
     const reports = JSON.parse(
@@ -22,36 +21,66 @@ function loadReports() {
 
 export default function FeedPage() {
   const router = useRouter();
-  const [posts, setPosts] = useState(
-    SEED_POSTS.map((post) => ({ ...post, liked: false, saved: false })),
-  );
+  
 
+
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const [activeNav, setActiveNav] = useState("feed");
   const [openMenuId, setOpenMenuId] = useState(null);
 
-  useEffect(() => {
-    const reports = loadReports();
-    const addedCommentCounts = loadCommentCounts();
+ useEffect(() => {
+  async function loadPosts() {
+    const { data, error } = await supabase
+      .from("posts")
+      .select("*")
+      .eq("status", "approved")
+      .order("created_at", { ascending: false });
 
-    setPosts((current) => {
-      let merged = current;
+    if (error) {
+      console.error("Error loading posts:", error);
+      setError(error.message);
+      setLoading(false);
+      return;
+    }
 
-      if (reports.length) {
-        const seenIds = new Set(current.map((post) => post.id).filter(Boolean));
-        const uniqueReports = reports.filter((report) => {
-          if (!report.id || seenIds.has(report.id)) return false;
-          seenIds.add(report.id);
-          return true;
-        });
-        merged = uniqueReports.length ? [...uniqueReports, ...current] : current;
-      }
+    const databasePosts = (data || []).map((post) => ({
+      id: post.id,
+      name: post.display_name,
+      time: new Date(post.created_at).toLocaleString(),
+      text: post.description,
+      location: post.location,
+      image: post.image_url,
+      likes: 0,
+      comments: 0,
+      liked: false,
+      saved: false,
+    }));
 
-      return merged.map((post) =>
-        addedCommentCounts[post.id]
-          ? { ...post, comments: post.comments + addedCommentCounts[post.id] }
-          : post,
-      );
-    });
-  }, []);
+    setPosts(databasePosts);
+    setLoading(false);
+  }
+
+  loadPosts();
+}, []);
+if (loading) {
+  return (
+    <div style={{ padding: "40px", textAlign: "center" }}>
+      Loading community feed...
+    </div>
+  );
+}
+
+if (error) {
+  return (
+    <div style={{ padding: "40px", textAlign: "center", color: "#b42318" }}>
+      {error}
+    </div>
+  );
+}
+
 
   function openPost(id) {
     if (!id) return;

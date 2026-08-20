@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
+import BottomNav from "../components/BottomNav";
 import { supabase } from "../../../lib/supabase"; //Database is imported//
 
 

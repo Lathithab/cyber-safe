@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import BottomNav from "../components/BottomNav";
+import { SEED_POSTS, loadCommentCounts } from "./posts";
 
 function loadReports() {
   try {
@@ -19,109 +21,42 @@ function loadReports() {
 }
 
 export default function FeedPage() {
-  const [posts, setPosts] = useState([
-    {
-      name: "Sarah",
-      time: "2m ago",
-      text: "I almost got scammed by a fake banking SMS asking for account verification details.",
-      image:
-        "https://images.unsplash.com/photo-1563013544-824ae1b704d3?q=80&w=800&auto=format&fit=crop",
-      likes: 1400,
-      comments: 128,
-      profile: "https://i.pravatar.cc/150?img=47",
-      liked: false,
-      saved: false,
-    },
-    {
-      name: "Edward Chen",
-      time: "5m ago",
-      text: "Fake job offer emails are increasing. Never pay upfront fees for training.",
-      image:
-        "https://images.unsplash.com/photo-1556740749-887f6717d7e4?q=80&w=800&auto=format&fit=crop",
-      likes: 2100,
-      comments: 302,
-      profile: "https://i.pravatar.cc/150?img=12",
-      liked: false,
-      saved: false,
-    },
-    {
-      name: "Lerato",
-      time: "10m ago",
-      text: "Someone cloned my WhatsApp profile and tried scamming my family pretending to be me.",
-      image:
-        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=800&auto=format&fit=crop",
-      likes: 980,
-      comments: 84,
-      profile: "https://i.pravatar.cc/150?img=32",
-      liked: false,
-      saved: false,
-    },
-    {
-      name: "James",
-      time: "18m ago",
-      text: "Be careful of fake WiFi networks in malls and airports. Hackers can steal login details.",
-      image:
-        "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=800&auto=format&fit=crop",
-      likes: 760,
-      comments: 49,
-      profile: "https://i.pravatar.cc/150?img=22",
-      liked: false,
-      saved: false,
-    },
-    {
-      name: "Aisha Khan",
-      time: "30m ago",
-      text: "Received a phishing email pretending to be Netflix asking me to update payment information.",
-      image:
-        "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop",
-      likes: 1200,
-      comments: 175,
-      profile: "https://i.pravatar.cc/150?img=48",
-      liked: false,
-      saved: false,
-    },
-    {
-      name: "Michael",
-      time: "1h ago",
-      text: "Scammers are now using AI voice calls pretending to be family members asking for money.",
-      image:
-        "https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=800&auto=format&fit=crop",
-      likes: 3400,
-      comments: 601,
-      profile: "https://i.pravatar.cc/150?img=18",
-      liked: false,
-      saved: false,
-    },
-    {
-      name: "Nomvula",
-      time: "2h ago",
-      text: "Always enable two-factor authentication. It saved my account after a password leak.",
-      image:
-        "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop",
-      likes: 1800,
-      comments: 233,
-      profile: "https://i.pravatar.cc/150?img=25",
-      liked: false,
-      saved: false,
-    },
-  ]);
+  const router = useRouter();
+  const [posts, setPosts] = useState(
+    SEED_POSTS.map((post) => ({ ...post, liked: false, saved: false })),
+  );
 
   const [openMenuId, setOpenMenuId] = useState(null);
 
   useEffect(() => {
     const reports = loadReports();
-    if (reports.length) {
-      setPosts((current) => {
+    const addedCommentCounts = loadCommentCounts();
+
+    setPosts((current) => {
+      let merged = current;
+
+      if (reports.length) {
         const seenIds = new Set(current.map((post) => post.id).filter(Boolean));
         const uniqueReports = reports.filter((report) => {
           if (!report.id || seenIds.has(report.id)) return false;
           seenIds.add(report.id);
           return true;
         });
-        return uniqueReports.length ? [...uniqueReports, ...current] : current;
-      });
-    }
+        merged = uniqueReports.length ? [...uniqueReports, ...current] : current;
+      }
+
+      return merged.map((post) =>
+        addedCommentCounts[post.id]
+          ? { ...post, comments: post.comments + addedCommentCounts[post.id] }
+          : post,
+      );
+    });
   }, []);
+
+  function openPost(id) {
+    if (!id) return;
+    router.push(`/post?id=${encodeURIComponent(id)}`);
+  }
 
   // ── ICONS ─────────────────────────────
 
@@ -275,7 +210,16 @@ export default function FeedPage() {
       {/* FEED */}
       <div style={styles.feed}>
         {posts.map((p, i) => (
-          <div key={p.id || i} style={styles.card}>
+          <div
+            key={p.id || i}
+            style={styles.card}
+            onClick={() => openPost(p.id)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") openPost(p.id);
+            }}
+          >
             <div style={styles.postHeader}>
               <div style={styles.userInfo}>
                 {p.profile ? (
@@ -308,16 +252,17 @@ export default function FeedPage() {
                     aria-expanded={openMenuId === p.id}
                     style={styles.menuButton}
                     type="button"
-                    onClick={() =>
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setOpenMenuId((current) =>
                         current === p.id ? null : p.id,
-                      )
-                    }
+                      );
+                    }}
                   >
                     •••
                   </button>
                   {openMenuId === p.id && (
-                    <div style={styles.menuPopup}>
+                    <div style={styles.menuPopup} onClick={(e) => e.stopPropagation()}>
                       <button
                         style={styles.deleteButton}
                         type="button"
@@ -346,7 +291,13 @@ export default function FeedPage() {
             <div style={styles.actions}>
               <div style={styles.leftActions}>
                 {/* LIKE */}
-                <div style={styles.action} onClick={() => likePost(i)}>
+                <div
+                  style={styles.action}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    likePost(i);
+                  }}
+                >
                   <div style={{ pointerEvents: "none" }}>{gemSVG(p.liked)}</div>
 
                   <span
@@ -360,7 +311,7 @@ export default function FeedPage() {
                 </div>
 
                 {/* COMMENT */}
-                <div style={styles.action}>
+                <div style={styles.action} onClick={() => openPost(p.id)}>
                   {commentSVG()}
 
                   <span style={styles.commentText}>{p.comments}</span>
@@ -368,7 +319,13 @@ export default function FeedPage() {
               </div>
 
               {/* SAVE */}
-              <div style={styles.save} onClick={() => savePost(i)}>
+              <div
+                style={styles.save}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  savePost(i);
+                }}
+              >
                 {bookmarkSVG(p.saved)}
               </div>
             </div>
@@ -469,6 +426,7 @@ const styles = {
     borderRadius: "18px",
     padding: "15px",
     marginBottom: "15px",
+    cursor: "pointer",
   },
 
   postHeader: {

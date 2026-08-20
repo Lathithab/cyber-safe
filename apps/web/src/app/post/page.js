@@ -1,96 +1,116 @@
 "use client";
 
-import { useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import {
+  findSeedPost,
+  loadReportById,
+  loadStoredComments,
+  appendStoredComment,
+} from "../feed/posts";
+
+function initials(name) {
+  return (name || "?")
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+}
+
+const HeartIcon = ({ filled }) => (
+  <svg
+    viewBox="0 0 24 24"
+    width="20"
+    height="20"
+    fill={filled ? "currentColor" : "none"}
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+  </svg>
+);
+
+const CommentIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    width="20"
+    height="20"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+  </svg>
+);
+
+const PinIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    width="14"
+    height="14"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+    <circle cx="12" cy="10" r="3" />
+  </svg>
+);
 
 function PostPage() {
   const searchParams = useSearchParams();
-  const username = searchParams.get("username");
-  const location = searchParams.get("location");
-  const description = searchParams.get("description");
-  const issues = searchParams.get("issues")?.split(",") ?? [];
-  const timestamp = new Date();
+  const router = useRouter();
+  const id = searchParams.get("id");
 
-  const POST_DATA = {
-    user: {
-      username,
-      avatar: "AO",
-    },
-    description,
-    location,
-    timestamp: "4:22 PM · May 15, 2026",
-    likes: 284,
-    comments: 37,
-  };
-
-  const HeartIcon = ({ filled }) => (
-    <svg
-      viewBox="0 0 24 24"
-      width="20"
-      height="20"
-      fill={filled ? "currentColor" : "none"}
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-    </svg>
-  );
-
-  const CommentIcon = () => (
-    <svg
-      viewBox="0 0 24 24"
-      width="20"
-      height="20"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-    </svg>
-  );
-
-  const PinIcon = () => (
-    <svg
-      viewBox="0 0 24 24"
-      width="14"
-      height="14"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-      <circle cx="12" cy="10" r="3" />
-    </svg>
-  );
-
+  const [post, setPost] = useState(undefined); // undefined = loading, null = not found
   const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(POST_DATA.likes);
-  const [showCommentBox, setShowCommentBox] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
-  const [commentCount, setCommentCount] = useState(POST_DATA.comments);
-  const [submittedComment, setSubmittedComment] = useState(null);
 
-  const handleLike = () => {
+  useEffect(() => {
+    if (!id) {
+      setPost(null);
+      return;
+    }
+    const found = findSeedPost(id) || loadReportById(id);
+    setPost(found);
+    if (found) {
+      setLikeCount(found.likes || 0);
+      setComments(loadStoredComments(id));
+    }
+  }, [id]);
+
+  function goBack() {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/feed");
+    }
+  }
+
+  function handleLike() {
     setLiked((prev) => !prev);
     setLikeCount((prev) => (liked ? prev - 1 : prev + 1));
-  };
+  }
 
-  const handleCommentSubmit = () => {
-    if (!commentText.trim()) return;
-    setSubmittedComment(commentText);
+  function handleCommentSubmit(e) {
+    e.preventDefault();
+    const text = commentText.trim();
+    if (!text || !id) return;
+
+    const comment = { name: "You", text, time: "Just now" };
+    const updated = appendStoredComment(id, comment);
+    setComments(updated || [...comments, comment]);
     setCommentText("");
-    setCommentCount((prev) => prev + 1);
-    setShowCommentBox(false);
-  };
-
-  const router = useRouter();
+  }
 
   return (
     <>
@@ -101,42 +121,26 @@ function PostPage() {
 
         body {
           font-family: 'DM Sans', sans-serif;
-          background: #ffffff;
+          background: #f5f7fa;
           min-height: 100vh;
-          color: #000000;
+          color: #0e1b24;
         }
 
         .page {
           min-height: 100vh;
-          background: #ffffff;
+          background: #f5f7fa;
           display: flex;
           flex-direction: column;
           align-items: center;
-          padding: 0;
-          position: relative;
-          overflow: hidden;
         }
 
-        .bg-glow {
-          position: fixed;
-          top: -120px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 600px;
-          height: 600px;
-          background: radial-gradient(circle, rgba(29,155,240,0.08) 0%, transparent 70%);
-          pointer-events: none;
-          z-index: 0;
-        }
-
-        .feed-column {
+        .page-column {
           width: 100%;
-          max-width: 598px;
+          max-width: 500px;
           min-height: 100vh;
-          border-left: 1px solid #ffffff;
-          border-right: 1px solid #ffffff;
+          background: #f5f7fa;
           position: relative;
-          z-index: 1;
+          padding-bottom: 88px;
         }
 
         /* Top nav bar */
@@ -144,19 +148,18 @@ function PostPage() {
           position: sticky;
           top: 0;
           z-index: 10;
-          background: #ffffff;
-          backdrop-filter: blur(16px);
-          border-bottom: 1px solid #ffffff;
-          padding: 14px 16px;
+          background: #30C9E8;
+          color: #fff;
+          padding: 12px 14px;
           display: flex;
           align-items: center;
-          gap: 24px;
+          gap: 14px;
         }
 
         .back-btn {
-          background: none;
+          background: rgba(255,255,255,0.18);
           border: none;
-          color: #000000;
+          color: #fff;
           cursor: pointer;
           width: 36px;
           height: 36px;
@@ -165,23 +168,24 @@ function PostPage() {
           align-items: center;
           justify-content: center;
           transition: background 0.15s;
+          flex: none;
         }
-        .back-btn:hover { background: rgba(255,255,255,0.06); }
+        .back-btn:hover { background: rgba(255,255,255,0.3); }
 
         .topbar-title {
           font-family: 'Syne', sans-serif;
-          font-weight: 700;
+          font-weight: 800;
           font-size: 18px;
-          letter-spacing: -0.3px;
-          color: #000;
+          color: #fff;
         }
 
         /* Post card */
         .post-card {
-          padding: 16px 16px 0;
-          border-radius: 25px;
-          border: 2px solid #1e1e2e;
-          width: 100%;
+          margin: 14px;
+          padding: 16px;
+          border-radius: 18px;
+          background: #fff;
+          box-shadow: 0 2px 12px rgba(0,0,0,0.06);
         }
 
         .post-header {
@@ -191,16 +195,11 @@ function PostPage() {
           margin-bottom: 12px;
         }
 
-        .avatar-wrap {
-          position: relative;
-          flex-shrink: 0;
-        }
-
         .avatar {
           width: 48px;
           height: 48px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #1d9bf0 0%, #7856ff 100%);
+          background: linear-gradient(135deg, #30C9E8 0%, #7856ff 100%);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -208,7 +207,15 @@ function PostPage() {
           font-weight: 700;
           font-size: 16px;
           color: #fff;
-          letter-spacing: 0.5px;
+          flex-shrink: 0;
+          object-fit: cover;
+        }
+
+        .avatar-img {
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          object-fit: cover;
           flex-shrink: 0;
         }
 
@@ -220,67 +227,23 @@ function PostPage() {
           min-width: 0;
         }
 
-        .name-row {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          flex-wrap: wrap;
-        }
-
         .display-name {
           font-family: 'Syne', sans-serif;
           font-weight: 700;
           font-size: 15px;
-          color: #00000;
-          white-space: nowrap;
+          color: #0e1b24;
         }
 
-
-        .more-btn {
-          margin-left: auto;
-          background: none;
-          border: none;
-          color: #6b7280;
-          cursor: pointer;
-          width: 34px;
-          height: 34px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: background 0.15s, color 0.15s;
-        }
-        .more-btn:hover { background: rgba(29,155,240,0.1); color: #1d9bf0; }
-
-        /* Post body */
-        .post-content {
-          font-size: 17px;
-          line-height: 1.55;
-          color: #000000;
-          font-weight: 400;
-          margin-bottom: 14px;
-          word-break: break-word;
-        }
-
-        /* Metadata row */
-        .meta-row {
+        .handle-row {
           display: flex;
           align-items: center;
           gap: 6px;
-          margin-bottom: 14px;
           flex-wrap: wrap;
         }
 
-        .meta-text {
+        .handle {
           font-size: 13px;
-          color: #6b7280;
-        }
-
-        .meta-dot {
-          width: 3px;
-          height: 3px;
-          border-radius: 50%;
-          background: #4b5563;
+          color: #6b7c86;
         }
 
         .location-badge {
@@ -292,33 +255,58 @@ function PostPage() {
           font-weight: 500;
         }
 
-        /* Stats row */
-        .stats-row {
-          display: flex;
-          gap: 20px;
-          padding: 14px 0;
-        }
-
-        .stat-item {
+        .more-btn {
+          margin-left: auto;
+          background: none;
+          border: none;
+          color: #6b7c86;
+          cursor: pointer;
+          width: 34px;
+          height: 34px;
+          border-radius: 50%;
           display: flex;
           align-items: center;
-          gap: 4px;
+          justify-content: center;
+          flex: none;
+        }
+        .more-btn:hover { background: rgba(48,201,232,0.1); color: #1d9bf0; }
+
+        /* Post body */
+        .post-content {
+          font-size: 16px;
+          line-height: 1.55;
+          color: #0e1b24;
+          margin-bottom: 12px;
+          word-break: break-word;
         }
 
-        .stat-num {
-          font-family: 'Syne', sans-serif;
-          font-weight: 700;
-          font-size: 15px;
-          color: #fff;
+        .post-image {
+          width: 100%;
+          max-height: 320px;
+          object-fit: cover;
+          border-radius: 12px;
+          margin-bottom: 12px;
         }
 
+        .meta-row {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          margin-bottom: 12px;
+          flex-wrap: wrap;
+        }
+
+        .meta-text {
+          font-size: 13px;
+          color: #6b7c86;
+        }
 
         /* Action row */
         .action-row {
           display: flex;
-          justify-content: left ;
-          padding: 4px 0 14px;
-          border-top: 1px solid #1e1e2e;
+          gap: 6px;
+          padding-top: 10px;
+          border-top: 1px solid #eef1f4;
         }
 
         .action-btn {
@@ -331,7 +319,7 @@ function PostPage() {
           padding: 8px 12px;
           border-radius: 999px;
           transition: all 0.15s;
-          color: #6b7280;
+          color: #6b7c86;
           font-size: 13px;
           font-family: 'DM Sans', sans-serif;
         }
@@ -345,48 +333,31 @@ function PostPage() {
           color: #f91880;
         }
 
-        .action-btn.liked:hover {
-          color: #f91880;
-          background: rgba(249,24,128,0.08);
-        }
-
-
-        .like-icon {
-          transition: transform 0.15s cubic-bezier(0.34,1.56,0.64,1);
-        }
-
-        .action-btn.liked .like-icon {
-          transform: scale(1.25);
-          color: #f91880;
-        }
-
         .action-count {
-          font-weight: 500;
+          font-weight: 600;
           font-size: 13px;
         }
 
-        /* Comment box */
-        .comment-section {
-          border-top: 1px solid #1e1e2e;
-          padding: 16px;
-          animation: slideDown 0.2s ease;
+        /* Comments */
+        .comments-heading {
+          padding: 4px 18px 8px;
+          font-family: 'Syne', sans-serif;
+          font-weight: 700;
+          font-size: 14px;
+          color: #0e1b24;
         }
 
-        @keyframes slideDown {
-          from { opacity: 0; transform: translateY(-8px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-
-        .comment-inner {
+        .comment-row {
           display: flex;
           gap: 10px;
+          padding: 10px 14px;
         }
 
         .comment-avatar {
-          width: 36px;
-          height: 36px;
+          width: 34px;
+          height: 34px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #7856ff 0%, #1d9bf0 100%);
+          background: linear-gradient(135deg, #7856ff 0%, #30C9E8 100%);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -397,150 +368,146 @@ function PostPage() {
           flex-shrink: 0;
         }
 
-        .comment-input-wrap {
-          flex: 1;
+        .comment-body { flex: 1; min-width: 0; }
+
+        .comment-name {
+          font-family: 'Syne', sans-serif;
+          font-weight: 700;
+          font-size: 13.5px;
+          color: #0e1b24;
+        }
+
+        .comment-text {
+          font-size: 14px;
+          color: #3d4c55;
+          line-height: 1.5;
+          word-break: break-word;
+        }
+
+        .comment-time {
+          font-size: 11.5px;
+          color: #9aa7b0;
+          margin-top: 3px;
+        }
+
+        .report-cta {
+          margin: 18px 14px 0;
+          display: block;
+          text-align: center;
+          background: #eafaff;
+          border: 1px solid #bfeaf5;
+          color: #0e8fb0;
+          border-radius: 12px;
+          padding: 12px;
+          font-family: 'DM Sans', sans-serif;
+          font-weight: 600;
+          font-size: 13.5px;
+          cursor: pointer;
+          transition: background 0.15s;
+        }
+        .report-cta:hover { background: #d9f4fb; }
+
+        /* Composer */
+        .composer {
+          position: fixed;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          z-index: 20;
+          background: #fff;
+          border-top: 1px solid #e3e9ed;
+          padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+        }
+
+        .composer-inner {
+          max-width: 500px;
+          margin: 0 auto;
           display: flex;
-          flex-direction: column;
+          align-items: center;
           gap: 10px;
         }
 
-        .comment-textarea {
-          background: transparent;
+        .composer-avatar {
+          width: 34px;
+          height: 34px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #7856ff 0%, #30C9E8 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: 'Syne', sans-serif;
+          font-weight: 700;
+          font-size: 12px;
+          color: #fff;
+          flex-shrink: 0;
+        }
+
+        .composer-input {
+          flex: 1;
+          min-width: 0;
+          background: #f0f3f5;
           border: none;
           outline: none;
-          color: #e8e8f0;
-          font-family: 'DM Sans', sans-serif;
-          font-size: 15px;
-          resize: none;
-          width: 100%;
-          min-height: 70px;
-          placeholder-color: #4b5563;
-          line-height: 1.5;
-        }
-
-        .comment-textarea::placeholder { color: #4b5563; }
-
-        .comment-footer {
-          display: flex;
-          justify-content: flex-end;
-          gap: 8px;
-        }
-
-        .cancel-btn {
-          background: transparent;
-          border: 1px solid #374151;
-          color: #9ca3af;
-          padding: 6px 16px;
           border-radius: 999px;
+          padding: 10px 14px;
           font-family: 'DM Sans', sans-serif;
           font-size: 14px;
-          font-weight: 500;
-          cursor: pointer;
-          transition: all 0.15s;
+          color: #0e1b24;
         }
-        .cancel-btn:hover { background: rgba(255,255,255,0.05); }
+        .composer-input::placeholder { color: #9aa7b0; }
 
-        .submit-btn {
-          background: #1d9bf0;
+        .composer-submit {
+          background: #30C9E8;
           border: none;
           color: #fff;
-          padding: 6px 18px;
+          padding: 9px 16px;
           border-radius: 999px;
           font-family: 'Syne', sans-serif;
-          font-size: 14px;
+          font-size: 13.5px;
           font-weight: 700;
           cursor: pointer;
-          transition: all 0.15s;
+          flex: none;
+          transition: opacity 0.15s;
         }
-        .submit-btn:hover { background: #1a8cd8; }
-        .submit-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+        .composer-submit:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        /* Replied comment display */
-        .submitted-comment {
-          border-top: 1px solid #1e1e2e;
-          padding: 16px;
-          display: flex;
-          gap: 10px;
-          animation: slideDown 0.25s ease;
+        .empty-state {
+          padding: 60px 24px;
+          text-align: center;
         }
 
-        .sc-avatar {
-          width: 36px;
-          height: 36px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #7856ff 0%, #1d9bf0 100%);
-          display: flex;
-          align-items: center;
-          justify-content: center;
+        .empty-title {
           font-family: 'Syne', sans-serif;
-          font-weight: 700;
-          font-size: 12px;
-          color: #fff;
-          flex-shrink: 0;
+          font-weight: 800;
+          font-size: 18px;
+          margin-bottom: 8px;
+          color: #0e1b24;
         }
 
-        .sc-body {
-          flex: 1;
-        }
-
-        .sc-name {
-          font-family: 'Syne', sans-serif;
-          font-weight: 700;
+        .empty-sub {
           font-size: 14px;
+          color: #6b7c86;
+          margin-bottom: 18px;
+        }
+
+        .empty-btn {
+          background: #30C9E8;
+          border: none;
           color: #fff;
-          margin-bottom: 2px;
-        }
-
-        .sc-text {
-          font-size: 14px;
-          color: #d1d5db;
-          line-height: 1.5;
-        }
-
-        .sc-time {
-          font-size: 12px;
-          color: #4b5563;
-          margin-top: 4px;
-        }
-
-        /* Toast */
-        .toast {
-          position: fixed;
-          bottom: 32px;
-          left: 50%;
-          transform: translateX(-50%) translateY(0);
-          background: #1d9bf0;
-          color: #fff;
-          padding: 10px 20px;
+          padding: 11px 22px;
           border-radius: 999px;
           font-family: 'Syne', sans-serif;
-          font-weight: 600;
-          font-size: 13px;
-          z-index: 100;
-          animation: toastIn 0.25s ease;
-          white-space: nowrap;
-        }
-
-        @keyframes toastIn {
-          from { opacity: 0; transform: translateX(-50%) translateY(12px); }
-          to { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
-
-        /* Responsive tweaks */
-        @media (max-width: 600px) {
-          .feed-column { border-left: none; border-right: none; }
-          .post-content { font-size: 16px; }
-          .stats-row { gap: 14px; }
+          font-weight: 700;
+          font-size: 14px;
+          cursor: pointer;
         }
       `}</style>
 
       <div className="page">
-        <div className="bg-glow" />
-
         <div className="page-column">
           {/* Top bar */}
           <div className="topbar">
-            <button className="back-btn" onClick={() => router.back()}>
+            <button className="back-btn" onClick={goBack} aria-label="Go back">
               <svg
                 viewBox="0 0 24 24"
                 width="20"
@@ -554,128 +521,133 @@ function PostPage() {
                 <polyline points="15 18 9 12 15 6" />
               </svg>
             </button>
-            <span className="topbar-title">Scam Report</span>
+            <span className="topbar-title">Post</span>
           </div>
 
-          {/* Post card */}
-          <div className="post-card">
-            {/* Header */}
-            <div className="post-header">
-              <div className="avatar-wrap">
-                <div className="avatar">{POST_DATA.user.avatar}</div>
-              </div>
+          {post === undefined && <div className="empty-state" />}
 
-              <div className="user-info">
-                <div className="name-row">
-                  <span className="display-name">
-                    {POST_DATA.user.username}
-                  </span>
-                </div>
-                <span className="location-badge">
-                  <PinIcon />
-                  {POST_DATA.location}
-                </span>
-              </div>
-
-              <button className="more-btn" aria-label="More options">
-                <svg
-                  viewBox="0 0 24 24"
-                  width="18"
-                  height="18"
-                  fill="currentColor"
-                >
-                  <circle cx="5" cy="12" r="1.5" />
-                  <circle cx="12" cy="12" r="1.5" />
-                  <circle cx="19" cy="12" r="1.5" />
-                </svg>
+          {post === null && (
+            <div className="empty-state">
+              <div className="empty-title">We couldn't find that post</div>
+              <p className="empty-sub">
+                It may have been removed, or the link is out of date.
+              </p>
+              <button className="empty-btn" onClick={() => router.push("/feed")}>
+                Back to feed
               </button>
-            </div>
-
-            {/* Content */}
-            <p className="post-content">{POST_DATA.description}</p>
-
-            {/* Meta */}
-            <div className="meta-row">
-              <span className="meta-text">{POST_DATA.timestamp}</span>
-              <div className="meta-dot" />
-            </div>
-
-            <div className="divider" />
-
-            {/* Actions */}
-            <div className="action-row">
-              <button
-                className="action-btn"
-                onClick={() => setShowCommentBox((v) => !v)}
-                aria-label="Reply"
-              >
-                <CommentIcon />
-                <span className="action-count">{commentCount}</span>
-              </button>
-
-              <button
-                className={`action-btn ${liked ? "liked" : ""}`}
-                onClick={handleLike}
-                aria-label={liked ? "Unlike" : "Like"}
-              >
-                <span className="like-icon">
-                  <HeartIcon filled={liked} />
-                </span>
-                <span className="action-count">{likeCount}</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Comment box */}
-          {showCommentBox && (
-            <div className="comment-section">
-              <div className="comment-inner">
-                <div className="comment-avatar">YO</div>
-                <div className="comment-input-wrap">
-                  <textarea
-                    className="comment-textarea"
-                    placeholder="Post your reply"
-                    value={commentText}
-                    onChange={(e) => setCommentText(e.target.value)}
-                    rows={3}
-                    autoFocus
-                  />
-                  <div className="comment-footer">
-                    <button
-                      className="cancel-btn"
-                      onClick={() => {
-                        setShowCommentBox(false);
-                        setCommentText("");
-                      }}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      className="submit-btn"
-                      onClick={handleCommentSubmit}
-                      disabled={!commentText.trim()}
-                    >
-                      Reply
-                    </button>
-                  </div>
-                </div>
-              </div>
             </div>
           )}
 
-          {/* Submitted comment */}
-          {submittedComment && (
-            <div className="submitted-comment">
-              <div className="sc-avatar">YO</div>
-              <div className="sc-body">
-                <div className="sc-name">You</div>
-                <div className="sc-text">{submittedComment}</div>
-                <div className="sc-time">Just now</div>
+          {post && (
+            <>
+              {/* Post card */}
+              <div className="post-card">
+                <div className="post-header">
+                  {post.profile ? (
+                    <img className="avatar-img" src={post.profile} alt="" />
+                  ) : (
+                    <div className="avatar">{initials(post.name)}</div>
+                  )}
+
+                  <div className="user-info">
+                    <span className="display-name">{post.name}</span>
+                    <div className="handle-row">
+                      {post.handle && <span className="handle">{post.handle}</span>}
+                      <span className="handle">· {post.time}</span>
+                    </div>
+                    {post.location && (
+                      <span className="location-badge">
+                        <PinIcon />
+                        {post.location}
+                      </span>
+                    )}
+                  </div>
+
+                  <button className="more-btn" aria-label="More options">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                      <circle cx="5" cy="12" r="1.5" />
+                      <circle cx="12" cy="12" r="1.5" />
+                      <circle cx="19" cy="12" r="1.5" />
+                    </svg>
+                  </button>
+                </div>
+
+                <p className="post-content">{post.text}</p>
+
+                {post.incidentDate && (
+                  <div className="meta-row">
+                    <span className="meta-text">Incident date: {post.incidentDate}</span>
+                  </div>
+                )}
+
+                {post.image && <img className="post-image" src={post.image} alt="" />}
+
+                <div className="action-row">
+                  <button
+                    className={`action-btn ${liked ? "liked" : ""}`}
+                    onClick={handleLike}
+                    aria-label={liked ? "Unlike" : "Like"}
+                  >
+                    <HeartIcon filled={liked} />
+                    <span className="action-count">{likeCount}</span>
+                  </button>
+
+                  <button className="action-btn" aria-label="Comments">
+                    <CommentIcon />
+                    <span className="action-count">
+                      {(post.comments || 0) + comments.length}
+                    </span>
+                  </button>
+                </div>
               </div>
-            </div>
+
+              {/* CTA to post your own report */}
+              <button
+                type="button"
+                className="report-cta"
+                onClick={() => router.push("/postReport")}
+              >
+                Seen something similar? Share your own report →
+              </button>
+
+              {/* Comments */}
+              <div className="comments-heading">Comments</div>
+
+              {[...(post.topComments || []), ...comments].map((c, idx) => (
+                <div className="comment-row" key={idx}>
+                  <div className="comment-avatar">{initials(c.name)}</div>
+                  <div className="comment-body">
+                    <div className="comment-name">{c.name}</div>
+                    <div className="comment-text">{c.text}</div>
+                    <div className="comment-time">{c.time}</div>
+                  </div>
+                </div>
+              ))}
+            </>
           )}
         </div>
       </div>
+
+      {post && (
+        <form className="composer" onSubmit={handleCommentSubmit}>
+          <div className="composer-inner">
+            <div className="composer-avatar">YO</div>
+            <input
+              className="composer-input"
+              placeholder="Add a comment…"
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+            />
+            <button
+              type="submit"
+              className="composer-submit"
+              disabled={!commentText.trim()}
+            >
+              Post
+            </button>
+          </div>
+        </form>
+      )}
     </>
   );
 }

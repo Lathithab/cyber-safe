@@ -93,7 +93,7 @@ export default function PostReportPage() {
     description: report.text,
     location: report.location || null,
     issues: report.issues,
-    status: "pending",
+    status: "approved",
   });
 
 if (error) {

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
+import { supabase } from "../../../lib/supabase";
 function loadReports() {
   try {
     const reports = JSON.parse(localStorage.getItem("cybersafeReports") || "[]");
@@ -17,110 +17,62 @@ function loadReports() {
 export default function FeedPage() {
   const router = useRouter();
 
-  const [posts, setPosts] = useState([
-    {
-      name: "Sarah",
-      time: "2m ago",
-      text: "I almost got scammed by a fake banking SMS asking for account verification details.",
-      image:
-        "https://images.unsplash.com/photo-1563013544-824ae1b704d3?q=80&w=800&auto=format&fit=crop",
-      likes: 1400,
-      comments: 128,
-      profile: "https://i.pravatar.cc/150?img=47",
-      liked: false,
-      saved: false,
-    },
-    {
-      name: "Edward Chen",
-      time: "5m ago",
-      text: "Fake job offer emails are increasing. Never pay upfront fees for training.",
-      image:
-        "https://images.unsplash.com/photo-1556740749-887f6717d7e4?q=80&w=800&auto=format&fit=crop",
-      likes: 2100,
-      comments: 302,
-      profile: "https://i.pravatar.cc/150?img=12",
-      liked: false,
-      saved: false,
-    },
-    {
-      name: "Lerato",
-      time: "10m ago",
-      text: "Someone cloned my WhatsApp profile and tried scamming my family pretending to be me.",
-      image:
-        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=800&auto=format&fit=crop",
-      likes: 980,
-      comments: 84,
-      profile: "https://i.pravatar.cc/150?img=32",
-      liked: false,
-      saved: false,
-    },
-    {
-      name: "James",
-      time: "18m ago",
-      text: "Be careful of fake WiFi networks in malls and airports. Hackers can steal login details.",
-      image:
-        "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=800&auto=format&fit=crop",
-      likes: 760,
-      comments: 49,
-      profile: "https://i.pravatar.cc/150?img=22",
-      liked: false,
-      saved: false,
-    },
-    {
-      name: "Aisha Khan",
-      time: "30m ago",
-      text: "Received a phishing email pretending to be Netflix asking me to update payment information.",
-      image:
-        "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop",
-      likes: 1200,
-      comments: 175,
-      profile: "https://i.pravatar.cc/150?img=48",
-      liked: false,
-      saved: false,
-    },
-    {
-      name: "Michael",
-      time: "1h ago",
-      text: "Scammers are now using AI voice calls pretending to be family members asking for money.",
-      image:
-        "https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=800&auto=format&fit=crop",
-      likes: 3400,
-      comments: 601,
-      profile: "https://i.pravatar.cc/150?img=18",
-      liked: false,
-      saved: false,
-    },
-    {
-      name: "Nomvula",
-      time: "2h ago",
-      text: "Always enable two-factor authentication. It saved my account after a password leak.",
-      image:
-        "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop",
-      likes: 1800,
-      comments: 233,
-      profile: "https://i.pravatar.cc/150?img=25",
-      liked: false,
-      saved: false,
-    },
-  ]);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [activeNav, setActiveNav] = useState("feed");
   const [openMenuId, setOpenMenuId] = useState(null);
 
-  useEffect(() => {
-    const reports = loadReports();
-    if (reports.length) {
-      setPosts((current) => {
-        const seenIds = new Set(current.map((post) => post.id).filter(Boolean));
-        const uniqueReports = reports.filter((report) => {
-          if (!report.id || seenIds.has(report.id)) return false;
-          seenIds.add(report.id);
-          return true;
-        });
-        return uniqueReports.length ? [...uniqueReports, ...current] : current;
-      });
+ useEffect(() => {
+  async function loadPosts() {
+    const { data, error } = await supabase
+      .from("posts")
+      .select("*")
+      .eq("status", "approved")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error loading posts:", error);
+      setError(error.message);
+      setLoading(false);
+      return;
     }
-  }, []);
+
+    const databasePosts = (data || []).map((post) => ({
+      id: post.id,
+      name: post.display_name,
+      time: new Date(post.created_at).toLocaleString(),
+      text: post.description,
+      location: post.location,
+      image: post.image_url,
+      likes: 0,
+      comments: 0,
+      liked: false,
+      saved: false,
+    }));
+
+    setPosts(databasePosts);
+    setLoading(false);
+  }
+
+  loadPosts();
+}, []);
+if (loading) {
+  return (
+    <div style={{ padding: "40px", textAlign: "center" }}>
+      Loading community feed...
+    </div>
+  );
+}
+
+if (error) {
+  return (
+    <div style={{ padding: "40px", textAlign: "center", color: "#b42318" }}>
+      {error}
+    </div>
+  );
+}
 
   // ── ICONS ─────────────────────────────
 

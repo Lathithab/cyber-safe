@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { supabase } from "../../../lib/supabase"; //Database is imported//
 
 const LOSSES = ["Money", "Bank Details", "Passwords", "Identity Info"];
 
@@ -85,13 +86,22 @@ export default function PostReportPage() {
       image,
     };
 
-    try {
-      const previous = JSON.parse(localStorage.getItem("cybersafeReports") || "[]");
-      localStorage.setItem("cybersafeReports", JSON.stringify([report, ...previous]));
-    } catch {
-      setSubmitError("This image is too large to save on this device. Try a smaller image or post without an attachment.");
-      return;
-    }
+   const { error } = await supabase
+  .from("posts")
+  .insert({
+    display_name: report.name,
+    description: report.text,
+    location: report.location || null,
+    issues: report.issues,
+    status: "pending",
+  });
+
+if (error) {
+  console.error("Error creating report:", error);
+  setSubmitError("We couldn't post your report. Please try again.");
+  return;
+}
+
 
     router.push("/feed");
   }

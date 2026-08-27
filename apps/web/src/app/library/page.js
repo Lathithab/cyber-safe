@@ -2,218 +2,65 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import BottomNav from "../components/BottomNav";
+import DashboardNavIcon from "../components/DashboardNavIcon";
 
-const threats = [
-  {
-    id: "whatsapp-takeover",
-    category: "WhatsApp",
-    title: "WhatsApp verification-code scam",
-    summary:
-      "A scammer asks for the six-digit code sent to your phone, then takes over your WhatsApp account.",
-    signs: [
-      "They say they sent a code by mistake.",
-      "They pressure you to send the code quickly.",
-      "The message comes from a known contact whose account may be compromised.",
-    ],
-    action:
-      "Never share a WhatsApp verification code. Enable two-step verification in WhatsApp and warn your contacts if you shared one.",
-  },
-  {
-    id: "banking-phishing",
-    category: "Banking",
-    title: "Fake bank SMS or phishing link",
-    summary:
-      "A message claims there is a payment, account block, or security problem and asks you to tap a link.",
-    signs: [
-      "The link is shortened or does not match your bank’s official website.",
-      "It asks for a PIN, password, card details, or OTP.",
-      "It creates urgency with threats or a surprising payment.",
-    ],
-    action:
-      "Do not use the link. Open your official banking app or call the number on the back of your card. If money is moving, call your bank now.",
-  },
-  {
-    id: "sim-swap",
-    category: "SIM swap",
-    title: "SIM-swap fraud",
-    summary:
-      "Your number unexpectedly loses service while scammers try to receive your banking one-time passwords.",
-    signs: [
-      "Your phone suddenly shows no signal or cannot make calls.",
-      "You receive an unexpected SIM-swap notification.",
-      "Your banking app or account details change unexpectedly.",
-    ],
-    action:
-      "Call your mobile network from another phone immediately, then contact your bank and change important passwords from a safe device.",
-  },
-  {
-    id: "job-fee",
-    category: "Job scams",
-    title: "Job offer that asks for a fee",
-    summary:
-      "A supposed recruiter offers work, then asks for payment for training, equipment, a background check, or a placement fee.",
-    signs: [
-      "The salary is unusually high for little information.",
-      "They ask for money before you start work.",
-      "The sender uses a free email address rather than the company domain.",
-    ],
-    action:
-      "Do not pay or share ID documents. Independently verify the vacancy on the employer’s official website or switchboard.",
-  },
-  {
-    id: "marketplace-payment",
-    category: "Marketplace",
-    title: "Fake proof-of-payment",
-    summary:
-      "A buyer sends a convincing payment confirmation and pressures you to release goods before the money has cleared.",
-    signs: [
-      "They insist on courier collection immediately.",
-      "The payment email or screenshot looks unusual.",
-      "Your banking app does not show cleared funds.",
-    ],
-    action:
-      "Only release goods after cleared funds appear in your own banking app. A screenshot or email is not proof of payment.",
-  },
+const scams = [
+  { id: "whatsapp", category: "WhatsApp", title: "WhatsApp verification-code scam", summary: "A scammer asks for the six-digit code sent to your phone, then takes over your WhatsApp account.", signs: ["They say the code was sent by mistake.", "They pressure you to send it quickly.", "The request comes from a known contact whose account may be compromised."], action: "Never share a WhatsApp verification code. Enable two-step verification and warn your contacts if you shared one." },
+  { id: "bank", category: "Banking", title: "Fake bank SMS or phishing link", summary: "A message claims there is a payment, account block, or security problem and asks you to tap a link.", signs: ["The link is shortened or does not match your bank's official website.", "It asks for a PIN, password, card details, or OTP.", "It creates urgency around a surprising payment or threat."], action: "Do not use the link. Open your official banking app or call the number on the back of your card." },
+  { id: "sim", category: "SIM swap", title: "SIM-swap fraud", summary: "Your number unexpectedly loses service while scammers try to receive banking one-time passwords.", signs: ["Your phone suddenly has no signal.", "You receive an unexpected SIM-swap notification.", "Your banking details change unexpectedly."], action: "Call your mobile network from another phone immediately, then contact your bank." },
+  { id: "job", category: "Job scams", title: "Job offer that asks for a fee", summary: "A supposed recruiter offers work, then asks for payment for training, equipment, or placement.", signs: ["The salary is unusually high for little information.", "They ask for money before you start work.", "The sender uses a free email address rather than the company domain."], action: "Do not pay or share ID documents. Verify the vacancy on the employer's official website." },
+  { id: "market", category: "Marketplace", title: "Fake proof-of-payment", summary: "A buyer sends a convincing payment confirmation and pressures you to release goods before funds clear.", signs: ["They insist on courier collection immediately.", "The payment email or screenshot looks unusual.", "Your banking app does not show cleared funds."], action: "Release goods only after cleared funds appear in your own banking app." },
+  { id: "otp", category: "Banking", title: "One-time password (OTP) request", summary: "Someone claiming to be from your bank asks for the code sent to your phone to approve or stop a transaction.", signs: ["They ask for an OTP, PIN, or banking-app approval.", "They create panic about fraud or a blocked account.", "They ask you to read the code aloud or enter it on a link."], action: "Your bank will not ask you to disclose an OTP. End the call, then contact the bank using its official number." },
+  { id: "delivery", category: "Phishing", title: "Fake parcel or delivery notification", summary: "A text or email says a parcel is delayed and asks you to pay a small fee or confirm delivery details.", signs: ["You were not expecting a parcel.", "The link does not match the courier's official website.", "A small payment is requested to collect card details."], action: "Do not open the link. Track parcels only through the courier's official app or website." },
+  { id: "sars", category: "Phishing", title: "Fake SARS refund or tax notice", summary: "A message claims you are due a tax refund or owe money and directs you to a website or attachment.", signs: ["The message uses a strange email address or shortened link.", "It asks for banking credentials or an upfront payment.", "The language is urgent or contains unusual errors."], action: "Do not use the message link. Sign in through the official SARS eFiling service or contact SARS directly." },
+  { id: "remote", category: "Tech support", title: "Remote-access or tech-support scam", summary: "A caller says your phone or computer has a virus and asks you to install an app so they can fix it.", signs: ["The contact was unexpected.", "They ask you to install remote-control software.", "They request banking details, passwords, or a payment to clean your device."], action: "Hang up and uninstall any remote-access app you installed. Change passwords from a safe device and contact your bank if details were shared." },
+  { id: "loan", category: "Financial scams", title: "Advance-fee loan scam", summary: "A lender promises an easy loan but asks for an administration, insurance, or release fee before paying out.", signs: ["Approval is guaranteed with no affordability checks.", "You must pay before receiving the loan.", "The lender cannot be verified through official channels."], action: "Do not pay a fee or share banking credentials. Verify financial service providers before applying." },
+  { id: "charity", category: "Impersonation", title: "Charity or disaster-relief impersonation", summary: "Fraudsters use a real charity's name after an emergency and ask for donations through personal accounts or links.", signs: ["The request is sent by an unfamiliar account.", "They insist on payment to a personal number or wallet.", "The campaign cannot be found on the charity's official channels."], action: "Donate only through a verified charity website or established official account." },
+  { id: "boss", category: "Impersonation", title: "Boss or family emergency impersonation", summary: "A scammer pretends to be your manager or a relative on a new number and asks for urgent money or vouchers.", signs: ["They say their phone is broken or they cannot talk.", "They demand secrecy and urgency.", "The request is out of character or asks for gift cards."], action: "Verify through a known phone number or in person before taking any action. Do not share vouchers or transfer funds." },
 ];
 
-const categories = [
-  "All",
-  ...new Set(threats.map((threat) => threat.category)),
-];
+const categories = ["All", ...new Set(scams.map((item) => item.category))];
 
-export default function LibraryPage() {
+function Icon({ name, size = 22 }) {
+  const shared = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true };
+  if (name === "shield") return <svg {...shared}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>;
+  if (name === "home") return <svg {...shared}><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" /></svg>;
+  if (name === "book") return <svg {...shared}><path d="M4 19a2 2 0 0 1 2-2h14" /><path d="M6 3h14v18H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" /></svg>;
+  if (name === "alert") return <svg {...shared}><path d="m10.3 3.9-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3.1l-8-14a2 2 0 0 0-3.4 0z" /><path d="M12 9v4" /><path d="M12 17h.01" /></svg>;
+  if (name === "chat") return <svg {...shared}><path d="M21 11.5a8.4 8.4 0 0 1-9 8.5 9 9 0 0 1-4-.9L3 21l1.6-4.3A8.4 8.4 0 0 1 3 11.5 8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z" /></svg>;
+  if (name === "search") return <svg {...shared}><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>;
+  if (name === "phone") return <svg {...shared}><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z" /></svg>;
+  return <svg {...shared}><path d="M12 5v14M5 12h14" /></svg>;
+}
+
+function Sidebar({ router }) {
+  const links = [["Home Feed", "/", "home"], ["Learn Security", "/learn", "learn"], ["Scam Library", "/library", "library"], ["Report Incident", "/postReport", "report"], ["Get Help", "/help", "help"], ["CyberBot AI", "/cyberbot", "chat"]];
+  return <aside className="sidebar"><button className="brand" type="button" onClick={() => router.push("/")}><span className="brand-icon"><Icon name="shield" size={28} /></span><span><strong>CyberSafe</strong><small>South Africa</small></span></button><nav className="side-nav" aria-label="Dashboard navigation">{links.map(([label, route, icon]) => <button key={label} className={`side-link ${route === "/library" ? "active" : ""}`} type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={24} /><span>{label}</span></button>)}</nav><button className="emergency-card" type="button" onClick={() => router.push("/help")}><Icon name="phone" size={22} /><span><strong>EMERGENCY</strong><small>Victim of a scam or cyber hack?</small><b>Get Help Now</b></span></button></aside>;
+}
+
+export default function ScamLibraryPage() {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
-  const [selectedId, setSelectedId] = useState(null);
+  const [selected, setSelected] = useState(null);
+  const results = useMemo(() => scams.filter((scam) => {
+    const searchable = `${scam.title} ${scam.summary} ${scam.signs.join(" ")}`.toLowerCase();
+    return (category === "All" || scam.category === category) && (!query.trim() || searchable.includes(query.trim().toLowerCase()));
+  }), [query, category]);
 
-  const results = useMemo(() => {
-    const term = query.trim().toLowerCase();
-    return threats.filter((threat) => {
-      const matchesCategory =
-        category === "All" || threat.category === category;
-      const searchable =
-        `${threat.title} ${threat.summary} ${threat.signs.join(" ")}`.toLowerCase();
-      return matchesCategory && (!term || searchable.includes(term));
-    });
-  }, [category, query]);
-
-  return (
-    <main className="library-page">
-      <header className="library-header">
-        <button
-          className="back-button"
-          onClick={() => router.push("/")}
-          type="button"
-          aria-label="Go to home"
-        >
-          ←
-        </button>
-        <div>
-          <p className="eyebrow">CyberSafe</p>
-          <h1>Threat &amp; Scam Library</h1>
-        </div>
-      </header>
-
-      <section className="urgent-card">
-        <strong>Being scammed right now?</strong>
-        <span>
-          Call your bank immediately if money or account details are at risk.
-        </span>
-        <button onClick={() => router.push("/help")} type="button">
-          Get help now
-        </button>
-      </section>
-
-      <label className="search-label" htmlFor="library-search">
-        Search a scam, app, message or warning sign
-      </label>
-      <input
-        id="library-search"
-        className="search"
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        placeholder="e.g. WhatsApp code, fake bank SMS"
-      />
-
-      <div className="category-list" aria-label="Scam categories">
-        {categories.map((item) => (
-          <button
-            className={`category ${category === item ? "selected" : ""}`}
-            key={item}
-            onClick={() => setCategory(item)}
-            type="button"
-          >
-            {item}
-          </button>
-        ))}
-      </div>
-
-      <p className="result-count">
-        {results.length} {results.length === 1 ? "guide" : "guides"}
-      </p>
-      <section className="threat-list" aria-label="Scam guides">
-        {results.map((threat) => {
-          const expanded = selectedId === threat.id;
-          return (
-            <article className="threat-card" key={threat.id}>
-              <button
-                className="threat-heading"
-                onClick={() => setSelectedId(expanded ? null : threat.id)}
-                type="button"
-                aria-expanded={expanded}
-              >
-                <span>
-                  <small>{threat.category}</small>
-                  <strong>{threat.title}</strong>
-                </span>
-                <span className="chevron" aria-hidden="true">
-                  {expanded ? "−" : "+"}
-                </span>
-              </button>
-              <p>{threat.summary}</p>
-              {expanded && (
-                <div className="details">
-                  <h2>Warning signs</h2>
-                  <ul>
-                    {threat.signs.map((sign) => (
-                      <li key={sign}>{sign}</li>
-                    ))}
-                  </ul>
-                  <h2>What to do</h2>
-                  <p>{threat.action}</p>
-                </div>
-              )}
-            </article>
-          );
-        })}
-      </section>
-
-      {!results.length && (
-        <p className="empty">
-          No guide matches that search yet. Try a broader term or visit Help if
-          you need urgent support.
-        </p>
-      )}
-      <p className="library-note">
-        Guidance only - do not share PINs, passwords, one-time passwords, or
-        full card details.
-      </p>
-
-      <BottomNav />
-
-      <style>{`
-        * { box-sizing: border-box; }
-        .library-page { min-height: 100vh; max-width: 500px; margin: 0 auto; padding: 12px 15px 104px; background: #f5f7fa; color: #0e1b24; font-family: Arial, sans-serif; }
-        .library-header { position: sticky; z-index: 10; top: 0; display: flex; align-items: center; gap: 12px; margin: -12px -15px 22px; padding: 12px 14px; background: #30c9e8; color: #fff; } .back-button { width: 36px; height: 36px; border: 0; border-radius: 50%; background: rgba(255,255,255,.18); color: #fff; cursor: pointer; font-size: 27px; line-height: 1; } .eyebrow { margin: 0 0 2px; color: #fff; font-size: 11px; font-weight: 700; letter-spacing: .06em; opacity: .88; text-transform: uppercase; } h1 { margin: 0; font-size: 20px; letter-spacing: -.3px; }
-        .urgent-card { display: grid; gap: 5px; margin-bottom: 22px; padding: 15px 16px; border: 1px solid #f3c0c0; border-left: 4px solid #d92d20; border-radius: 14px; background: #fdecec; color: #b42318; font-size: 14px; line-height: 1.4; } .urgent-card button { justify-self: start; margin-top: 5px; padding: 8px 11px; border: 0; border-radius: 8px; background: #d92d20; color: #fff; cursor: pointer; font-size: 13px; font-weight: 700; }
-        .search-label { display: block; margin-bottom: 7px; color: #0e1b24; font-size: 13px; font-weight: 700; } .search { width: 100%; padding: 13px 14px; border: 1px solid #dbe3e9; border-radius: 12px; background: #fff; color: #0e1b24; font: inherit; font-size: 15px; outline: none; } .search:focus { border-color: #30c9e8; box-shadow: 0 0 0 3px rgba(48, 201, 232, .15); }
-        .category-list { display: flex; gap: 8px; overflow-x: auto; margin: 16px 0 18px; padding-bottom: 3px; } .category { flex: 0 0 auto; padding: 8px 12px; border: 1px solid #dbe3e9; border-radius: 999px; background: #fff; color: #3d4c55; cursor: pointer; font: inherit; font-size: 13px; font-weight: 700; } .category.selected { border-color: #30c9e8; background: #30c9e8; color: #fff; }
-        .result-count { margin: 0 0 10px; color: #6b7c86; font-size: 13px; font-weight: 700; } .threat-list { display: grid; gap: 11px; } .threat-card { padding: 16px; border: 1px solid #dbe3e9; border-radius: 14px; background: #fff; } .threat-heading { display: flex; align-items: flex-start; justify-content: space-between; width: 100%; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer; text-align: left; } .threat-heading small { display: block; margin-bottom: 5px; color: #30aeca; font-size: 12px; font-weight: 700; text-transform: uppercase; } .threat-heading strong { display: block; font-size: 17px; line-height: 1.2; } .chevron { margin-left: 12px; color: #30c9e8; font-size: 25px; line-height: .8; } .threat-card > p { margin: 10px 0 0; color: #5b6b75; font-size: 14px; line-height: 1.45; }
-        .details { margin-top: 14px; padding-top: 14px; border-top: 1px solid #e5edf0; } .details h2 { margin: 0 0 6px; color: #0e1b24; font-size: 14px; } .details ul { margin: 0 0 14px; padding-left: 19px; color: #5b6b75; font-size: 14px; line-height: 1.45; } .details li + li { margin-top: 5px; } .details p { margin: 0; color: #3d4c55; font-size: 14px; font-weight: 600; line-height: 1.45; }
-        .empty, .library-note { margin: 24px 4px 0; color: #8a99a3; font-size: 13px; line-height: 1.5; text-align: center; } .library-note { margin-top: 30px; }
-      `}</style>
-    </main>
-  );
+  return <main className="library-dashboard"><Sidebar router={router} /><section className="library-content">
+    <header className="library-header"><div><p className="eyebrow">CyberSafe reference centre</p><h1>Scam Library</h1><p>Recognise common South African scams, understand the warning signs, and take the right next step.</p></div><button className="help-button" type="button" onClick={() => router.push("/help")}>Get Help Now</button></header>
+    <section className="safety-banner"><span><Icon name="phone" size={28} /></span><div><strong>Are you being scammed right now?</strong><p>Stop responding, do not send money or codes, and call your bank immediately if account details may be at risk.</p></div><button type="button" onClick={() => router.push("/help")}>Open helpline hub</button></section>
+    <section className="library-tools"><label className="search"><Icon name="search" size={22} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search a scam, message or warning sign..." aria-label="Search scam library" /></label><div className="categories">{categories.map((item) => <button key={item} className={category === item ? "selected" : ""} type="button" onClick={() => setCategory(item)}>{item}</button>)}</div></section>
+    <div className="result-row"><span>{results.length} {results.length === 1 ? "scam guide" : "scam guides"}</span><span>Choose a guide to see what to do</span></div>
+    <section className="scam-list">{results.map((scam) => { const open = selected === scam.id; return <article className="scam-card" key={scam.id}><button className="scam-title" type="button" aria-expanded={open} onClick={() => setSelected(open ? null : scam.id)}><span><small>{scam.category}</small><strong>{scam.title}</strong></span><b>{open ? "−" : "+"}</b></button><p>{scam.summary}</p>{open && <div className="scam-detail"><div><h2>Warning signs</h2><ul>{scam.signs.map((sign) => <li key={sign}>{sign}</li>)}</ul></div><div><h2>What to do</h2><p>{scam.action}</p></div></div>}</article>; })}</section>
+    {!results.length && <p className="empty">No scam guide matches that search. Try a broader term or use the Helpline Hub for urgent support.</p>}
+  </section><style>{`
+    * { box-sizing: border-box; } .library-dashboard { min-height: 100vh; display: grid; grid-template-columns: 300px minmax(0, 1fr); background: #f6f9fd; color: #121a32; font-family: "DM Sans", Arial, sans-serif; } .sidebar { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; padding: 30px 28px 28px; border-right: 1px solid #e2e9f2; background: #fff; } .brand { display: flex; align-items: center; gap: 13px; padding: 0; border: 0; background: transparent; color: #121a32; cursor: pointer; text-align: left; } .brand-icon { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 15px; background: #e6faff; color: #31c7e6; } .brand strong { display: block; font-family: "Syne", Arial, sans-serif; font-size: 26px; line-height: 1; letter-spacing: -1px; } .brand small { display: block; margin-top: 5px; color: #31c7e6; font-size: 15px; font-weight: 700; } .side-nav { display: grid; gap: 9px; margin-top: 42px; } .side-link { display: flex; align-items: center; gap: 16px; width: 100%; padding: 14px 17px; border: 0; border-radius: 14px; background: transparent; color: #536179; cursor: pointer; font: inherit; font-size: 18px; font-weight: 600; text-align: left; } .side-link.active { background: #e5f9fd; color: #121a32; font-weight: 800; } .side-link.active svg { color: #31c7e6; } .emergency-card { display: flex; align-items: flex-start; gap: 13px; margin-top: auto; padding: 20px; border: 2px solid #ff5a5f; border-radius: 20px; background: #fff4f4; color: #ff5158; cursor: pointer; font: inherit; text-align: left; } .emergency-card strong, .emergency-card small, .emergency-card b { display: block; } .emergency-card strong { font-family: "Syne", Arial, sans-serif; font-size: 17px; } .emergency-card small { margin: 13px 0 7px; color: #536179; font-size: 13px; line-height: 1.4; } .emergency-card b { color: #ff5158; font-size: 14px; }
+    .library-content { min-width: 0; padding: 38px 42px 56px; } .library-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; padding-bottom: 26px; border-bottom: 1px solid #dce5ef; } .eyebrow { margin: 0 0 7px; color: #2fc4e4; font-size: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; } h1, h2, strong { font-family: "Syne", Arial, sans-serif; } h1 { margin: 0; font-size: clamp(32px, 3.4vw, 44px); letter-spacing: -2px; line-height: 1; } .library-header p:last-child { max-width: 780px; margin: 13px 0 0; color: #5b6980; font-size: 18px; line-height: 1.35; } .help-button { min-height: 50px; padding: 0 23px; border: 0; border-radius: 14px; background: #31c7e6; color: #102039; cursor: pointer; font: inherit; font-size: 16px; font-weight: 800; white-space: nowrap; }
+    .safety-banner { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 17px; margin-top: 28px; padding: 22px 26px; border: 1px solid #ffc1c3; border-left: 5px solid #ff5a5f; border-radius: 19px; background: #fff4f4; } .safety-banner > span { display: grid; place-items: center; width: 50px; height: 50px; border-radius: 50%; background: #fff; color: #ff5158; } .safety-banner strong { font-size: 18px; } .safety-banner p { margin: 6px 0 0; color: #65738a; font-size: 14px; line-height: 1.4; } .safety-banner button { padding: 11px 15px; border: 0; border-radius: 11px; background: #ff5158; color: #fff; cursor: pointer; font: inherit; font-size: 14px; font-weight: 800; white-space: nowrap; }
+    .library-tools { display: grid; grid-template-columns: minmax(280px, .8fr) 1.2fr; gap: 24px; margin-top: 30px; } .search { display: flex; align-items: center; gap: 11px; padding: 0 17px; border: 1px solid #dce5ef; border-radius: 14px; background: #fff; color: #536179; } .search input { width: 100%; height: 54px; border: 0; outline: 0; background: transparent; color: #26324a; font: inherit; font-size: 15px; } .categories { display: flex; align-items: center; gap: 9px; overflow-x: auto; } .categories button { flex: 0 0 auto; padding: 11px 14px; border: 1px solid #dce5ef; border-radius: 11px; background: #fff; color: #536179; cursor: pointer; font: inherit; font-size: 14px; font-weight: 700; } .categories button.selected { border-color: #31c7e6; background: #e6faff; color: #20b6d8; }
+    .result-row { display: flex; justify-content: space-between; gap: 15px; margin: 24px 2px 13px; color: #66758b; font-size: 14px; } .result-row span:first-child { color: #26324a; font-weight: 800; } .scam-list { display: grid; gap: 13px; } .scam-card { padding: 22px 25px; border: 1px solid #dce5ef; border-radius: 18px; background: #fff; } .scam-title { display: flex; align-items: flex-start; justify-content: space-between; width: 100%; padding: 0; border: 0; background: transparent; color: #121a32; cursor: pointer; text-align: left; } .scam-title small, .scam-title strong { display: block; } .scam-title small { margin-bottom: 6px; color: #2fc4e4; font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; } .scam-title strong { font-size: 20px; } .scam-title b { color: #31c7e6; font-size: 27px; line-height: .8; } .scam-card > p { max-width: 850px; margin: 10px 0 0; color: #65738a; font-size: 15px; line-height: 1.45; } .scam-detail { display: grid; grid-template-columns: 1.1fr 1fr; gap: 30px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e6edf3; } .scam-detail h2 { margin: 0 0 9px; font-size: 15px; } .scam-detail ul { display: grid; gap: 7px; margin: 0; padding-left: 19px; color: #65738a; font-size: 14px; line-height: 1.4; } .scam-detail p { margin: 0; color: #293950; font-size: 14px; font-weight: 600; line-height: 1.45; } .empty { margin: 35px 0; color: #65738a; text-align: center; }
+    @media (max-width: 1180px) { .library-dashboard { grid-template-columns: 270px minmax(0, 1fr); } .sidebar { padding: 28px 20px 25px; } .library-content { padding: 34px 30px 52px; } .side-link { font-size: 17px; } .library-tools { grid-template-columns: 1fr; gap: 15px; } } @media (max-width: 850px) { .library-dashboard { display: block; } .sidebar { position: static; height: auto; padding: 18px; border-right: 0; border-bottom: 1px solid #dce5ef; } .brand { margin-bottom: 16px; } .brand strong { font-size: 23px; } .brand small { font-size: 13px; } .side-nav { display: flex; gap: 7px; overflow-x: auto; margin: 0; } .side-link { width: auto; min-width: max-content; padding: 10px 13px; border-radius: 11px; font-size: 14px; } .side-link svg { width: 19px; } .emergency-card { display: none; } .library-content { padding: 27px 18px 45px; } } @media (max-width: 600px) { .library-content { padding: 22px 14px 35px; } h1 { font-size: 34px; } .library-header { flex-direction: column; } .safety-banner { grid-template-columns: auto 1fr; padding: 19px; } .safety-banner button { grid-column: 1 / -1; } .scam-card { padding: 19px 17px; } .scam-title strong { font-size: 18px; } .scam-detail { grid-template-columns: 1fr; gap: 18px; } .result-row { flex-direction: column; gap: 4px; } }
+  `}</style></main>;
 }

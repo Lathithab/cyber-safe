@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import BottomNav from "../components/BottomNav";
-import { supabase } from "../../../lib/supabase";
+import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
 function loadReports() {
   try {
     const reports = JSON.parse(
@@ -33,6 +33,12 @@ export default function FeedPage() {
 
  useEffect(() => {
   async function loadPosts() {
+    if (!isSupabaseConfigured) {
+      setPosts(loadReports());
+      setLoading(false);
+      return;
+    }
+
     const { data, error } = await supabase
       .from("posts")
       .select("*")

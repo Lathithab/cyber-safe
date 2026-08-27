@@ -6,7 +6,7 @@ const NAV_ITEMS = [
   { label: "Home", route: "/", icon: "home" },
   { label: "Feed", route: "/feed", icon: "feed" },
   { label: "Post", route: "/postReport", icon: "post" },
-  { label: "Library", route: "/library", icon: "library" },
+  { label: "Scams", route: "/library", icon: "library" },
   { label: "Help", route: "/help", icon: "help" },
 ];
 

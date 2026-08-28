@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import DashboardNavIcon from "../components/DashboardNavIcon";
+import { DASHBOARD_NAV } from "../components/dashboardNav";
 
 function Icon({ name, size = 24 }) {
   const props = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true };
@@ -15,7 +16,7 @@ function Icon({ name, size = 24 }) {
 
 export default function CyberBotPage() {
   const router = useRouter();
-  const links = [["Home Feed", "/", "home"], ["Learn Security", "/learn", "learn"], ["Scam Library", "/library", "library"], ["Report Incident", "/postReport", "report"], ["Get Help", "/help", "help"], ["CyberBot AI", "/cyberbot", "chat"]];
+  const links = DASHBOARD_NAV;
 
   return <main className="cyberbot-page">
     <aside className="sidebar">

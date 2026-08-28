@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
 import DashboardNavIcon from "../components/DashboardNavIcon";
+import { DASHBOARD_NAV } from "../components/dashboardNav";
 import { SEED_POSTS, loadStoredComments, appendStoredComment } from "./posts";
 
 function Icon({ name, size = 22 }) {
@@ -61,9 +62,7 @@ export default function FeedPage() {
   const toastTimer = useRef(null);
   const fileInputRef = useRef(null);
 
-  const links = [["Home Feed", "/", "home"], ["Community Feed", "/feed", "feed"], ["Learn Security", "/learn", "learn"], ["Scam Library", "/library", "library"], ["Report Incident", "/postReport", "report"], ["Get Help", "/help", "help"], ["CyberBot AI", "/cyberbot", "chat"], ["Explore / Nearby", "/explore", "explore"], ["Notifications", "/notifications", "bell"]];
-  const secondaryLinks = [["User Profile", "/profile", "user"], ["Settings", "/settings", "gear"]];
-  const footerLinks = [["Educator Hub", "/educator-hub", "grad"], ["Platform Admin", "/platform-admin", "lock"]];
+  const links = DASHBOARD_NAV;
 
   function showToast(message) {
     setToast(message);
@@ -247,12 +246,8 @@ export default function FeedPage() {
         <button className="brand" type="button" onClick={() => router.push("/")}><span className="brand-icon"><Icon name="shield" size={28} /></span><span><strong>CyberSafe</strong><small>South Africa</small></span></button>
         <nav className="side-nav" aria-label="Dashboard navigation">
           {links.map(([label, route, icon]) => <button key={label} className={`side-link ${route === "/feed" ? "active" : ""}`} type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={24} /><span>{label}</span></button>)}
-          <div className="side-divider" />
-          {secondaryLinks.map(([label, route, icon]) => <button key={label} className="side-link" type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={24} /><span>{label}</span></button>)}
         </nav>
-        <div className="footer-links">{footerLinks.map(([label, route, icon]) => <button key={label} className="footer-link" type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={18} />{label}</button>)}</div>
         <button className="emergency-card" type="button" onClick={() => router.push("/help")}><span className="emergency-icon"><Icon name="phone" size={23} /></span><span><strong>EMERGENCY</strong><small>Victim of a scam or cyber hack?</small><b>Get Help Now</b></span></button>
-        <button className="user-chip" type="button" onClick={() => router.push("/login")}><span className="chip-avatar">SN</span><span><strong>{CURRENT_USER.name}</strong><small>{CURRENT_USER.role}</small></span></button>
       </aside>
 
       <section className="dashboard-content">

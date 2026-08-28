@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { emergency, banks, networks, geoLinks } from "./contacts";
 import DashboardNavIcon from "../components/DashboardNavIcon";
+import { DASHBOARD_NAV } from "../components/dashboardNav";
 
 function Icon({ name, size = 22 }) {
   const shared = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true };
@@ -20,7 +21,7 @@ function Icon({ name, size = 22 }) {
 }
 
 function Sidebar({ router }) {
-  const links = [["Home Feed", "/", "home"], ["Learn Security", "/learn", "learn"], ["Scam Library", "/library", "library"], ["Report Incident", "/postReport", "report"], ["Get Help", "/help", "help"], ["CyberBot AI", "/cyberbot", "chat"]];
+  const links = DASHBOARD_NAV;
   return <aside className="sidebar">
     <button className="brand" type="button" onClick={() => router.push("/")}><span className="brand-icon"><Icon name="shield" size={28} /></span><span><strong>CyberSafe</strong><small>South Africa</small></span></button>
     <nav className="side-nav" aria-label="Dashboard navigation">{links.map(([label, route, icon]) => <button key={label} className={`side-link ${route === "/help" ? "active" : ""}`} type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={25} /><span>{label}</span></button>)}</nav>

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import DashboardNavIcon from "../components/DashboardNavIcon";
+import { DASHBOARD_NAV } from "../components/dashboardNav";
 
 const scams = [
   { id: "whatsapp", category: "WhatsApp", title: "WhatsApp verification-code scam", summary: "A scammer asks for the six-digit code sent to your phone, then takes over your WhatsApp account.", signs: ["They say the code was sent by mistake.", "They pressure you to send it quickly.", "The request comes from a known contact whose account may be compromised."], action: "Never share a WhatsApp verification code. Enable two-step verification and warn your contacts if you shared one." },
@@ -34,7 +35,7 @@ function Icon({ name, size = 22 }) {
 }
 
 function Sidebar({ router }) {
-  const links = [["Home Feed", "/", "home"], ["Learn Security", "/learn", "learn"], ["Scam Library", "/library", "library"], ["Report Incident", "/postReport", "report"], ["Get Help", "/help", "help"], ["CyberBot AI", "/cyberbot", "chat"]];
+  const links = DASHBOARD_NAV;
   return <aside className="sidebar"><button className="brand" type="button" onClick={() => router.push("/")}><span className="brand-icon"><Icon name="shield" size={28} /></span><span><strong>CyberSafe</strong><small>South Africa</small></span></button><nav className="side-nav" aria-label="Dashboard navigation">{links.map(([label, route, icon]) => <button key={label} className={`side-link ${route === "/library" ? "active" : ""}`} type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={24} /><span>{label}</span></button>)}</nav><button className="emergency-card" type="button" onClick={() => router.push("/help")}><Icon name="phone" size={22} /><span><strong>EMERGENCY</strong><small>Victim of a scam or cyber hack?</small><b>Get Help Now</b></span></button></aside>;
 }
 

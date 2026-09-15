@@ -1,5 +1,6 @@
 require("dotenv").config();
 const axios = require("axios");
+const { franc } = require("franc");
 
 const { GROQ_API_KEY } = process.env;
 
@@ -50,30 +51,17 @@ Haeba o kotsing hona jwale kapa sena se utlwahala se le potlakileng, ka kopo iko
 // keyword backstop when we can't confidently guess the learner's language.
 const SAFETY_RESOURCES = SAFETY_RESOURCES_BY_LANG.en;
 
-// Very rough heuristic language detection based on a handful of common,
-// distinctive words per language. Good enough to pick which translation to
-// force-append; NOT a substitute for the LLM's own (better) language handling
-// in normal replies.
+const FRANC_TO_LANG_KEY = {
+  eng: "en",
+  zul: "zu",
+  xho: "xh",
+  afr: "af",
+  sot: "st",
+};
+
 function detectLanguage(text) {
-  const lower = text.toLowerCase();
-  const markers = {
-    zu: [
-      "ngicela",
-      "ngithole",
-      "umuntu",
-      "ngiyaxolisa",
-      "yebo",
-      "kunjani",
-      "ngiyakhala",
-    ],
-    xh: ["ndicela", "umntu", "ndiyaxolisa", "ewe", "unjani", "iintsapho"],
-    af: ["asseblief", "dankie", "hulle", "wat", "kry", "vreemde", "boodskappe"],
-    st: ["ka kopo", "kea leboha", "batho", "tichere", "moeletsi"],
-  };
-  for (const [lang, words] of Object.entries(markers)) {
-    if (words.some((w) => lower.includes(w))) return lang;
-  }
-  return "en";
+  const code = franc(text, { only: Object.keys(FRANC_TO_LANG_KEY) });
+  return FRANC_TO_LANG_KEY[code] || "en";
 }
 
 // ---------- Core system prompt ----------

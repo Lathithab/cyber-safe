@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
+import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   findSeedPost,
@@ -76,17 +77,58 @@ function PostPage() {
   const [commentText, setCommentText] = useState("");
 
   useEffect(() => {
+  async function loadPost() {
     if (!id) {
       setPost(null);
       return;
     }
+
+    // First try to find the post in Supabase
+    if (isSupabaseConfigured) {
+      const { data, error } = await supabase
+        .from("posts")
+        .select("*")
+        .eq("id", id)
+        .eq("status", "approved")
+        .single();
+
+      if (!error && data) {
+        const databasePost = {
+          id: data.id,
+          name: data.display_name,
+          handle: data.handle,
+          time: new Date(data.created_at).toLocaleString(),
+          text: data.description,
+          location: data.location,
+          image: data.image_url,
+          likes: 0,
+          comments: 0,
+        };
+
+        setPost(databasePost);
+        setLikeCount(databasePost.likes);
+        setComments(loadStoredComments(id));
+        return;
+      }
+
+      if (error) {
+        console.error("Error loading post:", error);
+      }
+    }
+
+    // Fall back to seed posts and locally stored reports
     const found = findSeedPost(id) || loadReportById(id);
+
     setPost(found);
+
     if (found) {
       setLikeCount(found.likes || 0);
       setComments(loadStoredComments(id));
     }
-  }, [id]);
+  }
+
+  loadPost();
+}, [id]);
 
   function goBack() {
     if (typeof window !== "undefined" && window.history.length > 1) {

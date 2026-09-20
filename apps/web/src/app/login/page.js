@@ -52,7 +52,7 @@ export default function LoginPage() {
   function handleSubmit(event) {
     event.preventDefault();
     // UI-only for now: no auth backend is wired up yet.
-    router.push("/");
+    router.push("/feed");
   }
 
   return (

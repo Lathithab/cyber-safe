@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useRequireAuth } from "../../../lib/useRequireAuth";
 import DashboardNavIcon from "../components/DashboardNavIcon";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
 
@@ -296,6 +297,7 @@ function ShieldIcon() {
 
 export default function LearnPage() {
   const router = useRouter();
+  const { loading: authLoading } = useRequireAuth();
   const [filter, setFilter] = useState("All modules");
   const [selectedModule, setSelectedModule] = useState(null);
   const [answers, setAnswers] = useState({});
@@ -325,6 +327,8 @@ export default function LearnPage() {
     if (!selectedModule) return;
     setEarnedBadges((current) => (current.includes(selectedModule.id) ? current : [...current, selectedModule.id]));
   }
+
+  if (authLoading) return null;
 
   return (
     <main className="dashboard-shell">

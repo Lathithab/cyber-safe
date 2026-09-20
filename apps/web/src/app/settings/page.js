@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
+import { useRequireAuth } from "../../../lib/useRequireAuth";
 import DashboardNavIcon from "../components/DashboardNavIcon";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
 
@@ -24,6 +26,7 @@ function Toggle({ checked, onChange, label }) {
 
 export default function SettingsPage() {
   const router = useRouter();
+  const { user, loading: authLoading } = useRequireAuth();
   const [twoFA, setTwoFA] = useState(true);
   const [smsAdvisories, setSmsAdvisories] = useState(true);
   const [emailReminders, setEmailReminders] = useState(false);
@@ -32,6 +35,15 @@ export default function SettingsPage() {
   const [screenReader, setScreenReader] = useState(false);
 
   const links = DASHBOARD_NAV;
+
+  async function handleLogOut() {
+    if (isSupabaseConfigured) {
+      await supabase.auth.signOut();
+    }
+    router.push("/login");
+  }
+
+  if (authLoading) return null;
 
   return (
     <main className="settings-dashboard">
@@ -59,9 +71,10 @@ export default function SettingsPage() {
           <div className="main-col">
             <section className="settings-card">
               <h2>Account Settings</h2>
-              <div className="row"><div><strong>Email Address</strong><small>sipho.ndlovu@gmail.com</small></div><button type="button" className="modify">Modify</button></div>
+              <div className="row"><div><strong>Email Address</strong><small>{user?.email || "Guest"}</small></div><button type="button" className="modify">Modify</button></div>
               <div className="row"><div><strong>Security Password</strong><small>Last updated 4 months ago</small></div><button type="button" className="modify">Modify</button></div>
               <div className="row"><div><strong>Two-Factor Authentication (2FA)</strong><small>Secure verification using an authenticator app.</small></div><Toggle checked={twoFA} onChange={() => setTwoFA((v) => !v)} label="Two-factor authentication" /></div>
+              <div className="row"><div><strong>Log Out</strong><small>End your session on this device.</small></div><button type="button" className="modify" onClick={handleLogOut}>Log out</button></div>
             </section>
 
             <section className="settings-card">

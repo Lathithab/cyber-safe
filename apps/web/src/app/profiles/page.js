@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useRequireAuth } from "../../../lib/useRequireAuth";
 import DashboardNavIcon from "../components/DashboardNavIcon";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
 
@@ -30,8 +31,12 @@ const TABS = ["Earned Badges", "My Posts", "Enrolled Courses", "Incident History
 
 export default function ProfilePage() {
   const router = useRouter();
+  const { user, loading: authLoading } = useRequireAuth();
   const [tab, setTab] = useState("Earned Badges");
   const links = DASHBOARD_NAV;
+  const displayName = user?.user_metadata?.username || user?.email || "Guest";
+
+  if (authLoading) return null;
 
   return (
     <main className="profile-dashboard">
@@ -58,7 +63,7 @@ export default function ProfilePage() {
         <section className="profile-card">
           <div className="avatar" aria-hidden="true">SN</div>
           <div className="profile-info">
-            <h2>Sipho Ndlovu</h2>
+            <h2>{displayName}</h2>
             <p>Community Safety Advocate · Gauteng East</p>
             <small>Johannesburg, SA · Joined Jan 2026</small>
           </div>

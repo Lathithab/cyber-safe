@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useRequireAuth } from "../../../lib/useRequireAuth";
 import DashboardNavIcon from "../components/DashboardNavIcon";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
 
@@ -41,6 +42,7 @@ function Sidebar({ router }) {
 
 export default function ScamLibraryPage() {
   const router = useRouter();
+  const { loading: authLoading } = useRequireAuth();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
   const [selected, setSelected] = useState(null);
@@ -48,6 +50,8 @@ export default function ScamLibraryPage() {
     const searchable = `${scam.title} ${scam.summary} ${scam.signs.join(" ")}`.toLowerCase();
     return (category === "All" || scam.category === category) && (!query.trim() || searchable.includes(query.trim().toLowerCase()));
   }), [query, category]);
+
+  if (authLoading) return null;
 
   return <main className="library-dashboard"><Sidebar router={router} /><section className="library-content">
     <header className="library-header"><div><p className="eyebrow">CyberSafe reference centre</p><h1>Scam Library</h1><p>Recognise common South African scams, understand the warning signs, and take the right next step.</p></div><button className="help-button" type="button" onClick={() => router.push("/help")}>Get Help Now</button></header>

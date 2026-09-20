@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import QRCode from "qrcode";
+import { useRequireAuth } from "../../../lib/useRequireAuth";
 import DashboardNavIcon from "../components/DashboardNavIcon";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
 
@@ -20,6 +21,7 @@ function Icon({ name, size = 24 }) {
 
 export default function CyberBotPage() {
   const router = useRouter();
+  const { loading: authLoading } = useRequireAuth();
   const links = DASHBOARD_NAV;
   const [qrCode, setQrCode] = useState("");
 
@@ -28,6 +30,8 @@ export default function CyberBotPage() {
       .then(setQrCode)
       .catch(() => setQrCode(""));
   }, []);
+
+  if (authLoading) return null;
 
   return <main className="cyberbot-page">
     <aside className="sidebar">

@@ -1,4 +1,5 @@
 export const DASHBOARD_NAV = [
+  ["Home", "/home", "home"],
   ["Login", "/login", "user"],
   ["Community Feed", "/feed", "feed"],
   ["Learn Security", "/learn", "learn"],

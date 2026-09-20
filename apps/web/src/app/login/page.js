@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
 
 function ShieldIcon({ size = 22, color = "currentColor" }) {
   return (
@@ -45,14 +46,45 @@ function MicrosoftIcon() {
 export default function LoginPage() {
   const router = useRouter();
   const [mode, setMode] = useState("login");
-  const [email, setEmail] = useState("sipho.ndlovu@gmail.com");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    // UI-only for now: no auth backend is wired up yet.
-    router.push("/feed");
+    setError("");
+
+    if (!isSupabaseConfigured) {
+      // Demo mode: no auth backend configured, so just enter the app.
+      router.push("/home");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      if (mode === "login") {
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) {
+          setError(signInError.message);
+          return;
+        }
+      } else {
+        const { error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { data: { username: email.split("@")[0] } },
+        });
+        if (signUpError) {
+          setError(signUpError.message);
+          return;
+        }
+      }
+      router.push("/home");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -67,10 +99,6 @@ export default function LoginPage() {
             <p>Join CyberSafe SA, a cybersecurity awareness platform built specifically for students, schools, and local communities. Learn how to spot scams, report online incidents, and get instant emergency assistance.</p>
           </div>
 
-          <div className="hero-trust">
-            <small>Trusted by education departments &amp; local communities</small>
-            <div className="trust-row"><span>SAPS Connected</span><span>SA Banks Alliance</span><span>EduNet</span></div>
-          </div>
         </div>
       </section>
 
@@ -94,15 +122,16 @@ export default function LoginPage() {
               <button type="button" className="toggle-visibility" onClick={() => setShowPassword((v) => !v)} aria-label="Toggle password visibility"><EyeIcon /></button>
             </div>
 
-            <button type="submit" className="submit-button">{mode === "login" ? "Sign In" : "Create Account"}</button>
+            {error && <p className="form-error" role="alert">{error}</p>}
+            <button type="submit" className="submit-button" disabled={loading}>{loading ? "Please wait..." : mode === "login" ? "Sign In" : "Create Account"}</button>
           </form>
 
           <div className="divider"><span>or connect with</span></div>
           <div className="oauth-row">
-            <button type="button" className="oauth-button"><GoogleIcon />Google</button>
-            <button type="button" className="oauth-button"><MicrosoftIcon />Microsoft</button>
+            <button type="button" className="oauth-button" disabled title="Coming soon"><GoogleIcon />Google</button>
+            <button type="button" className="oauth-button" disabled title="Coming soon"><MicrosoftIcon />Microsoft</button>
           </div>
-          <p className="demo-note">This screen is a front-end preview only — no account is created or verified yet.</p>
+          {!isSupabaseConfigured && <p className="demo-note">This screen is a front-end preview only — no account is created or verified yet.</p>}
         </div>
       </section>
 
@@ -128,7 +157,9 @@ export default function LoginPage() {
         input { width: 100%; height: 52px; padding: 0 16px; border: 1px solid #dce5ef; border-radius: 13px; background: #f8fafc; color: #121a32; font: inherit; font-size: 15px; outline: none; } input:focus { border-color: #31c7e6; box-shadow: 0 0 0 3px rgba(49,199,230,.15); }
         .password-row { display: flex; align-items: center; justify-content: space-between; } .password-row .field-label { margin: 16px 0 8px; } .forgot { border: 0; background: transparent; color: #1f87e7; cursor: pointer; font: inherit; font-size: 13px; font-weight: 700; }
         .password-shell { position: relative; } .password-shell input { padding-right: 46px; } .toggle-visibility { position: absolute; top: 50%; right: 14px; transform: translateY(-50%); border: 0; background: transparent; color: #8996a8; cursor: pointer; }
-        .submit-button { width: 100%; margin-top: 26px; padding: 15px; border: 0; border-radius: 13px; background: #31c7e6; color: #06263a; cursor: pointer; font: inherit; font-size: 16px; font-weight: 800; }
+        .submit-button { width: 100%; margin-top: 26px; padding: 15px; border: 0; border-radius: 13px; background: #31c7e6; color: #06263a; cursor: pointer; font: inherit; font-size: 16px; font-weight: 800; } .submit-button:disabled { opacity: .6; cursor: not-allowed; }
+        .form-error { margin: 14px 0 0; padding: 12px 14px; border-radius: 10px; background: #fdecec; color: #d92d20; font-size: 13.5px; line-height: 1.4; }
+        .oauth-button:disabled { opacity: .5; cursor: not-allowed; }
         .divider { position: relative; margin: 26px 0 18px; text-align: center; } .divider::before { content: ""; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #e2e9f2; } .divider span { position: relative; padding: 0 14px; background: #fff; color: #8996a8; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
         .oauth-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; } .oauth-button { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px; border: 1px solid #dce5ef; border-radius: 13px; background: #fff; color: #26324a; cursor: pointer; font: inherit; font-size: 14px; font-weight: 700; }
         .demo-note { margin: 18px 0 0; color: #a4afbe; font-size: 12px; text-align: center; line-height: 1.4; }

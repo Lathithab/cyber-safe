@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
+import { useRequireAuth } from "../../../lib/useRequireAuth";
 import DashboardNavIcon from "../components/DashboardNavIcon";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
 
@@ -54,10 +55,16 @@ function Sidebar({ router }) {
   );
 }
 
+const MAX_EVIDENCE_FILE_BYTES = 5 * 1024 * 1024;
+const MAX_EVIDENCE_WIDTH = 1024;
+const EVIDENCE_JPEG_QUALITY = 0.7;
+
 export default function PostReportPage() {
   const router = useRouter();
+  const { user, loading: authLoading } = useRequireAuth();
   const [form, setForm] = useState({ incidentType: "", description: "", incidentDate: "", location: "", anonymous: true, file: null });
   const [submitError, setSubmitError] = useState("");
+  const [submitSuccess, setSubmitSuccess] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const canSubmit = form.incidentType && form.description.trim().length >= 10;
@@ -73,7 +80,19 @@ export default function PostReportPage() {
 
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const scale = Math.min(1, MAX_EVIDENCE_WIDTH / img.width);
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.round(img.width * scale);
+          canvas.height = Math.round(img.height * scale);
+          canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL("image/jpeg", EVIDENCE_JPEG_QUALITY));
+        };
+        img.onerror = () => reject(new Error("The selected image could not be read."));
+        img.src = reader.result;
+      };
       reader.onerror = () => reject(new Error("The selected image could not be read."));
       reader.readAsDataURL(file);
     });
@@ -83,6 +102,13 @@ export default function PostReportPage() {
     event.preventDefault();
     if (!canSubmit || isSubmitting) return;
     setSubmitError("");
+    setSubmitSuccess("");
+
+    if (form.file && form.file.size > MAX_EVIDENCE_FILE_BYTES) {
+      setSubmitError("That file is too large. Please attach evidence under 5 MB.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     let evidenceImage = null;
@@ -123,12 +149,13 @@ export default function PostReportPage() {
     }
 
     const { error } = await supabase.from("posts").insert({
+      author_id: form.anonymous ? null : user?.id ?? null,
       display_name: form.anonymous ? "Anonymous" : "CyberSafe member",
       description: form.description.trim(),
       location: form.location.trim() || null,
       issues: [form.incidentType],
       image_url: evidenceImage,
-      status: "approved",
+      status: "pending",
     });
 
     if (error) {
@@ -136,8 +163,13 @@ export default function PostReportPage() {
       setIsSubmitting(false);
       return;
     }
-    router.push("/feed");
+
+    setForm({ incidentType: "", description: "", incidentDate: "", location: "", anonymous: true, file: null });
+    setSubmitSuccess("Submitted for review. It will appear once approved.");
+    setIsSubmitting(false);
   }
+
+  if (authLoading) return null;
 
   return (
     <main className="report-dashboard">
@@ -177,6 +209,7 @@ export default function PostReportPage() {
               <button className="submit-button" type="submit" disabled={!canSubmit || isSubmitting}>{isSubmitting ? "Submitting report..." : "Submit Incident Report"}</button>
             </div>
             {submitError && <p className="submit-error" role="alert">{submitError}</p>}
+            {submitSuccess && <p className="submit-success" role="status">{submitSuccess}</p>}
             <p className="privacy-note">Do not include passwords, PINs, one-time passwords, full card numbers, or ID numbers.</p>
           </form>
 
@@ -210,7 +243,7 @@ export default function PostReportPage() {
         .incident-types { margin: 40px 0 27px; padding: 0; border: 0; } .incident-types legend, .field-label { display: block; margin-bottom: 13px; color: #1c263d; font-size: 17px; font-weight: 800; } .type-options { display: flex; flex-wrap: wrap; gap: 13px; } .type-button { padding: 14px 20px; border: 1px solid #dce5ef; border-radius: 14px; background: #f8fafc; color: #536179; cursor: pointer; font: inherit; font-size: 15px; font-weight: 700; } .type-button.selected { border-color: #31c7e6; background: #e6faff; color: #20b6d8; box-shadow: inset 0 0 0 1px #31c7e6; }
         textarea, .input-shell { width: 100%; border: 1px solid #dce5ef; border-radius: 15px; background: #f8fafc; color: #26324a; font: inherit; font-size: 16px; outline: none; } textarea { min-height: 158px; padding: 18px 20px; resize: vertical; line-height: 1.45; } textarea:focus, .input-shell:focus-within { border-color: #31c7e6; box-shadow: 0 0 0 3px rgba(49,199,230,.13); } .two-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 27px; } .input-shell { display: flex; align-items: center; gap: 12px; height: 58px; padding: 0 16px; color: #607087; } .input-shell input { min-width: 0; width: 100%; border: 0; outline: 0; background: transparent; color: #26324a; font: inherit; font-size: 16px; }
         .anonymous-option { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 28px; padding: 21px 22px; border-radius: 17px; background: #e5f9fd; cursor: pointer; } .anonymous-option strong, .anonymous-option small { display: block; } .anonymous-option strong { font-size: 16px; } .anonymous-option small { margin-top: 7px; color: #66758b; font-size: 14px; line-height: 1.35; } .anonymous-option input { position: absolute; opacity: 0; pointer-events: none; } .anonymous-option i { position: relative; width: 54px; height: 31px; flex: 0 0 auto; border-radius: 999px; background: #bdc9d7; } .anonymous-option i::after { content: ""; position: absolute; top: 4px; left: 4px; width: 23px; height: 23px; border-radius: 50%; background: #fff; transition: transform .18s; } .anonymous-option input:checked + i { background: #31c7e6; } .anonymous-option input:checked + i::after { transform: translateX(23px); }
-        .form-actions { display: grid; grid-template-columns: 1fr 1.2fr; gap: 22px; margin-top: 38px; } .upload-button { display: flex; align-items: center; justify-content: center; gap: 11px; min-height: 62px; padding: 10px 16px; border: 1px solid #dce5ef; border-radius: 15px; background: #f8fafc; color: #536179; cursor: pointer; font-size: 16px; font-weight: 800; overflow: hidden; } .upload-button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .submit-button:disabled { cursor: not-allowed; opacity: .5; } .submit-error { margin: 16px 0 0; color: #d92d20; font-size: 14px; line-height: 1.4; } .privacy-note { margin: 18px 0 0; color: #8996a8; font-size: 12px; line-height: 1.45; }
+        .form-actions { display: grid; grid-template-columns: 1fr 1.2fr; gap: 22px; margin-top: 38px; } .upload-button { display: flex; align-items: center; justify-content: center; gap: 11px; min-height: 62px; padding: 10px 16px; border: 1px solid #dce5ef; border-radius: 15px; background: #f8fafc; color: #536179; cursor: pointer; font-size: 16px; font-weight: 800; overflow: hidden; } .upload-button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .submit-button:disabled { cursor: not-allowed; opacity: .5; } .submit-error { margin: 16px 0 0; color: #d92d20; font-size: 14px; line-height: 1.4; } .submit-success { margin: 16px 0 0; padding: 12px 14px; border-radius: 10px; background: #edfff8; color: #118362; font-size: 14px; line-height: 1.4; } .privacy-note { margin: 18px 0 0; color: #8996a8; font-size: 12px; line-height: 1.45; }
         .report-summary { padding: 34px; } .status-card { margin-top: 25px; padding: 23px; border: 1px solid #dce5ef; border-radius: 17px; } .case-number { color: #2fc4e4; font-size: 13px; font-weight: 800; letter-spacing: .04em; } .status-title { margin: 18px 0; font-family: "Syne", Arial, sans-serif; font-size: 18px; font-weight: 800; } .status-card ol { display: grid; gap: 15px; margin: 0; padding: 0; list-style: none; color: #8b97a8; font-size: 14px; } .status-card li { position: relative; padding-left: 28px; } .status-card li::before { content: ""; position: absolute; top: 3px; left: 0; width: 14px; height: 14px; border-radius: 50%; background: #e9eef4; } .status-card li.complete { color: #202c42; font-weight: 700; } .status-card li.complete::before { background: #16bf89; }
         .report-tip { margin-top: 24px; padding: 22px; border-radius: 17px; background: #fff4f4; } .report-tip strong { color: #d92d20; font-size: 16px; } .report-tip p { margin: 8px 0 16px; color: #65738a; font-size: 14px; line-height: 1.4; } .report-tip button { border: 0; background: transparent; color: #d92d20; cursor: pointer; font: inherit; font-size: 14px; font-weight: 800; padding: 0; }
         @media (max-width: 1180px) { .report-dashboard { grid-template-columns: 270px minmax(0, 1fr); } .sidebar { padding: 28px 20px 25px; } .dashboard-content { padding: 34px 30px 52px; } .side-link { font-size: 17px; } .page-header { align-items: flex-start; flex-direction: column; } .header-actions { width: 100%; } .platform-search { flex: 1; } }

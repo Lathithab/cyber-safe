@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useRequireAuth } from "../../../lib/useRequireAuth";
 import DashboardNavIcon from "../components/DashboardNavIcon";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
 
@@ -30,6 +31,7 @@ const TABS = ["All", "Alerts", "Community", "Learning", "Reports"];
 
 export default function NotificationsPage() {
   const router = useRouter();
+  const { loading: authLoading } = useRequireAuth();
   const [tab, setTab] = useState("Alerts");
   const [read, setRead] = useState({});
   const [prefsOpen, setPrefsOpen] = useState(false);
@@ -56,6 +58,8 @@ export default function NotificationsPage() {
     setPrefs(draftPrefs);
     setPrefsOpen(false);
   }
+
+  if (authLoading) return null;
 
   return (
     <main className="notif-dashboard">

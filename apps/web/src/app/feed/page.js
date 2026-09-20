@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
+import { useRequireAuth } from "../../../lib/useRequireAuth";
 import DashboardNavIcon from "../components/DashboardNavIcon";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
 import { SEED_POSTS, loadStoredComments, appendStoredComment } from "./posts";
@@ -45,10 +46,11 @@ const TRENDING = [
 ];
 
 const CATEGORIES = ["General Tip", "Scam Alert", "Cyberbullying", "Phishing", "Malware"];
-const CURRENT_USER = { name: "Sipho Ndlovu", role: "Gauteng Community" };
 
 export default function FeedPage() {
   const router = useRouter();
+  const { user, loading: authLoading } = useRequireAuth();
+  const CURRENT_USER = { name: user?.user_metadata?.username || user?.email || "Guest" };
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openMenuId, setOpenMenuId] = useState(null);
@@ -239,6 +241,8 @@ export default function FeedPage() {
     removeImageAttachment();
     showToast("Posted to the community feed");
   }
+
+  if (authLoading) return null;
 
   return (
     <main className="feed-dashboard">

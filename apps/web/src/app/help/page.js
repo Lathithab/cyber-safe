@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useRequireAuth } from "../../../lib/useRequireAuth";
 import { emergency, banks, networks, geoLinks } from "./contacts";
 import DashboardNavIcon from "../components/DashboardNavIcon";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
@@ -40,6 +41,7 @@ function ContactRow({ contact, urgent = false }) {
 
 export default function HelpPage() {
   const router = useRouter();
+  const { loading: authLoading } = useRequireAuth();
   const [bankSearch, setBankSearch] = useState("");
   const filteredBanks = useMemo(() => banks.filter((bank) => `${bank.name} ${bank.detail}`.toLowerCase().includes(bankSearch.toLowerCase())), [bankSearch]);
 
@@ -51,6 +53,8 @@ export default function HelpPage() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+
+  if (authLoading) return null;
 
   return <main className="hub-dashboard">
     <Sidebar router={router} />

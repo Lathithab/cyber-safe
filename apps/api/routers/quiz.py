@@ -5,6 +5,8 @@ The frontend only ever receives questions (no `correct_index`); grading
 happens here on the server so answers can't be read from dev tools.
 """
 
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException
 
 from database import get_supabase
@@ -55,13 +57,34 @@ def submit_quiz(module_id: str, submission: QuizSubmission, user: CurrentUser = 
     score_percent = round((correct_count / total_questions) * 100, 1) if total_questions else 0.0
     passed = score_percent >= PASS_THRESHOLD_PERCENT
 
+    existing = (
+        supabase.table("user_progress")
+        .select("status, quiz_score, completed_at")
+        .eq("user_id", user.id)
+        .eq("module_id", module_id)
+        .maybe_single()
+        .execute()
+    )
+    existing_row = existing.data if existing else None
+    already_completed = bool(existing_row and existing_row.get("status") == "completed")
+
+    if already_completed:
+        # Never downgrade a module the user already passed.
+        new_status = "completed"
+        new_score = max(existing_row.get("quiz_score") or 0, score_percent)
+        new_completed_at = existing_row.get("completed_at")
+    else:
+        new_status = "completed" if passed else "in_progress"
+        new_score = score_percent
+        new_completed_at = datetime.now(timezone.utc).isoformat() if passed else None
+
     supabase.table("user_progress").upsert(
         {
             "user_id": user.id,
             "module_id": module_id,
-            "status": "completed" if passed else "in_progress",
-            "quiz_score": score_percent,
-            "completed_at": "now()" if passed else None,
+            "status": new_status,
+            "quiz_score": new_score,
+            "completed_at": new_completed_at,
         },
         on_conflict="user_id,module_id",
     ).execute()

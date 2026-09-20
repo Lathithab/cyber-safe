@@ -4,12 +4,18 @@ Authentication & role-based access control.
 """
 
 from dataclasses import dataclass
+from functools import lru_cache
 
 import jwt
 from fastapi import Depends, Header, HTTPException, status
 
 from config import settings
 from database import get_supabase
+
+
+@lru_cache
+def _get_jwks_client() -> jwt.PyJWKClient:
+    return jwt.PyJWKClient(f"{settings.supabase_url}/auth/v1/.well-known/jwks.json")
 
 
 @dataclass
@@ -32,15 +38,26 @@ def get_current_user(authorization: str | None = Header(default=None)) -> Curren
     token = _extract_token(authorization)
 
     try:
-        payload = jwt.decode(
-            token,
-            settings.supabase_jwt_secret,
-            algorithms=["HS256"],
-            audience="authenticated",
-        )
+        alg = jwt.get_unverified_header(token).get("alg", "HS256")
+
+        if alg in ("ES256", "RS256"):
+            signing_key = _get_jwks_client().get_signing_key_from_jwt(token)
+            payload = jwt.decode(
+                token,
+                signing_key.key,
+                algorithms=["ES256", "RS256"],
+                audience="authenticated",
+            )
+        else:
+            payload = jwt.decode(
+                token,
+                settings.supabase_jwt_secret,
+                algorithms=["HS256"],
+                audience="authenticated",
+            )
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session expired, please log in again")
-    except jwt.InvalidTokenError:
+    except (jwt.InvalidTokenError, jwt.PyJWKClientError):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication token")
 
     user_id = payload.get("sub")

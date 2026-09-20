@@ -99,6 +99,9 @@ What's on your mind?
 // NOTE: keep this list to unambiguous, high-signal phrases to avoid firing
 // on ordinary chat; extend with isiZulu/isiXhosa/Afrikaans terms once you've
 // had a chance to review real conversation samples with your team/C3SA.
+// NOTE: the isiZulu, isiXhosa, Afrikaans and Sesotho phrases below are a
+// starting point and have NOT been reviewed by a fluent speaker yet — get
+// them checked (ideally via C3SA) before relying on them in production.
 const CRISIS_KEYWORDS = [
   "kill myself",
   "want to die",
@@ -108,11 +111,48 @@ const CRISIS_KEYWORDS = [
   "self harm",
   "self-harm",
   "no reason to live",
+  // isiZulu
+  "ngifuna ukufa",
+  "ngizibulala",
+  // isiXhosa
+  "ndifuna ukufa",
+  "ndizibulala",
+  // Afrikaans
+  "ek wil doodgaan",
+  "maak myself dood",
+  "selfmoord",
+  // Sesotho
+  "ke batla ho shwa",
+  "ke batla ho ipolaea",
 ];
 
+function normalizeForMatching(text) {
+  return text
+    .normalize("NFD")
+    .replace(new RegExp("[\\u0300-\\u036f]", "g"), "") // strip diacritics
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
 function containsCrisisKeyword(text) {
-  const lower = text.toLowerCase();
-  return CRISIS_KEYWORDS.some((kw) => lower.includes(kw));
+  const normalized = normalizeForMatching(text);
+  return CRISIS_KEYWORDS.some((kw) => normalized.includes(normalizeForMatching(kw)));
+}
+
+// WhatsApp text messages are rejected above this length.
+const WHATSAPP_MAX_REPLY_LENGTH = 4000;
+
+// Shown when Groq is unreachable/slow, so a learner is never left in silence.
+const GROQ_FALLBACK_REPLY = `
+Sorry, I'm having trouble replying right now — please try again in a moment.
+
+${SAFETY_RESOURCES}
+`.trim();
+
+function truncateReply(text) {
+  if (text.length <= WHATSAPP_MAX_REPLY_LENGTH) return text;
+  return `${text.slice(0, WHATSAPP_MAX_REPLY_LENGTH - 1)}…`;
 }
 
 // ---------- Call Groq (free, fast LLM) ----------
@@ -128,32 +168,41 @@ async function getAIReply(conversations, userId, userMessage) {
 
   conversations[userId].push({ role: "user", content: userMessage });
 
-  const response = await axios.post(
-    "https://api.groq.com/openai/v1/chat/completions",
-    {
-      model: "openai/gpt-oss-120b",
-      messages: conversations[userId],
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${GROQ_API_KEY}`,
-        "Content-Type": "application/json",
+  let reply;
+  try {
+    const response = await axios.post(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        model: "openai/gpt-oss-120b",
+        messages: conversations[userId],
       },
-    },
-  );
+      {
+        timeout: 20000,
+        headers: {
+          Authorization: `Bearer ${GROQ_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
 
-  let reply = response.data.choices[0].message.content;
+    reply = response.data.choices[0].message.content;
 
-  // Deterministic backstop: force resources block if a crisis keyword was
-  // used and the model didn't already include it. Picks the resources
-  // translation matching a rough guess of the learner's language; falls
-  // back to English if we can't tell.
-  if (containsCrisisKeyword(userMessage) && !reply.includes("Childline")) {
-    const lang = detectLanguage(userMessage);
-    const resources =
-      SAFETY_RESOURCES_BY_LANG[lang] || SAFETY_RESOURCES_BY_LANG.en;
-    reply = `${reply}\n\n${resources}`;
+    // Deterministic backstop: force resources block if a crisis keyword was
+    // used and the model didn't already include it. Picks the resources
+    // translation matching a rough guess of the learner's language; falls
+    // back to English if we can't tell.
+    if (containsCrisisKeyword(userMessage) && !reply.includes("Childline")) {
+      const lang = detectLanguage(userMessage);
+      const resources =
+        SAFETY_RESOURCES_BY_LANG[lang] || SAFETY_RESOURCES_BY_LANG.en;
+      reply = `${reply}\n\n${resources}`;
+    }
+  } catch (err) {
+    console.error("Groq request failed:", err.response?.data || err.message);
+    reply = GROQ_FALLBACK_REPLY;
   }
+
+  reply = truncateReply(reply);
 
   conversations[userId].push({ role: "assistant", content: reply });
 

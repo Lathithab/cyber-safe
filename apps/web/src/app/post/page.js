@@ -528,7 +528,7 @@ function PostPage() {
 
           {post === null && (
             <div className="empty-state">
-              <div className="empty-title">We couldn't find that post</div>
+              <div className="empty-title">We couldn&apos;t find that post</div>
               <p className="empty-sub">
                 It may have been removed, or the link is out of date.
               </p>

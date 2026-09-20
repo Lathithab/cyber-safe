@@ -375,7 +375,7 @@ export default function FeedPage() {
               <span className="incident-icon"><Icon name="phone" size={22} /></span>
               <h2>Cyber Incident?</h2>
               <small>Immediate assistance is ready</small>
-              <p>If you've been phished, hacked, or are facing cyberbullying, use our specialized South African hotlines.</p>
+              <p>If you&apos;ve been phished, hacked, or are facing cyberbullying, use our specialized South African hotlines.</p>
               <button type="button" onClick={() => router.push("/help")}>Access Cyber Helpline</button>
             </section>
 

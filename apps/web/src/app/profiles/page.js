@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
 import { useRouter } from "next/navigation";
 import DashboardNavIcon from "../components/DashboardNavIcon";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
@@ -27,12 +28,58 @@ const BADGES = [
 ];
 
 const TABS = ["Earned Badges", "My Posts", "Enrolled Courses", "Incident History"];
+function getInitials(name, username) {
+  const value = name || username || "User";
 
+  return value
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0].toUpperCase())
+    .join("");
+}
 export default function ProfilePage() {
+ 
   const router = useRouter();
   const [tab, setTab] = useState("Earned Badges");
+  const [profile, setProfile] = useState(null);
+const [isLoading, setIsLoading] = useState(true);
+const [errorMessage, setErrorMessage] = useState("");
   const links = DASHBOARD_NAV;
+useEffect(() => {
+  async function loadProfile() {
+    if (!isSupabaseConfigured || !supabase) {
+      setErrorMessage("Supabase is not configured.");
+      setIsLoading(false);
+      return;
+    }
 
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      router.push("/login");
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, username, email, full_name, role, created_at")
+      .eq("id", user.id)
+      .single();
+
+    if (error) {
+      console.error("Could not load profile:", error);
+      setErrorMessage("We could not load your profile.");
+      setIsLoading(false);
+      return;
+    }
+
+    setProfile(data);
+    setIsLoading(false);
+  }
+
+  loadProfile();
+}, [router]);
   return (
     <main className="profile-dashboard">
       <aside className="sidebar">
@@ -55,15 +102,45 @@ export default function ProfilePage() {
           </div>
         </header>
 
-        <section className="profile-card">
-          <div className="avatar" aria-hidden="true">SN</div>
-          <div className="profile-info">
-            <h2>Sipho Ndlovu</h2>
-            <p>Community Safety Advocate · Gauteng East</p>
-            <small>Johannesburg, SA · Joined Jan 2026</small>
-          </div>
-          <button type="button" className="edit-button" onClick={() => router.push("/settings")}>Edit Profile</button>
-        </section>
+       {isLoading ? (
+  <section className="profile-card">
+    <div className="profile-info">
+      <p>Loading your profile...</p>
+    </div>
+  </section>
+) : errorMessage ? (
+  <section className="profile-card">
+    <div className="profile-info">
+      <p>{errorMessage}</p>
+    </div>
+  </section>
+) : profile ? (
+  <section className="profile-card">
+    <div className="avatar" aria-hidden="true">
+      {getInitials(profile.full_name, profile.username)}
+    </div>
+
+    <div className="profile-info">
+      <h2>{profile.full_name || profile.username}</h2>
+      <p>@{profile.username} · {profile.role}</p>
+      <small>
+        {profile.email} · Joined{" "}
+        {new Date(profile.created_at).toLocaleDateString("en-ZA", {
+          month: "short",
+          year: "numeric",
+        })}
+      </small>
+    </div>
+
+    <button
+      type="button"
+      className="edit-button"
+      onClick={() => router.push("/settings")}
+    >
+      Edit Profile
+    </button>
+  </section>
+) : null}
 
         <div className="stat-grid">
           <div className="stat-card"><span>Security Badges</span><strong>4 / 6</strong><small>Elite Guard Level</small></div>

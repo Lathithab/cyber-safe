@@ -7,6 +7,9 @@ begin;
 
 alter table public.modules add column if not exists category text;
 
+-- Remove a leftover temporary table from a previous incomplete SQL Editor run.
+drop table if exists learning_module_seed;
+
 create temporary table learning_module_seed (
   slug text,
   title text,
@@ -16,7 +19,7 @@ create temporary table learning_module_seed (
   category text,
   order_index int,
   estimated_minutes int
-) on commit drop;
+);
 
 insert into learning_module_seed (
   slug, title, description, content, difficulty, category, order_index, estimated_minutes
@@ -150,3 +153,5 @@ select
 from public.modules as module
 left join public."Quizz" as quiz on quiz.module_id = module.id
 order by module.order_index, module.title;
+
+drop table if exists learning_module_seed;

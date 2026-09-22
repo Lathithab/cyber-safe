@@ -4,6 +4,32 @@
 
 export const SEED_POSTS = [
   {
+    id: "seed-0",
+    name: "Kgomotso Khumalo",
+    handle: "@kgomotso_k",
+    time: "2 hours ago",
+    role: "Soweto community leader",
+    issues: ["Scam Alert"],
+    text: "URGENT WARNING: Beware of a new Eskom billing scam circulating via WhatsApp in Gauteng. Scam messages claim you have an outstanding bill and demand immediate payment via an online card link. Eskom will NEVER request payment links over WhatsApp. Keep your details safe and warn your parents!",
+    image:
+      "https://images.unsplash.com/photo-1611606063065-ee7946f0787a?q=80&w=800&auto=format&fit=crop",
+    likes: 34,
+    comments: 2,
+    profile: "https://i.pravatar.cc/150?img=51",
+    topComments: [
+      {
+        name: "Thabo Mokoena",
+        text: "Thanks for the warning — forwarded this to my mom right away.",
+        time: "1h ago",
+      },
+      {
+        name: "Naledi Petersen",
+        text: "Same thing happened to my neighbour last week. Glad she didn't click the link.",
+        time: "45m ago",
+      },
+    ],
+  },
+  {
     id: "seed-1",
     name: "Sarah Mitchell",
     handle: "@sarah_m",

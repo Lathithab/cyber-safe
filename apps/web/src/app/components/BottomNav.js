@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 
 const NAV_ITEMS = [
-  { label: "Home", route: "/", icon: "home" },
+  { label: "Login", route: "/login", icon: "user" },
   { label: "Feed", route: "/feed", icon: "feed" },
   { label: "Post", route: "/postReport", icon: "post" },
   { label: "Scams", route: "/library", icon: "library" },
@@ -35,6 +35,11 @@ function NavIcon({ icon }) {
         <path d="M4.9 4.9l4 4M15.1 15.1l4 4M19.1 4.9l-4 4M8.9 15.1l-4 4" />
       </>
     );
+  if (icon === "user")
+    return <>
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21a8 8 0 0116 0" />
+    </>;
   return <path d="M12 5v14M5 12h14" />;
 }
 

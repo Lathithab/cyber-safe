@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
 import DashboardNavIcon from "../components/DashboardNavIcon";
+import { DASHBOARD_NAV } from "../components/dashboardNav";
 
 const INCIDENT_TYPES = [
   "Phishing Link",
@@ -30,14 +31,7 @@ function Icon({ name, size = 22 }) {
 }
 
 function Sidebar({ router }) {
-  const items = [
-    ["Home Feed", "/", "home"],
-    ["Learn Security", "/learn", "learn"],
-    ["Scam Library", "/library", "library"],
-    ["Report Incident", "/postReport", "report"],
-    ["Get Help", "/help", "help"],
-    ["CyberBot AI", "/cyberbot", "chat"],
-  ];
+  const items = DASHBOARD_NAV;
 
   return (
     <aside className="sidebar">
@@ -74,11 +68,31 @@ export default function PostReportPage() {
     setForm((current) => ({ ...current, [name]: type === "checkbox" ? checked : files ? files[0] ?? null : value }));
   }
 
+  function readEvidenceImage(file) {
+    if (!file?.type.startsWith("image/")) return Promise.resolve(null);
+
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error("The selected image could not be read."));
+      reader.readAsDataURL(file);
+    });
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
     if (!canSubmit || isSubmitting) return;
     setSubmitError("");
     setIsSubmitting(true);
+
+    let evidenceImage = null;
+    try {
+      evidenceImage = await readEvidenceImage(form.file);
+    } catch (error) {
+      setSubmitError(error.message);
+      setIsSubmitting(false);
+      return;
+    }
 
     if (!isSupabaseConfigured) {
       const localReport = {
@@ -88,6 +102,7 @@ export default function PostReportPage() {
         location: form.location.trim(),
         incidentDate: form.incidentDate,
         issues: [form.incidentType],
+        image: evidenceImage,
         time: "Just now",
         likes: 0,
         comments: 0,
@@ -112,6 +127,7 @@ export default function PostReportPage() {
       description: form.description.trim(),
       location: form.location.trim() || null,
       issues: [form.incidentType],
+      image_url: evidenceImage,
       status: "approved",
     });
 

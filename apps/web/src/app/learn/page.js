@@ -4,17 +4,12 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
 import DashboardNavIcon from "../components/DashboardNavIcon";
+import { DASHBOARD_NAV } from "../components/dashboardNav";
 
 const FILTERS = ["All modules", "Banking", "Social engineering", "School resources"];
 
-function Icon({ name, size = 22 }) {
-  const shared = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true };
-  if (name === "shield") return <svg {...shared}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>;
-  if (name === "home") return <svg {...shared}><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" /></svg>;
-  if (name === "book") return <svg {...shared}><path d="M4 19a2 2 0 0 1 2-2h14" /><path d="M6 3h14v18H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" /></svg>;
-  if (name === "alert") return <svg {...shared}><path d="m10.3 3.9-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3.1l-8-14a2 2 0 0 0-3.4 0z" /><path d="M12 9v4" /><path d="M12 17h.01" /></svg>;
-  if (name === "chat") return <svg {...shared}><path d="M21 11.5a8.4 8.4 0 0 1-9 8.5 9 9 0 0 1-4-.9L3 21l1.6-4.3A8.4 8.4 0 0 1 3 11.5 8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z" /></svg>;
-  return <svg {...shared}><path d="M12 5v14M5 12h14" /></svg>;
+function ShieldIcon() {
+  return <span className="shield-icon" aria-hidden="true">✓</span>;
 }
 
 export default function LearnPage() {

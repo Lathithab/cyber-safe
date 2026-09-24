@@ -1,12 +1,13 @@
 "use client";
-import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 function ShieldIcon({ size = 22, color = "currentColor" }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    <svg width={size} height={size} viewBox="0 0 24 26" fill={color} stroke="none" aria-hidden="true">
+      <path d="M7,1 L15.5,1 L18.5,2.5 L21,7.5 L17.8,9.5 L16.8,13.5 L15.8,20 L12.5,25 L9.5,23.5 L8,19.5 L6,15 L7,11.5 L5,9.5 L2.8,10.3 L1,6 L2.3,2.2 Z" />
+      <ellipse cx="19.5" cy="17" rx="0.9" ry="1.9" transform="rotate(20 19.5 17)" />
     </svg>
   );
 }
@@ -45,78 +46,22 @@ function MicrosoftIcon() {
 export default function LoginPage() {
   const router = useRouter();
   const [mode, setMode] = useState("login");
-const [fullName, setFullName] = useState("");
-const [username, setUsername] = useState("");
-const [email, setEmail] = useState("");
-const [password, setPassword] = useState("");
-const [showPassword, setShowPassword] = useState(false);
-const [errorMessage, setErrorMessage] = useState("");
-const [successMessage, setSuccessMessage] = useState("");
-const [isSubmitting, setIsSubmitting] = useState(false);
+  const [email, setEmail] = useState("sipho.ndlovu@gmail.com");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
-async function handleSubmit(event) {
-  event.preventDefault();
-
-  setErrorMessage("");
-  setSuccessMessage("");
-  setIsSubmitting(true);
-
-  if (!isSupabaseConfigured || !supabase) {
-    setErrorMessage("Authentication is not configured.");
-    setIsSubmitting(false);
-    return;
+  function handleSubmit(event) {
+    event.preventDefault();
+    // UI-only for now: no auth backend is wired up yet.
+    router.push("/feed");
   }
 
-  if (mode === "register") {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          username,
-          full_name: fullName,
-        },
-      },
-    });
-
-    if (error) {
-      setErrorMessage(error.message);
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (data.session) {
-      router.push("/feed");
-    } else {
-      setSuccessMessage(
-        "Account created. Please check your email to confirm your account."
-      );
-    }
-  } else {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      setErrorMessage(error.message);
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (data.user) {
-      router.push("/feed");
-    }
-  }
-
-  setIsSubmitting(false);
-}
   return (
     <main className="login-page">
       <section className="login-hero">
         <div className="hero-scrim" />
         <div className="hero-content">
-          <div className="hero-brand"><span className="hero-brand-icon"><ShieldIcon size={20} color="#fff" /></span><strong>CyberSafe SA</strong></div>
+          <div className="hero-brand"><span className="hero-brand-icon"><ShieldIcon size={16} color="#fff" /></span><strong>CyberSafe SA</strong></div>
 
           <div className="hero-copy">
             <h1>Empowering South African Communities to Stay Safe Online.</h1>
@@ -139,45 +84,8 @@ async function handleSubmit(event) {
             <button type="button" className={mode === "login" ? "selected" : ""} onClick={() => setMode("login")}>Log In</button>
             <button type="button" className={mode === "register" ? "selected" : ""} onClick={() => setMode("register")}>Register</button>
           </div>
-{errorMessage && (
-  <p style={{ color: "#d64545", marginBottom: "16px" }}>
-    {errorMessage}
-  </p>
-)}
 
-{successMessage && (
-  <p style={{ color: "#159f76", marginBottom: "16px" }}>
-    {successMessage}
-  </p>
-)}
           <form onSubmit={handleSubmit}>
-            {mode === "register" && (
-  <>
-    <label className="field-label" htmlFor="fullName">
-      Full Name
-    </label>
-    <input
-      id="fullName"
-      type="text"
-      value={fullName}
-      onChange={(event) => setFullName(event.target.value)}
-      required
-      autoComplete="name"
-    />
-
-    <label className="field-label" htmlFor="username">
-      Username
-    </label>
-    <input
-      id="username"
-      type="text"
-      value={username}
-      onChange={(event) => setUsername(event.target.value)}
-      required
-      autoComplete="username"
-    />
-  </>
-)}
             <label className="field-label" htmlFor="email">Email Address</label>
             <input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
 
@@ -187,17 +95,7 @@ async function handleSubmit(event) {
               <button type="button" className="toggle-visibility" onClick={() => setShowPassword((v) => !v)} aria-label="Toggle password visibility"><EyeIcon /></button>
             </div>
 
-           <button
-  type="submit"
-  className="submit-button"
-  disabled={isSubmitting}
->
-  {isSubmitting
-    ? "Please wait..."
-    : mode === "login"
-      ? "Sign In"
-      : "Create Account"}
-</button>
+            <button type="submit" className="submit-button">{mode === "login" ? "Sign In" : "Create Account"}</button>
           </form>
 
           <div className="divider"><span>or connect with</span></div>
@@ -205,42 +103,46 @@ async function handleSubmit(event) {
             <button type="button" className="oauth-button"><GoogleIcon />Google</button>
             <button type="button" className="oauth-button"><MicrosoftIcon />Microsoft</button>
           </div>
-          <p className="demo-note">
-  Email and password authentication is active. Google and Microsoft sign-in are not connected yet.
-</p>
+          <p className="demo-note">This screen is a front-end preview only — no account is created or verified yet.</p>
         </div>
       </section>
 
       <style>{`
         * { box-sizing: border-box; }
-        .login-page { min-height: 100vh; display: flex; background: #f6f9fd; color: #121a32; font-family: "DM Sans", Arial, sans-serif; }
+        .login-page { min-height: 100vh; display: flex; flex-direction: column; background: #f6f9fd; color: #00243A; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
         .login-hero {
-          position: relative; width: 44%; min-height: 100vh; padding: 46px 44px; color: #fff; overflow: hidden;
-          background-image: linear-gradient(180deg, rgba(10,20,35,.35), rgba(10,20,35,.82)), url("https://images.unsplash.com/photo-1580582932707-520aed937b7b?q=80&w=1200&auto=format&fit=crop");
+          position: relative; width: 100%; padding: 28px 20px; color: #fff; overflow: hidden;
+          background-image: linear-gradient(180deg, rgba(0,36,58,.55), rgba(0,36,58,.88)), url("https://images.unsplash.com/photo-1580582932707-520aed937b7b?q=80&w=1200&auto=format&fit=crop");
           background-size: cover; background-position: center;
         }
         .hero-scrim { display: none; }
-        .hero-content { position: relative; z-index: 1; display: flex; flex-direction: column; height: 100%; }
-        .hero-brand { display: flex; align-items: center; gap: 12px; } .hero-brand-icon { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 11px; background: rgba(49,199,230,.35); border: 1px solid rgba(255,255,255,.25); } .hero-brand strong { font-family: "Syne", Arial, sans-serif; font-size: 19px; letter-spacing: -.2px; }
-        .hero-copy { margin-top: auto; padding-bottom: 34px; } .hero-copy h1 { margin: 0 0 18px; font-family: "Syne", Arial, sans-serif; font-size: clamp(28px, 3.1vw, 38px); line-height: 1.12; letter-spacing: -1.1px; } .hero-copy p { margin: 0; max-width: 460px; color: rgba(255,255,255,.88); font-size: 15.5px; line-height: 1.55; }
-        .hero-trust small { display: block; margin-bottom: 12px; color: rgba(255,255,255,.72); font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; } .trust-row { display: flex; flex-wrap: wrap; gap: 18px; font-size: 14px; font-weight: 700; }
+        .hero-content { position: relative; z-index: 1; display: flex; flex-direction: column; }
+        .hero-brand { display: flex; align-items: center; gap: 10px; } .hero-brand-icon { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 7px; background: rgba(235,99,15,.35); border: 1px solid rgba(255,255,255,.25); } .hero-brand strong { font-size: 15px; letter-spacing: -.2px; }
+        .hero-copy { margin-top: 18px; } .hero-copy h1 { margin: 0 0 12px; font-size: 24px; line-height: 1.18; letter-spacing: -0.6px; } .hero-copy p { margin: 0; max-width: 460px; color: rgba(255,255,255,.88); font-size: 13.5px; line-height: 1.55; }
+        .hero-trust { margin-top: 20px; } .hero-trust small { display: block; margin-bottom: 10px; color: rgba(255,255,255,.72); font-size: 10.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; } .trust-row { display: flex; flex-wrap: wrap; gap: 12px; font-size: 11px; font-weight: 700; }
 
-        .login-panel { flex: 1; display: grid; place-items: center; padding: 40px 24px; }
-        .login-card { width: 100%; max-width: 420px; padding: 40px; border: 1px solid #dce5ef; border-radius: 22px; background: #fff; box-shadow: 0 20px 50px rgba(15, 30, 60, .08); }
-        h2 { margin: 0; font-family: "Syne", Arial, sans-serif; font-size: 28px; letter-spacing: -1px; } .subtitle { margin: 10px 0 24px; color: #65738a; font-size: 15px; }
-        .mode-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 26px; padding: 5px; border-radius: 13px; background: #f1f4f9; } .mode-toggle button { padding: 11px; border: 0; border-radius: 10px; background: transparent; color: #65738a; cursor: pointer; font: inherit; font-size: 14px; font-weight: 800; } .mode-toggle button.selected { background: #fff; color: #121a32; box-shadow: 0 4px 10px rgba(15,30,60,.08); }
-        .field-label { display: block; margin: 16px 0 8px; color: #26324a; font-size: 14px; font-weight: 700; }
-        input { width: 100%; height: 52px; padding: 0 16px; border: 1px solid #dce5ef; border-radius: 13px; background: #f8fafc; color: #121a32; font: inherit; font-size: 15px; outline: none; } input:focus { border-color: #31c7e6; box-shadow: 0 0 0 3px rgba(49,199,230,.15); }
-        .password-row { display: flex; align-items: center; justify-content: space-between; } .password-row .field-label { margin: 16px 0 8px; } .forgot { border: 0; background: transparent; color: #1f87e7; cursor: pointer; font: inherit; font-size: 13px; font-weight: 700; }
-        .password-shell { position: relative; } .password-shell input { padding-right: 46px; } .toggle-visibility { position: absolute; top: 50%; right: 14px; transform: translateY(-50%); border: 0; background: transparent; color: #8996a8; cursor: pointer; }
-        .submit-button { width: 100%; margin-top: 26px; padding: 15px; border: 0; border-radius: 13px; background: #31c7e6; color: #06263a; cursor: pointer; font: inherit; font-size: 16px; font-weight: 800; }
-        .divider { position: relative; margin: 26px 0 18px; text-align: center; } .divider::before { content: ""; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #e2e9f2; } .divider span { position: relative; padding: 0 14px; background: #fff; color: #8996a8; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
-        .oauth-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; } .oauth-button { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px; border: 1px solid #dce5ef; border-radius: 13px; background: #fff; color: #26324a; cursor: pointer; font: inherit; font-size: 14px; font-weight: 700; }
-        .demo-note { margin: 18px 0 0; color: #a4afbe; font-size: 12px; text-align: center; line-height: 1.4; }
+        .login-panel { flex: 1; display: grid; place-items: center; padding: 28px 16px 40px; }
+        .login-card { width: 100%; max-width: 420px; padding: 26px 22px; border: 1px solid #dce5ef; border-radius: 13px; background: #fff; box-shadow: 0 20px 50px rgba(15, 30, 60, .08); }
+        h2 { margin: 0; font-size: 22px; letter-spacing: -0.55px; } .subtitle { margin: 8px 0 22px; color: #65738a; font-size: 12.5px; }
+        .mode-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 24px; padding: 4px; border-radius: 8px; background: #f1f4f9; } .mode-toggle button { padding: 10px; min-height: 40px; border: 0; border-radius: 6px; background: transparent; color: #65738a; cursor: pointer; font: inherit; font-size: 12px; font-weight: 800; } .mode-toggle button.selected { background: #fff; color: #00243A; box-shadow: 0 4px 10px rgba(15,30,60,.08); }
+        .field-label { display: block; margin: 13px 0 8px; color: #26324a; font-size: 12px; font-weight: 700; }
+        input { width: 100%; height: 46px; padding: 0 15px; border: 1px solid #dce5ef; border-radius: 8px; background: #f8fafc; color: #00243A; font: inherit; font-size: 13px; outline: none; } input:focus { border-color: #EB630F; box-shadow: 0 0 0 3px rgba(235,99,15,.15); }
+        .password-row { display: flex; align-items: center; justify-content: space-between; } .password-row .field-label { margin: 13px 0 8px; } .forgot { border: 0; background: transparent; color: #C24F0C; cursor: pointer; font: inherit; font-size: 12px; font-weight: 700; }
+        .password-shell { position: relative; } .password-shell input { padding-right: 46px; } .toggle-visibility { position: absolute; top: 50%; right: 13px; transform: translateY(-50%); border: 0; background: transparent; color: #8996a8; cursor: pointer; }
+        .submit-button { width: 100%; margin-top: 22px; padding: 13px; min-height: 46px; border: 0; border-radius: 8px; background: #EB630F; color: #00243A; cursor: pointer; font: inherit; font-size: 13px; font-weight: 800; }
+        .divider { position: relative; margin: 20px 0 16px; text-align: center; } .divider::before { content: ""; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #e2e9f2; } .divider span { position: relative; padding: 0 14px; background: #fff; color: #8996a8; font-size: 10.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+        .oauth-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } .oauth-button { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 11px; min-height: 44px; border: 1px solid #dce5ef; border-radius: 8px; background: #fff; color: #26324a; cursor: pointer; font: inherit; font-size: 12px; font-weight: 700; }
+        .demo-note { margin: 14px 0 0; color: #a4afbe; font-size: 10.5px; text-align: center; line-height: 1.4; }
 
-        @media (max-width: 900px) { .login-hero { display: none; } .login-panel { padding: 30px 18px; } }
-        @media (max-width: 480px) { .login-card { padding: 28px 22px; border-radius: 18px; } .oauth-row { grid-template-columns: 1fr; } }
+        @media (min-width: 851px) {
+          .login-page { flex-direction: row; }
+          .login-hero { width: 44%; min-height: 100vh; padding: 37px 35px; }
+          .hero-content { height: 100%; }
+          .hero-copy { margin-top: auto; padding-bottom: 34px; } .hero-copy h1 { font-size: clamp(21px, 2.6vw, 26px); }
+          .login-panel { padding: 32px 24px; }
+        }
+        @media (max-width: 480px) { .login-card { padding: 22px 18px; border-radius: 11px; } .oauth-row { grid-template-columns: 1fr; } }
       `}</style>
     </main>
   );
-}
+} 

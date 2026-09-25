@@ -96,13 +96,13 @@ export default function CyberBotPage() {
     </section>
     <style>{`
       * { box-sizing: border-box; } .cyberbot-page { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr); background: #f6f9fd; color: #00243A; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        .mobile-topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 41; display: grid; grid-template-columns: 40px 1fr 40px; align-items: center; height: calc(52px + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px); background: #fff; border-bottom: 1px solid #e2e9f2; }
-        .mobile-topbar-menu, .mobile-topbar-bell { display: grid; place-items: center; width: 40px; height: 40px; margin: 0 auto; border: 0; background: transparent; color: #536179; cursor: pointer; }
-        .mobile-topbar-brand { display: flex; align-items: center; justify-content: center; gap: 7px; border: 0; background: transparent; color: #00243A; cursor: pointer; font: inherit; padding: 0; }
-        .mobile-topbar-icon { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 6px; background: #FDEAE0; color: #EB630F; }
+        .mobile-topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 41; display: grid; grid-template-columns: 40px 1fr 40px; align-items: center; height: calc(52px + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px); background: #00243A; border-bottom: 2px solid #EB630F; }
+        .mobile-topbar-menu, .mobile-topbar-bell { display: grid; place-items: center; width: 40px; height: 40px; margin: 0 auto; border: 0; background: transparent; color: #fff; cursor: pointer; }
+        .mobile-topbar-brand { display: flex; align-items: center; justify-content: center; gap: 7px; border: 0; background: transparent; color: #fff; cursor: pointer; font: inherit; padding: 0; }
+        .mobile-topbar-icon { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 6px; background: rgba(235,99,15,.22); color: #EB630F; }
         .mobile-topbar-brand strong { font-size: 15px; letter-spacing: -0.3px; }
-        .bottom-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: flex; background: #fff; border-top: 1px solid #e2e9f2; padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 -4px 16px rgba(0,0,0,.05); }
-        .bottom-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 2px; border: 0; background: transparent; color: #8996a8; cursor: pointer; font: inherit; font-size: 10px; font-weight: 700; }
+        .bottom-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: flex; background: #00243A; border-top: 2px solid #EB630F; padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 -4px 16px rgba(0,0,0,.25); }
+        .bottom-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 2px; border: 0; background: transparent; color: rgba(255,255,255,.6); cursor: pointer; font: inherit; font-size: 10px; font-weight: 700; }
         .bottom-nav-item.active { color: #EB630F; }
         .bottom-nav-item span { white-space: nowrap; }
         .nav-menu-overlay { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-end; background: rgba(0,36,58,.4); }
@@ -114,16 +114,23 @@ export default function CyberBotPage() {
         .nav-menu-item { display: flex; align-items: center; gap: 10px; padding: 13px 12px; border: 1px solid #eef2f7; border-radius: 10px; background: #f8fafc; color: #26324a; cursor: pointer; font: inherit; font-size: 13px; font-weight: 700; text-align: left; }
         .nav-menu-icon { display: grid; place-items: center; width: 30px; height: 30px; flex: 0 0 auto; border-radius: 8px; background: #FDEAE0; color: #EB630F; }
                 .cyberbot-content { padding-top: calc(18px + 52px + env(safe-area-inset-top, 0px)); padding-bottom: 78px; }
-         .sidebar { position: sticky; top: 0; height: 100vh; padding: 24px 22px; border-right: 1px solid #e2e9f2; background: #fff; } .sidebar { display: none; }
+         .sidebar { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; padding: 24px 22px; border-right: 1px solid #e2e9f2; background: #00243A; overflow: hidden; } .sidebar { display: none; }
         @media (min-width: 851px) {
           .sidebar { display: flex; }
-          .cyberbot-page { grid-template-columns: 230px minmax(0, 1fr); }
+          .cyberbot-page { grid-template-columns: 230px minmax(0, 1fr); } .side-link { font-size: 12px; padding: 10px 12px; gap: 10px; } .brand strong { font-size: 16px; } .brand small { font-size: 11px; }
           .mobile-topbar, .bottom-nav, .nav-menu-overlay { display: none; }
           .cyberbot-content { padding-top: 24px; padding-bottom: 36px; }
         }
- .brand { display: flex; align-items: center; gap: 10px; padding: 0; border: 0; background: transparent; color: #00243A; cursor: pointer; text-align: left; } .brand-icon { display: grid; place-items: center; width: 41px; height: 41px; border-radius: 9px; background: #FDEAE0; color: #EB630F; } .brand strong { display: block; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 20px; letter-spacing: -0.55px; } .brand small { display: block; margin-top: 5px; color: #EB630F; font-size: 12px; font-weight: 700; } .side-nav { display: grid; gap: 7px; margin-top: 42px; } .side-link { display: flex; align-items: center; gap: 13px; width: 100%; padding: 11px 14px; border: 0; border-radius: 8px; background: transparent; color: #536179; cursor: pointer; font: inherit; font-size: 14px; font-weight: 600; text-align: left; } .side-link.active { background: #FDEAE0; color: #00243A; font-weight: 800; } .side-link.active svg { color: #EB630F; }
+ .brand { display: flex; align-items: center; gap: 10px; padding: 0; border: 0; background: transparent; color: #fff; cursor: pointer; text-align: left; } .brand-icon { display: grid; place-items: center; width: 41px; height: 41px; border-radius: 9px; background: rgba(235,99,15,.22); color: #EB630F; } .brand strong { display: block; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 20px; letter-spacing: -0.55px; } .brand small { display: block; margin-top: 5px; color: #EB630F; font-size: 12px; font-weight: 700; } .side-nav { display: grid; gap: 7px; margin-top: 42px; } .side-link { display: flex; align-items: center; gap: 13px; width: 100%; padding: 11px 14px; border: 0; border-radius: 8px; background: transparent; color: rgba(255,255,255,.68); cursor: pointer; font: inherit; font-size: 14px; font-weight: 600; text-align: left; } .side-link.active { background: rgba(235,99,15,.25); color: #fff; font-weight: 800; } .side-link.active svg { color: #EB630F; }
       .cyberbot-content { display: grid; min-height: 100vh; place-items: center; padding: 38px 21px; } .cyberbot-card { width: min(100%, 510px); padding: 30px; border: 1px solid #dce5ef; border-radius: 14px; background: #fff; box-shadow: 0 12px 32px rgba(36, 56, 87, .07); text-align: center; } .chat-icon { display: grid; place-items: center; width: 48px; height: 48px; margin: 0 auto 18px; border-radius: 11px; background: #FDEAE0; color: #EB630F; } .eyebrow { margin: 0; color: #C24F0C; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; } h1 { margin: 7px 0 13px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: clamp(17px, 3vw, 20px); letter-spacing: -0.83px; } .cyberbot-card > p { max-width: 400px; margin: 0 auto; color: #65738a; font-size: 12px; line-height: 1.5; } .qr-code { display: block; width: 250px; height: 250px; margin: 22px auto 23px; padding: 8px; border: 1px solid #dce5ef; border-radius: 10px; background: #fff; } .whatsapp-button { display: inline-flex; align-items: center; justify-content: center; min-height: 50px; padding: 0 24px; border-radius: 8px; background: #EB630F; color: #00243A; font-size: 12px; font-weight: 800; text-decoration: none; } .cyberbot-card small { display: block; max-width: 390px; margin: 15px auto 0; color: #8996a8; font-size: 11px; line-height: 1.45; }
       @media (max-width: 1180px) { .sidebar { padding: 20px 16px; } .cyberbot-content { padding: 30px 22px; } } @media (max-width: 850px) {   .sidebar { padding: 11px 8px; } .brand strong { font-size: 12px; } .brand small { font-size: 11px; } .side-nav { margin-top: 18px; gap: 3px; } .side-link { padding: 6px 6px; font-size: 11px; gap: 6px; } .side-link svg { width: 16px; height: 16px; } .cyberbot-content { min-height: auto; padding: 26px 14px; } } @media (max-width: 480px) { .cyberbot-content { padding: 18px 11px; } .cyberbot-card { padding: 22px 14px; } .qr-code { width: 220px; height: 220px; } }
-    `}</style>
+  
+    @media (min-width: 851px) {
+      .side-link { font-size: 12px !important; padding: 10px 12px !important; gap: 10px !important; min-width: 0; overflow: hidden; }
+      .side-link span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; display: block; } .side-link svg { flex-shrink: 0; }
+      .brand strong { font-size: 16px !important; }
+      .brand small { font-size: 11px !important; }
+    }
+  `}</style>
   </main>;
 }

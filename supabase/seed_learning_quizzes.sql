@@ -19,7 +19,7 @@ with quiz_seed (slug, quiz_title, quiz_description) as (
     ('safe-job-search', 'Safe Job Search Quiz', 'Test your ability to recognise fake job offers.')
 )
 insert into public."Quizz" ("Title", module_id, "Tier", "Description")
-select seed.quiz_title, module.id, module.difficulty, seed.quiz_description
+select seed.quiz_title, module.id, module.difficulty::public."Tier", seed.quiz_description
 from quiz_seed as seed
 join public.modules as module on module.slug = seed.slug
 where not exists (
@@ -69,10 +69,10 @@ with question_seed (slug, question, options, correct_index, explanation, order_i
     ('safe-job-search', 'What information should you share in an early job application?', jsonb_build_array('Only information genuinely needed for a legitimate application', 'Your banking PIN', 'Every identity document and OTP', 'Money for a training fee'), 0, 'Limit personal information until you have verified the employer and opportunity.', 3)
 )
 insert into public.quiz_questions (
-  module_id, quizz_id, question, options, correct_index, explanation, order_index
+  quizz_id, question, options, correct_index, explanation, order_index
 )
 select
-  module.id, quiz.id, seed.question, seed.options, seed.correct_index,
+  quiz.id, seed.question, seed.options, seed.correct_index,
   seed.explanation, seed.order_index
 from question_seed as seed
 join public.modules as module on module.slug = seed.slug
@@ -119,10 +119,10 @@ with extension_question_seed (slug, question, options, correct_index, explanatio
     ('safe-job-search', 'What should you do if a recruiter demands a payment before an interview?', jsonb_build_array('Do not pay; verify the employer through official channels', 'Pay quickly to secure the role', 'Share your banking OTP', 'Send a photo of your bank card'), 0, 'Upfront recruitment fees are a major warning sign of a job scam.', 5)
 )
 insert into public.quiz_questions (
-  module_id, quizz_id, question, options, correct_index, explanation, order_index
+  quizz_id, question, options, correct_index, explanation, order_index
 )
 select
-  module.id, quiz.id, seed.question, seed.options, seed.correct_index,
+  quiz.id, seed.question, seed.options, seed.correct_index,
   seed.explanation, seed.order_index
 from extension_question_seed as seed
 join public.modules as module on module.slug = seed.slug

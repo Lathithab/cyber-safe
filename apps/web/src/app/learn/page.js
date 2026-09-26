@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
 import DashboardNavIcon from "../components/DashboardNavIcon";
+import LogoutButton from "../components/LogoutButton";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
 
 const FILTERS = ["All modules", "Banking", "Social engineering", "School resources"];
@@ -43,6 +44,7 @@ export default function LearnPage() {
       const { data, error } = await supabase
         .from("modules")
         .select("*")
+        .eq("published", true)
         .order("order_index", { ascending: true });
 
       if (error) {
@@ -72,7 +74,7 @@ export default function LearnPage() {
       <button className="mobile-topbar-brand" type="button" onClick={() => router.push("/feed")}><span className="mobile-topbar-icon"><Icon name="shield" size={18} /></span><strong>CyberSafe</strong></button>
       <button className="mobile-topbar-bell" type="button" onClick={() => router.push("/notification")} aria-label="Notifications"><DashboardNavIcon name="bell" size={21} /></button>
     </header>
-    <aside className="sidebar"><button className="brand" onClick={() => router.push("/feed")} type="button"><span className="brand-icon"><Icon name="shield" size={28} /></span><span><strong>CyberSafe</strong><small>South Africa</small></span></button><nav className="side-nav">{links.map(([label, route, icon]) => <button key={label} type="button" className={`side-link ${route === "/learn" ? "active" : ""}`} onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={24} />{label}</button>)}</nav><button className="emergency-card" type="button" onClick={() => router.push("/help")}><span className="emergency-icon"><DashboardNavIcon name="help" size={23} /></span><span><strong>EMERGENCY</strong><small>Victim of a scam or cyber hack?</small><b>Get Help Now</b></span></button></aside>
+    <aside className="sidebar"><button className="brand" onClick={() => router.push("/feed")} type="button"><span className="brand-icon"><Icon name="shield" size={28} /></span><span><strong>CyberSafe</strong><small>South Africa</small></span></button><nav className="side-nav">{links.map(([label, route, icon]) => <button key={label} type="button" className={`side-link ${route === "/learn" ? "active" : ""}`} onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={24} />{label}</button>)}</nav><LogoutButton /><button className="emergency-card" type="button" onClick={() => router.push("/help")}><span className="emergency-icon"><DashboardNavIcon name="help" size={23} /></span><span><strong>EMERGENCY</strong><small>Victim of a scam or cyber hack?</small><b>Get Help Now</b></span></button></aside>
     <nav className="bottom-nav" aria-label="Primary navigation">
       {primaryNav.map(([label, route, icon]) => (
         <button key={label} type="button" className={`bottom-nav-item ${route === "/learn" ? "active" : ""}`} onClick={() => router.push(route)}>

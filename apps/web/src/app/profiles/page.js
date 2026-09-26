@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import DashboardNavIcon from "../components/DashboardNavIcon";
+import LogoutButton from "../components/LogoutButton";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
+import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
 
 function Icon({ name, size = 22 }) {
   const shared = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true };
@@ -29,16 +31,57 @@ const BADGES = [
 ];
 
 const TABS = ["Earned Badges", "My Posts", "Enrolled Courses", "Incident History"];
+function getInitials(name, username) {
+  return (name || username || "User")
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0].toUpperCase())
+    .join("");
+}
 
 export default function ProfilePage() {
   const router = useRouter();
   const [tab, setTab] = useState("Earned Badges");
+  const [profile, setProfile] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
   const links = DASHBOARD_NAV;
   const [menuOpen, setMenuOpen] = useState(false);
   const PRIMARY_ROUTES = ["/feed", "/learn", "/postReport", "/cyberbot"];
   const MENU_EXCLUDED_ROUTES = [...PRIMARY_ROUTES, "/login", "/admin", "/notification"];
   const primaryNav = links.filter(([, route]) => PRIMARY_ROUTES.includes(route));
   const menuNav = links.filter(([, route]) => !MENU_EXCLUDED_ROUTES.includes(route));
+
+  useEffect(() => {
+    async function loadProfile() {
+      if (!isSupabaseConfigured || !supabase) {
+        setErrorMessage("Supabase is not configured.");
+        setIsLoading(false);
+        return;
+      }
+
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        router.push("/login");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, username, email, full_name, role, created_at")
+        .eq("id", user.id)
+        .single();
+      if (error) {
+        console.error("Could not load profile:", error);
+        setErrorMessage("We could not load your profile.");
+      } else {
+        setProfile(data);
+      }
+      setIsLoading(false);
+    }
+    loadProfile();
+  }, [router]);
 
 
   return (
@@ -61,7 +104,8 @@ export default function ProfilePage() {
         <nav className="side-nav" aria-label="Dashboard navigation">
           {links.map(([label, route, icon]) => <button key={label} className={`side-link ${route === "/profiles" ? "active" : ""}`} type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={19} /><span>{label}</span></button>)}
         </nav>
-        <button className="emergency-card" type="button" onClick={() => router.push("/help")}><span className="emergency-icon"><Icon name="phone" size={18} /></span><span><strong>EMERGENCY</strong><small>Victim of a scam or cyber hack?</small><b>Get Help Now</b></span></button>
+        <LogoutButton />
+        <button className="emergency-card" type="button" onClick={() => router.push("/help")}><span className="emergency-icon"><Icon name="phone" size={23} /></span><span><strong>EMERGENCY</strong><small>Victim of a scam or cyber hack?</small><b>Get Help Now</b></span></button>
       </aside>
 
       <nav className="bottom-nav" aria-label="Primary navigation">
@@ -104,15 +148,48 @@ export default function ProfilePage() {
           </div>
         </header>
 
-        <section className="profile-card">
-          <div className="avatar" aria-hidden="true">SN</div>
-          <div className="profile-info">
-            <h2>Sipho Ndlovu</h2>
-            <p>Community Safety Advocate · Gauteng East</p>
-            <small>Johannesburg, SA · Joined Jan 2026</small>
-          </div>
-          <button type="button" className="edit-button" onClick={() => router.push("/settings")}>Edit Profile</button>
-        </section>
+       {isLoading ? (
+  <section className="profile-card">
+    <div className="profile-info">
+      <p>Loading your profile...</p>
+    </div>
+  </section>
+) : errorMessage ? (
+  <section className="profile-card">
+    <div className="profile-info">
+      <p>{errorMessage}</p>
+    </div>
+  </section>
+) : profile ? (
+  <section className="profile-card">
+    <div className="avatar" aria-hidden="true">
+      {getInitials(profile.full_name, profile.username)}
+    </div>
+
+    <div className="profile-info">
+      <h2>{profile.full_name || profile.username}</h2>
+      <p>@{profile.username} · {profile.role}</p>
+      <small>
+        {profile.email} · Joined{" "}
+        {new Date(profile.created_at).toLocaleDateString("en-ZA", {
+          month: "short",
+          year: "numeric",
+        })}
+      </small>
+    </div>
+
+    <div className="profile-actions">
+      <button
+        type="button"
+        className="edit-button"
+        onClick={() => router.push("/settings")}
+      >
+        Edit Profile
+      </button>
+      <LogoutButton className="profile-logout-button" label="Logout" />
+    </div>
+  </section>
+) : null}
 
         <div className="stat-grid">
           <div className="stat-card"><span>Security Badges</span><strong>4 / 6</strong><small>Elite Guard Level</small></div>
@@ -183,6 +260,7 @@ export default function ProfilePage() {
         .header-actions { display: flex; align-items: center; gap: 11px; flex: 0 0 auto; } .platform-search { display: flex; align-items: center; gap: 8px; width: 245px; padding: 0 16px; border: 1px solid #dce5ef; border-radius: 8px; background: #fff; color: #536179; } .platform-search input { width: 100%; height: 50px; border: 0; outline: 0; color: #26324a; font: inherit; font-size: 12px; } .help-button { border: 0; border-radius: 8px; background: #EB630F; color: #00243A; cursor: pointer; font: inherit; font-size: 12px; font-weight: 800; min-height: 50px; padding: 0 23px; white-space: nowrap; }
 
         .profile-card { display: flex; align-items: center; gap: 18px; margin-top: 28px; padding: 24px; border: 1px solid #dce5ef; border-radius: 12px; background: #fff; box-shadow: 0 8px 24px rgba(36, 56, 87, .035); } .avatar { display: grid; place-items: center; width: 58px; height: 58px; flex: 0 0 auto; border-radius: 50%; background: #FDEAE0; color: #C24F0C; font-size: 19px; font-weight: 800; } .profile-info { flex: 1; min-width: 0; } .profile-info h2 { margin: 0; font-size: 19px; } .profile-info p { margin: 5px 0 0; color: #536179; font-size: 12px; } .profile-info small { color: #8996a8; font-size: 11px; } .edit-button { flex: 0 0 auto; padding: 10px 18px; border: 1px solid #dce5ef; border-radius: 8px; background: #fff; color: #26324a; cursor: pointer; font: inherit; font-size: 12px; font-weight: 800; }
+        .profile-actions { display: flex; align-items: center; gap: 10px; }
 
         .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 22px; } .stat-card { padding: 18px; border: 1px solid #dce5ef; border-radius: 10px; background: #fff; } .stat-card span { color: #65738a; font-size: 11px; font-weight: 700; } .stat-card strong { display: block; margin: 8px 0 6px; font-size: 20px; letter-spacing: -0.55px; } .stat-card small { color: #8996a8; font-size: 11px; }
 

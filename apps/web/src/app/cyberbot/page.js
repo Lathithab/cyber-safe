@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import QRCode from "qrcode";
 import DashboardNavIcon from "../components/DashboardNavIcon";
+import LogoutButton from "../components/LogoutButton";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
 
 const WHATSAPP_URL = "https://wa.me/27618780277?text=Hello%20CyberBot";
@@ -54,6 +55,7 @@ export default function CyberBotPage() {
 <aside className="sidebar">
       <button className="brand" type="button" onClick={() => router.push("/")}><span className="brand-icon"><Icon name="shield" size={22} /></span><span><strong>CyberSafe</strong><small>South Africa</small></span></button>
       <nav className="side-nav" aria-label="Dashboard navigation">{links.map(([label, route, icon]) => <button key={label} className={`side-link ${route === "/cyberbot" ? "active" : ""}`} type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} /><span>{label}</span></button>)}</nav>
+      <LogoutButton />
     </aside>
 
       <nav className="bottom-nav" aria-label="Primary navigation">

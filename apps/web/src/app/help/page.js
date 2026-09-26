@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { emergency, banks, networks, geoLinks } from "./contacts";
 import DashboardNavIcon from "../components/DashboardNavIcon";
+import LogoutButton from "../components/LogoutButton";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
 
 function Icon({ name, size = 22 }) {
@@ -25,9 +26,14 @@ function Icon({ name, size = 22 }) {
 function Sidebar({ router }) {
   const links = DASHBOARD_NAV;
   return <aside className="sidebar">
-    <button className="brand" type="button" onClick={() => router.push("/")}><span className="brand-icon"><Icon name="shield" size={22} /></span><span><strong>CyberSafe</strong><small>South Africa</small></span></button>
-    <nav className="side-nav" aria-label="Dashboard navigation">{links.map(([label, route, icon]) => <button key={label} className={`side-link ${route === "/help" ? "active" : ""}`} type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={20} /><span>{label}</span></button>)}</nav>
-    <div className="emergency-card"><span className="emergency-icon"><Icon name="phone" size={18} /></span><span><strong>EMERGENCY</strong><small>Victim of a scam or cyber hack?</small><b>Use this hub for help</b></span></div>
+     <button className="brand" type="button" onClick={() => router.push("/")}><span className="brand-icon"><Icon name="shield" size={28} /></span><span><strong>CyberSafe</strong><small>South Africa</small></span></button>
+     <nav className="side-nav" aria-label="Dashboard navigation">{links.map(([label, route, icon]) => <button key={label} className={`side-link ${route === "/help" ? "active" : ""}`} type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={25} /><span>{label}</span></button>)}</nav>
+     <LogoutButton />
+     <div className="emergency-card"><span className="emergency-icon"><Icon name="phone" size={23} /></span><span><strong>EMERGENCY</strong><small>Victim of a scam or cyber hack?</small><b>Use this hub for help</b></span></div>
+      <button className="brand" type="button" onClick={() => router.push("/")}><span className="brand-icon"><Icon name="shield" size={22} /></span><span><strong>CyberSafe</strong><small>South Africa</small></span></button>
+      <nav className="side-nav" aria-label="Dashboard navigation">{links.map(([label, route, icon]) => <button key={label} className={`side-link ${route === "/help" ? "active" : ""}`} type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={20} /><span>{label}</span></button>)}</nav>
+      <LogoutButton />
+      <div className="emergency-card"><span className="emergency-icon"><Icon name="phone" size={18} /></span><span><strong>EMERGENCY</strong><small>Victim of a scam or cyber hack?</small><b>Use this hub for help</b></span></div>
   </aside>;
 }
 

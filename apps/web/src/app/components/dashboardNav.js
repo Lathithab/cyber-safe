@@ -1,5 +1,4 @@
 export const DASHBOARD_NAV = [
-  ["Login", "/login", "user"],
   ["Community Feed", "/feed", "feed"],
   ["Learn Security", "/learn", "learn"],
   ["Scam Library", "/library", "library"],

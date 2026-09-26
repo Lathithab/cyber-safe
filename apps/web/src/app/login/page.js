@@ -1,5 +1,6 @@
 "use client";
-
+import Image from "next/image";
+import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -11,7 +12,6 @@ function ShieldIcon({ size = 22, color = "currentColor" }) {
     </svg>
   );
 }
-
 function EyeIcon({ size = 19 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -46,14 +46,50 @@ function MicrosoftIcon() {
 export default function LoginPage() {
   const router = useRouter();
   const [mode, setMode] = useState("login");
-  const [email, setEmail] = useState("sipho.ndlovu@gmail.com");
+  const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    // UI-only for now: no auth backend is wired up yet.
-    router.push("/feed");
+    setErrorMessage("");
+    setSuccessMessage("");
+    setIsSubmitting(true);
+
+    if (!isSupabaseConfigured || !supabase) {
+      setErrorMessage("Authentication is not configured.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (mode === "register") {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { username, full_name: fullName } },
+      });
+      if (error) {
+        setErrorMessage(error.message);
+        setIsSubmitting(false);
+        return;
+      }
+      if (data.session) router.push("/feed");
+      else setSuccessMessage("Account created. Please check your email to confirm your account.");
+    } else {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        setErrorMessage(error.message);
+        setIsSubmitting(false);
+        return;
+      }
+      if (data.user) router.push("/feed");
+    }
+    setIsSubmitting(false);
   }
 
   return (
@@ -61,7 +97,7 @@ export default function LoginPage() {
       <section className="login-hero">
         <div className="hero-scrim" />
         <div className="hero-content">
-          <div className="hero-brand"><span className="hero-brand-icon"><ShieldIcon size={16} color="#fff" /></span><strong>CyberSafe SA</strong></div>
+          <div className="hero-brand"><span className="hero-brand-icon"><Image src="/c3sa-logo.jpeg" alt="C3SA logo" width={48} height={48} /></span><strong>CyberSafe SA</strong></div>
 
           <div className="hero-copy">
             <h1>Empowering South African Communities to Stay Safe Online.</h1>
@@ -85,7 +121,16 @@ export default function LoginPage() {
             <button type="button" className={mode === "register" ? "selected" : ""} onClick={() => setMode("register")}>Register</button>
           </div>
 
+          {errorMessage && <p role="alert" style={{ color: "#d64545", marginBottom: "16px" }}>{errorMessage}</p>}
+          {successMessage && <p role="status" style={{ color: "#159f76", marginBottom: "16px" }}>{successMessage}</p>}
+
           <form onSubmit={handleSubmit}>
+            {mode === "register" && <>
+              <label className="field-label" htmlFor="fullName">Full Name</label>
+              <input id="fullName" type="text" value={fullName} onChange={(event) => setFullName(event.target.value)} required autoComplete="name" />
+              <label className="field-label" htmlFor="username">Username</label>
+              <input id="username" type="text" value={username} onChange={(event) => setUsername(event.target.value)} required autoComplete="username" />
+            </>}
             <label className="field-label" htmlFor="email">Email Address</label>
             <input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
 
@@ -95,7 +140,7 @@ export default function LoginPage() {
               <button type="button" className="toggle-visibility" onClick={() => setShowPassword((v) => !v)} aria-label="Toggle password visibility"><EyeIcon /></button>
             </div>
 
-            <button type="submit" className="submit-button">{mode === "login" ? "Sign In" : "Create Account"}</button>
+            <button type="submit" className="submit-button" disabled={isSubmitting}>{isSubmitting ? "Please wait…" : mode === "login" ? "Sign In" : "Create Account"}</button>
           </form>
 
           <div className="divider"><span>or connect with</span></div>
@@ -103,7 +148,7 @@ export default function LoginPage() {
             <button type="button" className="oauth-button"><GoogleIcon />Google</button>
             <button type="button" className="oauth-button"><MicrosoftIcon />Microsoft</button>
           </div>
-          <p className="demo-note">This screen is a front-end preview only — no account is created or verified yet.</p>
+          <p className="demo-note">Email and password authentication is active. Google and Microsoft sign-in are not connected yet.</p>
         </div>
       </section>
 
@@ -116,10 +161,10 @@ export default function LoginPage() {
           background-size: cover; background-position: center;
         }
         .hero-scrim { display: none; }
-        .hero-content { position: relative; z-index: 1; display: flex; flex-direction: column; }
-        .hero-brand { display: flex; align-items: center; gap: 10px; } .hero-brand-icon { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 7px; background: rgba(235,99,15,.35); border: 1px solid rgba(255,255,255,.25); } .hero-brand strong { font-size: 15px; letter-spacing: -.2px; }
-        .hero-copy { margin-top: 18px; } .hero-copy h1 { margin: 0 0 12px; font-size: 24px; line-height: 1.18; letter-spacing: -0.6px; } .hero-copy p { margin: 0; max-width: 460px; color: rgba(255,255,255,.88); font-size: 13.5px; line-height: 1.55; }
-        .hero-trust { margin-top: 20px; } .hero-trust small { display: block; margin-bottom: 10px; color: rgba(255,255,255,.72); font-size: 10.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; } .trust-row { display: flex; flex-wrap: wrap; gap: 12px; font-size: 11px; font-weight: 700; }
+        .hero-content { position: relative; z-index: 1; display: flex; flex-direction: column; height: 100%; }
+        .hero-brand { display: flex; align-items: center; gap: 12px; } .hero-brand-icon { display: grid; place-items: center; flex: 0 0 48px; width: 48px; height: 48px; overflow: hidden; border-radius: 9px; background: #fff; } .hero-brand-icon img { display: block; width: 100%; height: 100%; object-fit: contain; } .hero-brand strong { font-family: "Syne", Arial, sans-serif; font-size: 19px; letter-spacing: -.2px; }
+        .hero-copy { margin-top: auto; padding-bottom: 34px; } .hero-copy h1 { margin: 0 0 18px; font-family: "Syne", Arial, sans-serif; font-size: clamp(28px, 3.1vw, 38px); line-height: 1.12; letter-spacing: -1.1px; } .hero-copy p { margin: 0; max-width: 460px; color: rgba(255,255,255,.88); font-size: 15.5px; line-height: 1.55; }
+        .hero-trust small { display: block; margin-bottom: 12px; color: rgba(255,255,255,.72); font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; } .trust-row { display: flex; flex-wrap: wrap; gap: 18px; font-size: 14px; font-weight: 700; }
 
         .login-panel { flex: 1; display: grid; place-items: center; padding: 28px 16px 40px; }
         .login-card { width: 100%; max-width: 420px; padding: 26px 22px; border: 1px solid #dce5ef; border-radius: 13px; background: #fff; box-shadow: 0 20px 50px rgba(15, 30, 60, .08); }
@@ -145,4 +190,4 @@ export default function LoginPage() {
       `}</style>
     </main>
   );
-} 
+}

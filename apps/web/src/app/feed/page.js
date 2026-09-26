@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
 import DashboardNavIcon from "../components/DashboardNavIcon";
+import LogoutButton from "../components/LogoutButton";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
 import { SEED_POSTS, loadStoredComments, appendStoredComment } from "./posts";
 
@@ -59,6 +60,7 @@ export default function FeedPage() {
   const [draft, setDraft] = useState("");
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [pendingImage, setPendingImage] = useState(null);
+  const [isPosting, setIsPosting] = useState(false);
   const [toast, setToast] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const toastTimer = useRef(null);
@@ -77,6 +79,16 @@ export default function FeedPage() {
   }
 
   useEffect(() => {
+    try {
+      const pendingSubmissionMessage = sessionStorage.getItem("cybersafePendingSubmission");
+      if (pendingSubmissionMessage) {
+        showToast(pendingSubmissionMessage);
+        sessionStorage.removeItem("cybersafePendingSubmission");
+      }
+    } catch {
+      // The feed can load normally if session storage is unavailable.
+    }
+
     async function loadPosts() {
       const withComments = (list) =>
         list.map((post) => {
@@ -213,13 +225,37 @@ export default function FeedPage() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-  function submitPost(event) {
+  async function submitPost(event) {
     event.preventDefault();
     const trimmed = draft.trim();
     if (!trimmed && !pendingImage) {
       showToast("Write something or attach an image first");
       return;
     }
+
+    if (isSupabaseConfigured && supabase) {
+      setIsPosting(true);
+      const { error } = await supabase.from("posts").insert({
+        author_id: null,
+        display_name: CURRENT_USER.name,
+        description: trimmed || "(shared an image)",
+        issues: category === "General Tip" ? [] : [category],
+        image_url: pendingImage,
+        status: "pending",
+      });
+      setIsPosting(false);
+      if (error) {
+        console.error("Could not submit community post for review:", error);
+        showToast("Could not submit. Please try again.");
+        return;
+      }
+      setDraft("");
+      setCategory(CATEGORIES[0]);
+      removeImageAttachment();
+      showToast("Submitted for moderator review");
+      return;
+    }
+
     const newPost = {
       id: `report-${Date.now()}`,
       name: "You",
@@ -266,7 +302,8 @@ export default function FeedPage() {
         <nav className="side-nav" aria-label="Dashboard navigation">
           {links.map(([label, route, icon]) => <button key={label} className={`side-link ${route === "/feed" ? "active" : ""}`} type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={19} /><span>{label}</span></button>)}
         </nav>
-        <button className="emergency-card" type="button" onClick={() => router.push("/help")}><span className="emergency-icon"><Icon name="phone" size={18} /></span><span><strong>EMERGENCY</strong><small>Victim of a scam or cyber hack?</small><b>Get Help Now</b></span></button>
+        <LogoutButton />
+        <button className="emergency-card" type="button" onClick={() => router.push("/help")}><span className="emergency-icon"><Icon name="phone" size={23} /></span><span><strong>EMERGENCY</strong><small>Victim of a scam or cyber hack?</small><b>Get Help Now</b></span></button>
       </aside>
 
       <nav className="bottom-nav" aria-label="Primary navigation">
@@ -332,7 +369,7 @@ export default function FeedPage() {
                   </label>
                   <label className="tool category-picker"><Icon name="tag" size={14} /><select value={category} onChange={(event) => setCategory(event.target.value)} aria-label="Post category">{CATEGORIES.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
                 </div>
-                <button type="submit" className="post-button">Post Safety Alert</button>
+                <button type="submit" className="post-button" disabled={isPosting}>{isPosting ? "Submitting…" : "Post Safety Alert"}</button>
               </div>
             </form>
 

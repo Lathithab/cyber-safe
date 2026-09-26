@@ -171,10 +171,10 @@ export default function QuizPage() {
 
   <button
     type="button"
-    onClick={() => router.push("/")}
+    onClick={() => router.push("/learn")}
     style={styles.homeButton}
   >
-    Back to Home
+    Back to Learn
   </button>
 </div>
         </div>

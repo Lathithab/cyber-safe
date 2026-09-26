@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import DashboardNavIcon from "../components/DashboardNavIcon";
+import LogoutButton from "../components/LogoutButton";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
 
 function Icon({ name, size = 22 }) {
@@ -85,6 +86,7 @@ export default function NotificationsPage() {
         <nav className="side-nav" aria-label="Dashboard navigation">
           {links.map(([label, route, icon]) => <button key={label} className={`side-link ${route === "/notification" ? "active" : ""}`} type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={19} /><span>{label}</span></button>)}
         </nav>
+        <LogoutButton />
         <button className="emergency-card" type="button" onClick={() => router.push("/help")}><span className="emergency-icon"><Icon name="phone" size={18} /></span><span><strong>EMERGENCY</strong><small>Victim of a scam or cyber hack?</small><b>Get Help Now</b></span></button>
       </aside>
 

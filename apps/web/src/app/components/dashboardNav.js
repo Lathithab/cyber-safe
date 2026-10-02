@@ -5,7 +5,5 @@ export const DASHBOARD_NAV = [
   ["Report Incident", "/postReport", "report"],
   ["Get Help", "/help", "help"],
   ["CyberBot AI", "/cyberbot", "chat"],
-  ["Notifications", "/notification", "bell"],
   ["User Profile", "/profiles", "user"],
-  ["Settings", "/settings", "gear"],
 ];

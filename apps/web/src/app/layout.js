@@ -15,7 +15,7 @@ export const metadata = {
   title: "CyberSafe",
   description: "Cyber safety guidance for everyday life",
   manifest: "/manifest.json",
-  themeColor: "#30c9e8",
+  themeColor: "#eb630f",
 };
 
 export default function RootLayout({ children }) {

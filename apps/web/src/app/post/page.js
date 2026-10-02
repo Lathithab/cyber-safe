@@ -163,14 +163,14 @@ function PostPage() {
 
         body {
           font-family: 'DM Sans', sans-serif;
-          background: #f5f7fa;
+          background: #f7f4ef;
           min-height: 100vh;
           color: #0e1b24;
         }
 
         .page {
           min-height: 100vh;
-          background: #f5f7fa;
+          background: #f7f4ef;
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -180,7 +180,7 @@ function PostPage() {
           width: 100%;
           max-width: 500px;
           min-height: 100vh;
-          background: #f5f7fa;
+          background: #f7f4ef;
           position: relative;
           padding-bottom: 88px;
         }
@@ -190,7 +190,7 @@ function PostPage() {
           position: sticky;
           top: 0;
           z-index: 10;
-          background: #30C9E8;
+          background: #eb630f;
           color: #fff;
           padding: 12px 14px;
           display: flex;
@@ -241,7 +241,7 @@ function PostPage() {
           width: 48px;
           height: 48px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #30C9E8 0%, #7856ff 100%);
+          background: linear-gradient(135deg, #eb630f 0%, #00243a 100%);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -292,7 +292,7 @@ function PostPage() {
           display: flex;
           align-items: center;
           gap: 3px;
-          color: #1d9bf0;
+          color: #eb630f;
           font-size: 13px;
           font-weight: 500;
         }
@@ -311,7 +311,7 @@ function PostPage() {
           justify-content: center;
           flex: none;
         }
-        .more-btn:hover { background: rgba(48,201,232,0.1); color: #1d9bf0; }
+        .more-btn:hover { background: rgba(235, 99, 15, 0.1); color: #eb630f; }
 
         /* Post body */
         .post-content {
@@ -367,7 +367,7 @@ function PostPage() {
         }
 
         .action-btn:hover {
-          color: #1d9bf0;
+          color: #eb630f;
           background: rgba(29,155,240,0.08);
         }
 
@@ -399,7 +399,7 @@ function PostPage() {
           width: 34px;
           height: 34px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #7856ff 0%, #30C9E8 100%);
+          background: linear-gradient(135deg, #00243a 0%, #eb630f 100%);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -473,7 +473,7 @@ function PostPage() {
           width: 34px;
           height: 34px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #7856ff 0%, #30C9E8 100%);
+          background: linear-gradient(135deg, #00243a 0%, #eb630f 100%);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -499,7 +499,7 @@ function PostPage() {
         .composer-input::placeholder { color: #9aa7b0; }
 
         .composer-submit {
-          background: #30C9E8;
+          background: #eb630f;
           border: none;
           color: #fff;
           padding: 9px 16px;
@@ -533,7 +533,7 @@ function PostPage() {
         }
 
         .empty-btn {
-          background: #30C9E8;
+          background: #eb630f;
           border: none;
           color: #fff;
           padding: 11px 22px;

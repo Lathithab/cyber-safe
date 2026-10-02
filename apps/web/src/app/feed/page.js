@@ -6,6 +6,7 @@ import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
 import DashboardNavIcon from "../components/DashboardNavIcon";
 import LogoutButton from "../components/LogoutButton";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
+import PlatformSearch from "../components/PlatformSearch";
 import { SEED_POSTS, loadStoredComments, appendStoredComment } from "./posts";
 
 function Icon({ name, size = 22 }) {
@@ -235,8 +236,16 @@ export default function FeedPage() {
 
     if (isSupabaseConfigured && supabase) {
       setIsPosting(true);
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) {
+        console.error("Could not verify the post author:", userError);
+        setIsPosting(false);
+        showToast("Could not verify your account. Please try again.");
+        return;
+      }
+
       const { error } = await supabase.from("posts").insert({
-        author_id: null,
+        author_id: user?.id || null,
         display_name: CURRENT_USER.name,
         description: trimmed || "(shared an image)",
         issues: category === "General Tip" ? [] : [category],
@@ -292,8 +301,8 @@ export default function FeedPage() {
           <span className="mobile-topbar-icon"><Icon name="shield" size={18} /></span>
           <strong>CyberSafe</strong>
         </button>
-        <button className="mobile-topbar-bell" type="button" onClick={() => router.push("/notification")} aria-label="Notifications">
-          <DashboardNavIcon name="bell" size={21} />
+        <button className="mobile-topbar-bell" type="button" onClick={() => router.push("/profiles")} aria-label="User Profile">
+          <DashboardNavIcon name="user" size={21} />
         </button>
       </header>
 
@@ -303,7 +312,6 @@ export default function FeedPage() {
           {links.map(([label, route, icon]) => <button key={label} className={`side-link ${route === "/feed" ? "active" : ""}`} type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={19} /><span>{label}</span></button>)}
         </nav>
         <LogoutButton />
-        <button className="emergency-card" type="button" onClick={() => router.push("/help")}><span className="emergency-icon"><Icon name="phone" size={23} /></span><span><strong>EMERGENCY</strong><small>Victim of a scam or cyber hack?</small><b>Get Help Now</b></span></button>
       </aside>
 
       <nav className="bottom-nav" aria-label="Primary navigation">
@@ -341,7 +349,7 @@ export default function FeedPage() {
             <p>Stay updated with the latest scams, alerts, and cybersecurity advice across South Africa.</p>
           </div>
           <div className="header-actions">
-            <label className="platform-search"><Icon name="search" size={18} /><input aria-label="Search platform" placeholder="Search platform..." /></label>
+            <PlatformSearch />
             <button className="help-button" type="button" onClick={() => router.push("/help")}>Get Help Now</button>
           </div>
         </header>
@@ -486,7 +494,7 @@ export default function FeedPage() {
            default mobile layout. Tablet/desktop are added on top via
            min-width queries further down.
         ============================================================ */
-        .feed-dashboard { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr); background: #f6f9fd; color: #00243A; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .feed-dashboard { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr); background: #f7f4ef; color: #00243A; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
 
         .sidebar { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 14px 6px; border-right: 1px solid #0d3557; background: #00243A; overflow-y: auto; }
         .brand { display: flex; align-items: center; gap: 10px; padding: 0; border: 0; background: transparent; color: #fff; cursor: pointer; text-align: left; }
@@ -499,20 +507,20 @@ export default function FeedPage() {
         .side-link.active { background: rgba(235,99,15,.25); color: #fff; font-weight: 800; }
         .side-link.active svg { color: #EB630F; }
 
-        .side-divider { width: 100%; height: 1px; margin: 6px 0; background: #e2e9f2; }
+        .side-divider { width: 100%; height: 1px; margin: 6px 0; background: #e4ddd4; }
         .footer-links { display: none; }
         .emergency-card { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; margin-top: 14px; padding: 10px 4px; border: 2px solid #ff5a5f; border-radius: 10px; background: #fff4f4; color: #ff5158; cursor: pointer; font: inherit; text-align: center; }
         .emergency-card span:not(.emergency-icon) { display: none; }
         .emergency-card strong, .emergency-card small, .emergency-card b { display: block; }
         .user-chip { display: flex; align-items: center; justify-content: center; width: 100%; margin-top: 10px; padding: 6px; border: 0; border-radius: 7px; background: transparent; cursor: pointer; font: inherit; }
-        .user-chip:hover { background: #f6f9fd; }
+        .user-chip:hover { background: #f7f4ef; }
         .chip-avatar { display: grid; place-items: center; width: 26px; height: 26px; flex: 0 0 auto; border-radius: 50%; background: #FDEAE0; color: #C24F0C; font-weight: 800; font-size: 10px; }
         .user-chip span:not(.chip-avatar) { display: none; }
         .user-chip strong { display: block; font-size: 11px; }
         .user-chip small { display: block; color: #8996a8; font-size: 11px; font-weight: 600; }
 
         .dashboard-content { min-width: 0; padding: 18px 12px 28px; }
-        .page-header { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding-bottom: 18px; border-bottom: 1px solid #dce5ef; }
+        .page-header { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding-bottom: 18px; border-bottom: 1px solid #e4ddd4; }
         .page-intro { min-width: 0; }
         .title-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         h1, h2, strong { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
@@ -521,29 +529,29 @@ export default function FeedPage() {
         .page-intro p { max-width: 100%; margin: 8px 0 0; color: #5b6980; font-size: 13px; line-height: 1.4; }
 
         .header-actions { display: flex; flex-direction: column; align-items: stretch; gap: 8px; width: 100%; }
-        .platform-search { display: flex; align-items: center; gap: 8px; width: 100%; padding: 0 14px; border: 1px solid #dce5ef; border-radius: 9px; background: #fff; color: #536179; }
+        .platform-search { display: flex; align-items: center; gap: 8px; width: 100%; padding: 0 14px; border: 1px solid #e4ddd4; border-radius: 9px; background: #fff; color: #536179; }
         .platform-search input { width: 100%; height: 44px; border: 0; outline: 0; color: #26324a; font: inherit; font-size: 13px; }
         .help-button { border: 0; border-radius: 9px; background: #EB630F; color: #00243A; cursor: pointer; font: inherit; font-size: 13px; font-weight: 800; min-height: 44px; padding: 0 20px; white-space: nowrap; }
 
         .content-grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin: 18px auto 0; align-items: start; max-width: 560px; width: 100%; }
         .feed-column { display: grid; gap: 12px; }
-        .composer { padding: 14px; border: 1px solid #dce5ef; border-radius: 12px; background: #fff; box-shadow: 0 8px 24px rgba(36, 56, 87, .035); }
+        .composer { padding: 14px; border: 1px solid #e4ddd4; border-radius: 12px; background: #fff; box-shadow: 0 8px 24px rgba(36, 56, 87, .035); }
         .composer-top { display: flex; align-items: center; gap: 10px; }
         .composer-avatar { display: grid; place-items: center; width: 34px; height: 34px; flex: 0 0 auto; border-radius: 50%; background: #FDEAE0; color: #C24F0C; font-weight: 800; }
         .composer-top input { flex: 1; border: 0; outline: 0; background: transparent; color: #26324a; font: inherit; font-size: 14px; min-height: 34px; }
 
-        .composer-image-preview { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding: 6px; border: 1px solid #eef2f7; border-radius: 8px; background: #f8fafc; }
+        .composer-image-preview { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding: 6px; border: 1px solid #eee8e0; border-radius: 8px; background: #fbf9f5; }
         .composer-image-preview img { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; }
-        .composer-image-preview button { margin-left: auto; border: 1px solid #dce5ef; background: #fff; border-radius: 6px; color: #536179; cursor: pointer; padding: 6px; display: grid; place-items: center; min-width: 32px; min-height: 32px; }
+        .composer-image-preview button { margin-left: auto; border: 1px solid #e4ddd4; background: #fff; border-radius: 6px; color: #536179; cursor: pointer; padding: 6px; display: grid; place-items: center; min-width: 32px; min-height: 32px; }
 
-        .composer-bottom { display: flex; flex-direction: column; align-items: stretch; gap: 12px; margin-top: 14px; padding-top: 14px; border-top: 1px solid #eef2f7; }
+        .composer-bottom { display: flex; flex-direction: column; align-items: stretch; gap: 12px; margin-top: 14px; padding-top: 14px; border-top: 1px solid #eee8e0; }
         .composer-tools { display: flex; gap: 16px; }
         .tool { display: flex; align-items: center; gap: 6px; color: #536179; font-size: 12px; font-weight: 700; cursor: pointer; }
         .category-picker select { border: 0; background: transparent; color: #536179; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
         .post-button { border: 0; border-radius: 9px; padding: 12px 16px; background: #EB630F; color: #00243A; cursor: pointer; font: inherit; font-size: 13px; font-weight: 800; width: 100%; min-height: 42px; }
 
         .loading-state { padding: 22px; text-align: center; color: #65738a; }
-        .post-card { padding: 15px; border: 1px solid #dce5ef; border-radius: 12px; background: #fff; box-shadow: 0 8px 24px rgba(36, 56, 87, .035); }
+        .post-card { padding: 15px; border: 1px solid #e4ddd4; border-radius: 12px; background: #fff; box-shadow: 0 8px 24px rgba(36, 56, 87, .035); }
         .post-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
         .post-user { display: flex; gap: 9px; align-items: center; min-width: 0; }
         .avatar-img { width: 36px; height: 36px; flex: 0 0 auto; border-radius: 50%; object-fit: cover; }
@@ -555,9 +563,9 @@ export default function FeedPage() {
 
         .menu-wrap, .share-wrap { position: relative; }
         .menu-button { border: 0; background: transparent; color: #8996a8; cursor: pointer; font-size: 16px; font-weight: 800; padding: 6px; min-width: 32px; min-height: 32px; }
-        .menu-popup { position: absolute; z-index: 3; top: 30px; right: 0; min-width: 160px; padding: 4px; border: 1px solid #dce5ef; border-radius: 8px; background: #fff; box-shadow: 0 8px 20px rgba(14,27,36,.16); display: grid; }
+        .menu-popup { position: absolute; z-index: 3; top: 30px; right: 0; min-width: 160px; padding: 4px; border: 1px solid #e4ddd4; border-radius: 8px; background: #fff; box-shadow: 0 8px 20px rgba(14,27,36,.16); display: grid; }
         .menu-popup button { width: 100%; padding: 10px; border: 0; border-radius: 5px; background: transparent; color: #26324a; cursor: pointer; font: inherit; font-size: 12px; font-weight: 700; text-align: left; }
-        .menu-popup button:hover { background: #f6f9fd; }
+        .menu-popup button:hover { background: #f7f4ef; }
         .menu-popup button.delete-button { color: #d92d20; }
         .share-popup { left: 0; right: auto; top: auto; bottom: 34px; }
 
@@ -565,24 +573,24 @@ export default function FeedPage() {
         .post-meta { display: flex; align-items: center; gap: 5px; margin: 8px 0 0; color: #65738a; font-size: 12px; font-weight: 600; }
         .post-image { width: 100%; margin-top: 12px; border-radius: 9px; object-fit: cover; max-height: 260px; }
 
-        .post-actions { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; padding-top: 14px; border-top: 1px solid #eef2f7; }
+        .post-actions { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; padding-top: 14px; border-top: 1px solid #eee8e0; }
         .left-actions { display: flex; gap: 14px; }
         .action-button { display: flex; align-items: center; gap: 5px; border: 0; background: transparent; color: #536179; cursor: pointer; font: inherit; font-size: 12px; font-weight: 700; min-height: 32px; }
         .action-button.liked { color: #C24F0C; }
         .save-button { display: flex; align-items: center; gap: 5px; border: 0; background: transparent; color: #536179; cursor: pointer; font: inherit; font-size: 12px; font-weight: 700; min-height: 32px; }
         .save-button.saved { color: #00243A; }
 
-        .comments-panel { margin-top: 14px; padding-top: 14px; border-top: 1px solid #eef2f7; }
+        .comments-panel { margin-top: 14px; padding-top: 14px; border-top: 1px solid #eee8e0; }
         .comments-list { display: grid; gap: 11px; margin-bottom: 12px; }
         .no-comments { margin: 0 0 12px; color: #8996a8; font-size: 12px; }
         .comment-item { display: flex; gap: 8px; }
         .comment-avatar { display: grid; place-items: center; width: 26px; height: 26px; flex: 0 0 auto; border-radius: 50%; background: #FDEAE0; color: #C24F0C; font-size: 11px; font-weight: 800; }
-        .comment-bubble { flex: 1; padding: 9px 11px; border-radius: 9px; background: #f6f9fd; }
+        .comment-bubble { flex: 1; padding: 9px 11px; border-radius: 9px; background: #f7f4ef; }
         .c-name { font-size: 12px; font-weight: 800; color: #00243A; }
         .c-time { margin-left: 6px; font-size: 11px; color: #8996a8; font-weight: 600; }
         .comment-bubble p { margin: 3px 0 0; color: #26324a; font-size: 13px; line-height: 1.45; }
         .comment-input-row { display: flex; align-items: center; gap: 8px; }
-        .comment-input-row input { flex: 1; min-height: 40px; border: 1px solid #dce5ef; border-radius: 999px; padding: 0 14px; font: inherit; font-size: 13px; outline: none; }
+        .comment-input-row input { flex: 1; min-height: 40px; border: 1px solid #e4ddd4; border-radius: 999px; padding: 0 14px; font: inherit; font-size: 13px; outline: none; }
         .comment-input-row input:focus { border-color: #EB630F; box-shadow: 0 0 0 3px #FDEAE0; }
         .comment-input-row button { border: 0; background: #EB630F; color: #00243A; font-weight: 800; font-size: 12px; padding: 0 14px; min-height: 40px; border-radius: 999px; cursor: pointer; flex: 0 0 auto; }
 
@@ -626,9 +634,9 @@ export default function FeedPage() {
         .nav-menu-sheet { width: 100%; max-height: 70vh; overflow-y: auto; background: #fff; border-radius: 16px 16px 0 0; padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px)); }
         .nav-menu-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
         .nav-menu-header strong { font-size: 15px; }
-        .nav-menu-close { border: 0; background: #f1f4f9; color: #536179; border-radius: 999px; width: 32px; height: 32px; display: grid; place-items: center; cursor: pointer; }
+        .nav-menu-close { border: 0; background: #f3eee8; color: #536179; border-radius: 999px; width: 32px; height: 32px; display: grid; place-items: center; cursor: pointer; }
         .nav-menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .nav-menu-item { display: flex; align-items: center; gap: 10px; padding: 13px 12px; border: 1px solid #eef2f7; border-radius: 10px; background: #f8fafc; color: #26324a; cursor: pointer; font: inherit; font-size: 13px; font-weight: 700; text-align: left; }
+        .nav-menu-item { display: flex; align-items: center; gap: 10px; padding: 13px 12px; border: 1px solid #eee8e0; border-radius: 10px; background: #fbf9f5; color: #26324a; cursor: pointer; font: inherit; font-size: 13px; font-weight: 700; text-align: left; }
         .nav-menu-icon { display: grid; place-items: center; width: 30px; height: 30px; flex: 0 0 auto; border-radius: 8px; background: #FDEAE0; color: #EB630F; }
 
         .dashboard-content { padding-bottom: 78px; }

@@ -25,8 +25,8 @@ body {
   max-width: 598px;
   margin: 0 auto;
   min-height: 100vh;
-  border-left: 1px solid #e5e7eb;
-  border-right: 1px solid #e5e7eb;
+  border-left: 1px solid #e5ddd4;
+  border-right: 1px solid #e5ddd4;
 }
 
 /* Shared topbar */
@@ -35,7 +35,7 @@ body {
   top: 0;
   z-index: 10;
   background: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5ddd4;
   padding: 14px 16px;
   display: flex;
   align-items: center;
@@ -62,7 +62,7 @@ body {
   width: 100%;
   padding: 10px 14px;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e5ddd4;
   font-family: "DM Sans", sans-serif;
   font-size: 15px;
   color: #000;
@@ -70,12 +70,12 @@ body {
   transition: border-color 0.15s;
 }
 .field:focus {
-  border-color: #1d9bf0;
+  border-color: #eb630f;
 }
 
 /* Shared button */
 .btn-primary {
-  background: #1d9bf0;
+  background: #eb630f;
   color: #fff;
   border: none;
   padding: 10px 20px;
@@ -87,7 +87,7 @@ body {
   transition: background 0.15s;
 }
 .btn-primary:hover {
-  background: #1a8cd8;
+  background: #c24f0c;
 }
 
 /* Shared username display */
@@ -95,25 +95,104 @@ body {
   font-family: "Syne", sans-serif;
   font-weight: 700;
   font-size: 15px;
-  color: #1d9bf0;
+  color: #eb630f;
 }
 
-/* Use the supplied C3SA mark in the shared CyberSafe brand lockup. */
+/* Shared dashboard sidebar: one brand, palette, and nav rhythm on every route. */
+.sidebar {
+  background: #00243a !important;
+  border-color: #0d3557 !important;
+  color: #fff;
+}
+
+.sidebar .brand {
+  color: #fff !important;
+  gap: 12px !important;
+  flex: 0 0 auto;
+}
+
 .sidebar .brand .brand-icon {
-  flex: 0 0 76px;
-  width: 76px !important;
-  height: 76px !important;
+  flex: 0 0 92px !important;
+  width: 92px !important;
+  height: 92px !important;
   border-radius: 0 !important;
-  background: url("/c3sa-logo.jpeg") center / contain no-repeat !important;
+  background: #fff url("/c3sa-logo.jpeg") center / contain no-repeat !important;
 }
 
 .sidebar .brand .brand-icon svg {
-  display: none;
+  display: none !important;
+}
+
+.sidebar .brand strong {
+  color: #fff !important;
+}
+
+.sidebar .brand small {
+  color: #eb630f !important;
+}
+
+.sidebar .side-nav {
+  display: grid !important;
+  gap: 10px !important;
+  margin-top: 38px !important;
+  width: 100%;
+}
+
+.sidebar .side-link {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 14px !important;
+  width: 100% !important;
+  min-width: 0;
+  min-height: 58px !important;
+  padding: 12px 14px !important;
+  border: 0 !important;
+  border-radius: 16px !important;
+  background: transparent !important;
+  color: #a9bac5 !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  line-height: 1.25 !important;
+  text-align: left;
+  text-decoration: none;
+  white-space: nowrap;
+  transform: none !important;
+  transition: background-color .15s ease, color .15s ease;
+}
+
+.sidebar .side-link:hover {
+  background: rgba(235, 99, 15, .12) !important;
+  color: #fff !important;
+}
+
+.sidebar .side-link.active {
+  background: rgba(235, 99, 15, .25) !important;
+  color: #fff !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  transform: none !important;
+}
+
+.sidebar .side-link svg {
+  display: block;
+  flex: 0 0 24px !important;
+  width: 24px !important;
+  height: 24px !important;
+  color: currentColor;
+}
+
+.sidebar .side-link.active svg {
+  color: #eb630f !important;
+}
+
+.sidebar .platform-admin-nav {
+  border-color: rgba(255, 255, 255, .22) !important;
 }
 
 /* Shared banner */
 .banner {
-  background: #1d9bf0;
+  background: #eb630f;
   padding: 20px;
   color: white;
   font-family: "Syne", sans-serif;
@@ -133,18 +212,14 @@ body {
   .sidebar {
     display: flex !important;
     flex-direction: column !important;
+    align-items: stretch !important;
     padding: 22px 22px 20px !important;
     overflow-y: auto !important;
   }
 
-  .brand {
-    gap: 11px !important;
-  }
-
-  .brand-icon {
-    width: 49px !important;
-    height: 49px !important;
-    border-radius: 13px !important;
+  .sidebar .brand .brand-icon {
+    width: 92px !important;
+    height: 92px !important;
   }
 
   .brand strong {
@@ -156,26 +231,32 @@ body {
     font-size: 13px !important;
   }
 
-  .side-nav {
-    gap: 6px !important;
-    margin-top: 30px !important;
+  .sidebar .side-nav {
+    gap: 10px !important;
+    margin-top: 38px !important;
   }
 
   .platform-admin-nav {
     margin-top: 14px;
     padding-top: 14px;
-    border-top: 1px solid #e2e9f2;
+    border-top: 1px solid #e4ddd4;
   }
 
-  .side-link {
-    gap: 13px !important;
-    min-height: 46px !important;
-    padding: 11px 13px !important;
-    border-radius: 12px !important;
-    font-size: 17px !important;
+  .sidebar .side-link {
+    gap: 14px !important;
+    min-height: 58px !important;
+    padding: 12px 14px !important;
+    border-radius: 16px !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
   }
 
-  .side-link svg {
+  .sidebar .side-link.active {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+  }
+
+  .sidebar .side-link svg {
     width: 22px !important;
     height: 22px !important;
   }
@@ -186,25 +267,32 @@ body {
     gap: 10px !important;
     padding: 14px !important;
     border-radius: 16px !important;
+    border-color: #e68178 !important;
+    background: #fff7f2 !important;
+    color: #bd3f3f !important;
   }
 
   .emergency-card strong {
     font-size: 15px !important;
+    color: #bd3f3f !important;
   }
 
   .emergency-card small {
     margin: 7px 0 4px !important;
     font-size: 12px !important;
     line-height: 1.25 !important;
+    color: #536179 !important;
   }
 
   .emergency-card b {
     font-size: 13px !important;
+    color: #c24f0c !important;
   }
 
   .emergency-icon svg {
     width: 20px !important;
     height: 20px !important;
+    color: #bd3f3f !important;
   }
 
   aside.sidebar > button.sidebar-logout {
@@ -216,10 +304,10 @@ body {
     min-height: 46px;
     margin-top: auto;
     padding: 11px 13px;
-    border: 1px solid #ffb3b7;
+    border: 1px solid rgba(235, 99, 15, .4);
     border-radius: 12px;
-    background: #fff7f7;
-    color: #d64545;
+    background: #fff5ed;
+    color: #a94213;
     cursor: pointer;
     font: inherit;
     font-size: 14px;
@@ -229,9 +317,9 @@ body {
   }
 
   aside.sidebar > button.sidebar-logout:hover {
-    border-color: #ff858b;
-    background: #fff0f1;
-    color: #d64545;
+    border-color: #eb630f;
+    background: #ffebdd;
+    color: #8c3610;
   }
 
   .sidebar-logout svg {
@@ -258,15 +346,19 @@ body {
     padding-block: 14px !important;
   }
 
-  .side-nav {
-    gap: 2px !important;
-    margin-top: 15px !important;
+  .sidebar .side-nav {
+    gap: 6px !important;
+    margin-top: 22px !important;
   }
 
-  .side-link {
-    min-height: 38px !important;
-    padding: 8px 10px !important;
-    font-size: 15px !important;
+  .sidebar .side-link {
+    min-height: 48px !important;
+    padding: 10px 12px !important;
+    font-size: 16px !important;
+  }
+
+  .sidebar .side-link.active {
+    font-size: 16px !important;
   }
 
   .emergency-card {
@@ -292,10 +384,10 @@ body {
   gap: 8px;
   min-height: 46px;
   padding: 0 17px;
-  border: 1px solid #ffb3b7;
+  border: 1px solid rgba(235, 99, 15, .4);
   border-radius: 13px;
-  background: #fff7f7;
-  color: #d64545;
+  background: #fff5ed;
+  color: #a94213;
   cursor: pointer;
   font: inherit;
   font-size: 14px;
@@ -303,7 +395,9 @@ body {
 }
 
 .profile-logout-button:hover {
-  background: #fff0f1;
+  border-color: #eb630f;
+  background: #ffebdd;
+  color: #8c3610;
 }
 
 .profile-logout-button:disabled {

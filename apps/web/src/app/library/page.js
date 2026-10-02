@@ -35,7 +35,7 @@ function Icon({ name, size = 22 }) {
 
 function Sidebar({ router }) {
   const links = DASHBOARD_NAV;
-  return <aside className="sidebar"><button className="brand" type="button" onClick={() => router.push("/")}><span className="brand-icon"><Icon name="shield" size={22} /></span><span><strong>CyberSafe</strong><small>South Africa</small></span></button><nav className="side-nav" aria-label="Dashboard navigation">{links.map(([label, route, icon]) => <button key={label} className={`side-link ${route === "/library" ? "active" : ""}`} type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={19} /><span>{label}</span></button>)}</nav><LogoutButton /><button className="emergency-card" type="button" onClick={() => router.push("/help")}><Icon name="phone" size={22} /><span><strong>EMERGENCY</strong><small>Victim of a scam or cyber hack?</small><b>Get Help Now</b></span></button></aside>;
+  return <aside className="sidebar"><button className="brand" type="button" onClick={() => router.push("/")}><span className="brand-icon"><Icon name="shield" size={22} /></span><span><strong>CyberSafe</strong><small>South Africa</small></span></button><nav className="side-nav" aria-label="Dashboard navigation">{links.map(([label, route, icon]) => <button key={label} className={`side-link ${route === "/library" ? "active" : ""}`} type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={19} /><span>{label}</span></button>)}</nav><LogoutButton /></aside>;
 }
 
 function WhatsAppExample({ imageSrc }) {
@@ -47,9 +47,9 @@ function WhatsAppExample({ imageSrc }) {
       <div
         style={{
           padding: 18,
-          border: "1px solid #dce5ef",
+          border: "1px solid #e4ddd4",
           borderRadius: 16,
-          background: "#f6f9fd",
+          background: "#f7f4ef",
         }}
       >
         <p
@@ -71,12 +71,12 @@ function WhatsAppExample({ imageSrc }) {
       <aside
         style={{
           padding: 20,
-          border: "1px solid #bdebf4",
+          border: "1px solid #f1c49f",
           borderRadius: 16,
-          background: "#effbfe",
+          background: "#fff5eb",
         }}
       >
-        <p style={{ margin: "0 0 8px", color: "#149cba", fontSize: 12, fontWeight: 800, letterSpacing: ".06em", textTransform: "uppercase" }}>
+        <p style={{ margin: "0 0 8px", color: "#c24f0c", fontSize: 12, fontWeight: 800, letterSpacing: ".06em", textTransform: "uppercase" }}>
           What to notice
         </p>
         <h2 style={{ margin: "0 0 10px", color: "#121a32", fontSize: 18 }}>The code is yours alone</h2>
@@ -97,7 +97,7 @@ function SimSwapExample({ imageSrc }) {
       aria-labelledby="sim-swap-example-title"
       style={scamExampleRowStyle}
     >
-      <figure style={{ margin: 0, padding: 16, border: "1px solid #dce5ef", borderRadius: 16, background: "#f6f9fd" }}>
+      <figure style={{ margin: 0, padding: 16, border: "1px solid #e4ddd4", borderRadius: 16, background: "#f7f4ef" }}>
         <figcaption
           id="sim-swap-example-title"
           style={{ margin: "0 0 12px", color: "#536179", fontSize: 13, fontWeight: 800 }}
@@ -113,8 +113,8 @@ function SimSwapExample({ imageSrc }) {
           style={{ display: "block", width: "100%", height: "auto", maxWidth: 560, margin: "0 auto", borderRadius: 8 }}
         />
       </figure>
-      <aside style={{ padding: 20, border: "1px solid #bdebf4", borderRadius: 16, background: "#effbfe" }}>
-        <p style={{ margin: "0 0 8px", color: "#149cba", fontSize: 12, fontWeight: 800, letterSpacing: ".06em", textTransform: "uppercase" }}>
+      <aside style={{ padding: 20, border: "1px solid #f1c49f", borderRadius: 16, background: "#fff5eb" }}>
+        <p style={{ margin: "0 0 8px", color: "#c24f0c", fontSize: 12, fontWeight: 800, letterSpacing: ".06em", textTransform: "uppercase" }}>
           Act quickly
         </p>
         <h2 style={{ margin: "0 0 10px", color: "#121a32", fontSize: 18 }}>Unexpected loss of signal?</h2>
@@ -132,7 +132,7 @@ function PaymentProofExample({ imageSrc }) {
       aria-labelledby="payment-proof-example-title"
       style={scamExampleRowStyle}
     >
-      <figure style={{ margin: 0, padding: 16, border: "1px solid #dce5ef", borderRadius: 16, background: "#f6f9fd" }}>
+      <figure style={{ margin: 0, padding: 16, border: "1px solid #e4ddd4", borderRadius: 16, background: "#f7f4ef" }}>
         <figcaption
           id="payment-proof-example-title"
           style={{ margin: "0 0 12px", color: "#536179", fontSize: 13, fontWeight: 800 }}
@@ -148,8 +148,8 @@ function PaymentProofExample({ imageSrc }) {
           style={{ display: "block", width: "100%", height: "auto", maxHeight: 520, maxWidth: 560, objectFit: "contain", margin: "0 auto", borderRadius: 8 }}
         />
       </figure>
-      <aside style={{ padding: 20, border: "1px solid #bdebf4", borderRadius: 16, background: "#effbfe" }}>
-        <p style={{ margin: "0 0 8px", color: "#149cba", fontSize: 12, fontWeight: 800, letterSpacing: ".06em", textTransform: "uppercase" }}>
+      <aside style={{ padding: 20, border: "1px solid #f1c49f", borderRadius: 16, background: "#fff5eb" }}>
+        <p style={{ margin: "0 0 8px", color: "#c24f0c", fontSize: 12, fontWeight: 800, letterSpacing: ".06em", textTransform: "uppercase" }}>
           Verify the payment yourself
         </p>
         <h2 style={{ margin: "0 0 10px", color: "#121a32", fontSize: 18 }}>A receipt is only a claim</h2>
@@ -167,7 +167,7 @@ function ParcelNotificationExample({ imageSrc }) {
       aria-labelledby="parcel-notification-example-title"
       style={scamExampleRowStyle}
     >
-      <figure style={{ margin: 0, padding: 16, border: "1px solid #dce5ef", borderRadius: 16, background: "#f6f9fd" }}>
+      <figure style={{ margin: 0, padding: 16, border: "1px solid #e4ddd4", borderRadius: 16, background: "#f7f4ef" }}>
         <figcaption
           id="parcel-notification-example-title"
           style={{ margin: "0 0 12px", color: "#536179", fontSize: 13, fontWeight: 800 }}
@@ -183,13 +183,132 @@ function ParcelNotificationExample({ imageSrc }) {
           style={{ display: "block", width: "100%", height: "auto", maxWidth: 560, margin: "0 auto", borderRadius: 8 }}
         />
       </figure>
-      <aside style={{ alignSelf: "center", padding: 24, border: "1px solid #bdebf4", borderRadius: 18, background: "#effbfe" }}>
-        <p style={{ margin: "0 0 8px", color: "#149cba", fontSize: 12, fontWeight: 800, letterSpacing: ".06em", textTransform: "uppercase" }}>
+      <aside style={{ alignSelf: "center", padding: 24, border: "1px solid #f1c49f", borderRadius: 18, background: "#fff5eb" }}>
+        <p style={{ margin: "0 0 8px", color: "#c24f0c", fontSize: 12, fontWeight: 800, letterSpacing: ".06em", textTransform: "uppercase" }}>
           Pause before paying
         </p>
         <h2 style={{ margin: "0 0 10px", color: "#121a32", fontSize: 18 }}>A small fee can expose card details</h2>
         <p style={{ margin: 0, color: "#536179", fontSize: 14, lineHeight: 1.55 }}>
           Scammers imitate delivery notices and use unexpected fees to lure people to lookalike payment pages. Do not follow the message link. Check tracking through the courier&apos;s official app or website using details you already have.
+        </p>
+      </aside>
+    </section>
+  );
+}
+
+function JobOfferExample({ imageSrc }) {
+  return (
+    <section aria-labelledby="job-offer-example-title" style={scamExampleRowStyle}>
+      <figure style={{ margin: 0, padding: 16, border: "1px solid #e4ddd4", borderRadius: 16, background: "#f7f4ef" }}>
+        <figcaption
+          id="job-offer-example-title"
+          style={{ margin: "0 0 12px", color: "#536179", fontSize: 13, fontWeight: 800 }}
+        >
+          EXAMPLE JOB OFFER CHAT · CREDIT CHECK LINK
+        </figcaption>
+        <Image
+          src={imageSrc}
+          unoptimized
+          alt="Example WhatsApp job conversation where a supposed recruiter asks the applicant to complete a credit verification through a link and promises reimbursement"
+          width={700}
+          height={1392}
+          style={{ display: "block", width: "100%", height: "auto", maxHeight: 620, maxWidth: 340, objectFit: "contain", margin: "0 auto", borderRadius: 8 }}
+        />
+      </figure>
+      <aside style={{ display: "flex", flexDirection: "column", alignSelf: "stretch", padding: 24, border: "1px solid #f1c49f", borderRadius: 18, background: "#fff5eb" }}>
+        <p style={{ margin: "0 0 8px", color: "#c24f0c", fontSize: 12, fontWeight: 800, letterSpacing: ".06em", textTransform: "uppercase" }}>
+          Pause before applying
+        </p>
+        <h2 style={{ margin: "0 0 10px", color: "#121a32", fontSize: 18 }}>An interview shouldn’t require a payment link</h2>
+        <p style={{ margin: "0 0 14px", color: "#536179", fontSize: 14, lineHeight: 1.55 }}>
+          The recruiter asks for a credit check through a shortened link and promises to refund the fee after the interview.
+        </p>
+        <p style={{ margin: "0 0 8px", color: "#263950", fontSize: 13, fontWeight: 800 }}>Red flags in this chat</p>
+        <ul style={{ display: "grid", gap: 9, margin: 0, paddingLeft: 19, color: "#536179", fontSize: 14, lineHeight: 1.45 }}>
+          <li>A “credit verification” is requested before an interview.</li>
+          <li>The payment link is shortened and sent through chat.</li>
+          <li>You’re promised a refund after paying upfront.</li>
+        </ul>
+        <div style={{ marginTop: "auto", paddingTop: 18 }}>
+          <p style={{ margin: 0, color: "#c24f0c", fontSize: 13, fontWeight: 800 }}>Safer next step</p>
+          <p style={{ margin: "5px 0 0", color: "#293950", fontSize: 14, fontWeight: 600, lineHeight: 1.5 }}>
+            Don’t click or pay. Verify the vacancy using contact details on the employer’s official website.
+          </p>
+        </div>
+      </aside>
+    </section>
+  );
+}
+
+function AccountRecoveryExample({ imageSrc }) {
+  const rowStyle = {
+    ...scamExampleRowStyle,
+    gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
+    gap: 20,
+  };
+
+  return (
+    <section aria-labelledby="account-recovery-example-title" style={rowStyle}>
+      <figure style={{ margin: 0, padding: 16, border: "1px solid #e4ddd4", borderRadius: 16, background: "#f7f4ef" }}>
+        <figcaption
+          id="account-recovery-example-title"
+          style={{ margin: "0 0 12px", color: "#536179", fontSize: 13, fontWeight: 800 }}
+        >
+          EXAMPLE ACCOUNT-RECOVERY TEXT · SUSPICIOUS LINK
+        </figcaption>
+        <Image
+          src={imageSrc}
+          unoptimized
+          alt="Example text claiming an Amazon account is on hold and threatening a permanent lock unless the recipient follows a recovery link within two days"
+          width={414}
+          height={610}
+          style={{ display: "block", width: "100%", height: "auto", maxHeight: 410, maxWidth: 280, objectFit: "contain", margin: "0 auto", borderRadius: 8 }}
+        />
+      </figure>
+      <aside style={{ alignSelf: "stretch", padding: 24, border: "1px solid #f1c49f", borderRadius: 18, background: "#fff5eb" }}>
+        <p style={{ margin: "0 0 8px", color: "#c24f0c", fontSize: 12, fontWeight: 800, letterSpacing: ".06em", textTransform: "uppercase" }}>
+          Don’t use the message link
+        </p>
+        <h2 style={{ margin: "0 0 10px", color: "#121a32", fontSize: 18 }}>A deadline doesn’t prove your account is at risk</h2>
+        <p style={{ margin: "0 0 16px", color: "#536179", fontSize: 14, lineHeight: 1.55 }}>
+          This message uses pressure and an unfamiliar recovery link to make you act before you verify the claim.
+        </p>
+        <ul style={{ display: "grid", gap: 10, margin: 0, paddingLeft: 19, color: "#293950", fontSize: 14, fontWeight: 600, lineHeight: 1.45 }}>
+          <li>Unexpected claim that the account is on hold.</li>
+          <li>Threat of permanent lock within two days.</li>
+          <li>Recovery link arrives in an unsolicited text.</li>
+        </ul>
+      </aside>
+    </section>
+  );
+}
+
+function SarsNoticeExample({ imageSrc }) {
+  return (
+    <section aria-labelledby="sars-notice-example-title" style={scamExampleRowStyle}>
+      <figure style={{ justifySelf: "center", width: "fit-content", maxWidth: "100%", margin: 0, padding: 16, border: "1px solid #e4ddd4", borderRadius: 16, background: "#f7f4ef" }}>
+        <figcaption
+          id="sars-notice-example-title"
+          style={{ margin: "0 0 12px", color: "#536179", fontSize: 13, fontWeight: 800 }}
+        >
+          EXAMPLE TAX-DEBT NOTICE · VERIFY BEFORE PAYING
+        </figcaption>
+        <Image
+          src={imageSrc}
+          unoptimized
+          alt="Example tax notice claiming an overdue SARS debt and directing the recipient to pay using supplied bank details by a deadline"
+          width={456}
+          height={673}
+          style={{ display: "block", width: "100%", height: "auto", maxWidth: 456, objectFit: "contain", margin: "0 auto", borderRadius: 8 }}
+        />
+      </figure>
+      <aside style={{ alignSelf: "center", padding: 24, border: "1px solid #f1c49f", borderRadius: 18, background: "#fff5eb" }}>
+        <p style={{ margin: "0 0 8px", color: "#c24f0c", fontSize: 12, fontWeight: 800, letterSpacing: ".06em", textTransform: "uppercase" }}>
+          Verify independently
+        </p>
+        <h2 style={{ margin: "0 0 10px", color: "#121a32", fontSize: 18 }}>A logo and deadline don’t prove a tax debt is real</h2>
+        <p style={{ margin: 0, color: "#536179", fontSize: 14, lineHeight: 1.55 }}>
+          Unexpected tax demands can imitate official notices and include payment details to make a claim look credible. Don’t pay using bank details in an unexpected message or document. Sign in to SARS eFiling by entering its official address yourself, or contact SARS through verified channels.
         </p>
       </aside>
     </section>
@@ -202,7 +321,7 @@ function BankSmsExample({ imageSrc }) {
       aria-labelledby="bank-sms-example-title"
       style={scamExampleRowStyle}
     >
-      <figure style={{ margin: 0, padding: 16, border: "1px solid #dce5ef", borderRadius: 16, background: "#f6f9fd" }}>
+      <figure style={{ margin: 0, padding: 16, border: "1px solid #e4ddd4", borderRadius: 16, background: "#f7f4ef" }}>
         <figcaption
           id="bank-sms-example-title"
           style={{ margin: "0 0 12px", color: "#536179", fontSize: 13, fontWeight: 800 }}
@@ -218,8 +337,8 @@ function BankSmsExample({ imageSrc }) {
           style={{ display: "block", width: "100%", height: "auto", maxWidth: 560, margin: "0 auto", borderRadius: 8 }}
         />
       </figure>
-      <aside style={{ padding: 20, border: "1px solid #bdebf4", borderRadius: 16, background: "#effbfe" }}>
-        <p style={{ margin: "0 0 8px", color: "#149cba", fontSize: 12, fontWeight: 800, letterSpacing: ".06em", textTransform: "uppercase" }}>
+      <aside style={{ padding: 20, border: "1px solid #f1c49f", borderRadius: 16, background: "#fff5eb" }}>
+        <p style={{ margin: "0 0 8px", color: "#c24f0c", fontSize: 12, fontWeight: 800, letterSpacing: ".06em", textTransform: "uppercase" }}>
           Warning signs
         </p>
         <h2 style={{ margin: "0 0 10px", color: "#121a32", fontSize: 18 }}>Urgency plus an unexpected link</h2>
@@ -244,6 +363,14 @@ export default function ScamLibraryPage() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
   const [selected, setSelected] = useState(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const search = params.get("search");
+    const guide = params.get("guide");
+    if (search) setQuery(search);
+    if (guide) setSelected(guide);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -302,7 +429,7 @@ export default function ScamLibraryPage() {
     <header className="mobile-topbar">
       <button className="mobile-topbar-menu" type="button" onClick={() => setMenuOpen(true)} aria-label="Open menu"><Icon name="menu" size={21} /></button>
       <button className="mobile-topbar-brand" type="button" onClick={() => router.push("/feed")}><span className="mobile-topbar-icon"><Icon name="shield" size={18} /></span><strong>CyberSafe</strong></button>
-      <button className="mobile-topbar-bell" type="button" onClick={() => router.push("/notification")} aria-label="Notifications"><DashboardNavIcon name="bell" size={21} /></button>
+      <button className="mobile-topbar-bell" type="button" onClick={() => router.push("/profiles")} aria-label="User Profile"><DashboardNavIcon name="user" size={21} /></button>
     </header>
     <Sidebar router={router} />
     <nav className="bottom-nav" aria-label="Primary navigation">
@@ -347,11 +474,14 @@ export default function ScamLibraryPage() {
               {scam.id === "sim" && scam.example_image_path && <SimSwapExample imageSrc={scam.example_image_path} />}
               {scam.id === "market" && scam.example_image_path && <PaymentProofExample imageSrc={scam.example_image_path} />}
               {scam.id === "delivery" && scam.example_image_path && <ParcelNotificationExample imageSrc={scam.example_image_path} />}
-              <div>
+              {scam.id === "job" && scam.example_image_path && <JobOfferExample imageSrc={scam.example_image_path} />}
+              {scam.id === "account-recovery" && scam.example_image_path && <AccountRecoveryExample imageSrc={scam.example_image_path} />}
+              {scam.id === "sars" && scam.example_image_path && <SarsNoticeExample imageSrc={scam.example_image_path} />}
+              <div className="scam-section-card">
                 <h2>Warning signs</h2>
                 <ul>{scam.signs.map((sign) => <li key={sign}>{sign}</li>)}</ul>
               </div>
-              <div>
+              <div className="scam-section-card scam-action-card">
                 <h2>What to do</h2>
                 <p>{scam.action}</p>
               </div>
@@ -364,7 +494,7 @@ export default function ScamLibraryPage() {
     {!isLoading && loadError && <p className="empty" role="alert">{loadError}</p>}
     {!isLoading && !loadError && !results.length && <p className="empty">No scam guide matches that search. Try a broader term or use the Helpline Hub for urgent support.</p>}
   </section><style>{`
-    * { box-sizing: border-box; } .library-dashboard { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr); background: #f6f9fd; color: #00243A; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    * { box-sizing: border-box; } .library-dashboard { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr); background: #f7f4ef; color: #00243A; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
         .mobile-topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 41; display: grid; grid-template-columns: 40px 1fr 40px; align-items: center; height: calc(52px + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px); background: #00243A; border-bottom: 2px solid #EB630F; }
         .mobile-topbar-menu, .mobile-topbar-bell { display: grid; place-items: center; width: 40px; height: 40px; margin: 0 auto; border: 0; background: transparent; color: #fff; cursor: pointer; }
         .mobile-topbar-brand { display: flex; align-items: center; justify-content: center; gap: 7px; border: 0; background: transparent; color: #fff; cursor: pointer; font: inherit; padding: 0; }
@@ -378,12 +508,12 @@ export default function ScamLibraryPage() {
         .nav-menu-sheet { width: 100%; max-height: 70vh; overflow-y: auto; background: #fff; border-radius: 16px 16px 0 0; padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px)); }
         .nav-menu-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
         .nav-menu-header strong { font-size: 15px; }
-        .nav-menu-close { border: 0; background: #f1f4f9; color: #536179; border-radius: 999px; width: 32px; height: 32px; display: grid; place-items: center; cursor: pointer; }
+        .nav-menu-close { border: 0; background: #f3eee8; color: #536179; border-radius: 999px; width: 32px; height: 32px; display: grid; place-items: center; cursor: pointer; }
         .nav-menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .nav-menu-item { display: flex; align-items: center; gap: 10px; padding: 13px 12px; border: 1px solid #eef2f7; border-radius: 10px; background: #f8fafc; color: #26324a; cursor: pointer; font: inherit; font-size: 13px; font-weight: 700; text-align: left; }
+        .nav-menu-item { display: flex; align-items: center; gap: 10px; padding: 13px 12px; border: 1px solid #eee8e0; border-radius: 10px; background: #fbf9f5; color: #26324a; cursor: pointer; font: inherit; font-size: 13px; font-weight: 700; text-align: left; }
         .nav-menu-icon { display: grid; place-items: center; width: 30px; height: 30px; flex: 0 0 auto; border-radius: 8px; background: #FDEAE0; color: #EB630F; }
                 .library-content { padding-top: calc(18px + 52px + env(safe-area-inset-top, 0px)); padding-bottom: 78px; }
-         .sidebar { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; padding: 24px 22px 22px; border-right: 1px solid #e2e9f2; background: #00243A; overflow: hidden; } .sidebar { display: none; }
+         .sidebar { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; padding: 24px 22px 22px; border-right: 1px solid #e4ddd4; background: #00243A; overflow: hidden; } .sidebar { display: none; }
         @media (min-width: 851px) {
           .sidebar { display: flex; }
           .library-dashboard { grid-template-columns: 230px minmax(0, 1fr); } .side-link { font-size: 12px; padding: 10px 12px; gap: 10px; } .brand strong { font-size: 16px; } .brand small { font-size: 11px; }
@@ -391,10 +521,10 @@ export default function ScamLibraryPage() {
           .library-content { padding-top: 24px; padding-bottom: 36px; }
         }
  .brand { display: flex; align-items: center; gap: 10px; padding: 0; border: 0; background: transparent; color: #fff; cursor: pointer; text-align: left; } .brand-icon { display: grid; place-items: center; width: 41px; height: 41px; border-radius: 9px; background: rgba(235,99,15,.22); color: #EB630F; } .brand strong { display: block; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 20px; line-height: 1; letter-spacing: -0.55px; } .brand small { display: block; margin-top: 5px; color: #EB630F; font-size: 12px; font-weight: 700; } .side-nav { display: grid; gap: 7px; margin-top: 42px; } .side-link { display: flex; align-items: center; gap: 13px; width: 100%; padding: 11px 14px; border: 0; border-radius: 8px; background: transparent; color: rgba(255,255,255,.68); cursor: pointer; font: inherit; font-size: 14px; font-weight: 600; text-align: left; } .side-link.active { background: rgba(235,99,15,.25); color: #fff; font-weight: 800; } .side-link.active svg { color: #EB630F; } .emergency-card { display: flex; align-items: flex-start; gap: 10px; margin-top: auto; padding: 16px; border: 2px solid #ff5a5f; border-radius: 12px; background: #fff4f4; color: #ff5158; cursor: pointer; font: inherit; text-align: left; } .emergency-card strong, .emergency-card small, .emergency-card b { display: block; } .emergency-card strong { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 13px; } .emergency-card small { margin: 10px 0 7px; color: #536179; font-size: 11px; line-height: 1.4; } .emergency-card b { color: #ff5158; font-size: 11px; }
-    .library-content { min-width: 0; padding: 30px 34px 45px; } .library-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 19px; padding-bottom: 26px; border-bottom: 1px solid #dce5ef; } .eyebrow { margin: 0 0 7px; color: #C24F0C; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; } h1, h2, strong { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; } h1 { margin: 0; font-size: clamp(20px, 3.4vw, 24px); letter-spacing: -1.1px; line-height: 1; } .library-header p:last-child { max-width: 780px; margin: 10px 0 0; color: #5b6980; font-size: 14px; line-height: 1.35; } .help-button { min-height: 50px; padding: 0 23px; border: 0; border-radius: 8px; background: #EB630F; color: #00243A; cursor: pointer; font: inherit; font-size: 12px; font-weight: 800; white-space: nowrap; }
+    .library-content { min-width: 0; padding: 30px 34px 45px; } .library-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 19px; padding-bottom: 26px; border-bottom: 1px solid #e4ddd4; } .eyebrow { margin: 0 0 7px; color: #C24F0C; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; } h1, h2, strong { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; } h1 { margin: 0; font-size: clamp(20px, 3.4vw, 24px); letter-spacing: -1.1px; line-height: 1; } .library-header p:last-child { max-width: 780px; margin: 10px 0 0; color: #5b6980; font-size: 14px; line-height: 1.35; } .help-button { min-height: 50px; padding: 0 23px; border: 0; border-radius: 8px; background: #EB630F; color: #00243A; cursor: pointer; font: inherit; font-size: 12px; font-weight: 800; white-space: nowrap; }
     .safety-banner { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px; margin-top: 28px; padding: 18px 21px; border: 1px solid #ffc1c3; border-left: 5px solid #ff5a5f; border-radius: 11px; background: #fff4f4; } .safety-banner > span { display: grid; place-items: center; width: 39px; height: 39px; border-radius: 50%; background: #fff; color: #ff5158; } .safety-banner strong { font-size: 14px; } .safety-banner p { margin: 5px 0 0; color: #65738a; font-size: 11px; line-height: 1.4; } .safety-banner button { padding: 9px 12px; border: 0; border-radius: 7px; background: #ff5158; color: #fff; cursor: pointer; font: inherit; font-size: 11px; font-weight: 800; white-space: nowrap; }
-    .library-tools { display: grid; grid-template-columns: minmax(280px, .8fr) 1.2fr; gap: 19px; margin-top: 30px; } .search { display: flex; align-items: center; gap: 9px; padding: 0 17px; border: 1px solid #dce5ef; border-radius: 8px; background: #fff; color: #536179; } .search input { width: 100%; height: 54px; border: 0; outline: 0; background: transparent; color: #26324a; font: inherit; font-size: 12px; } .categories { display: flex; align-items: center; gap: 7px; overflow-x: auto; } .categories button { flex: 0 0 auto; padding: 9px 11px; border: 1px solid #dce5ef; border-radius: 7px; background: #fff; color: #536179; cursor: pointer; font: inherit; font-size: 11px; font-weight: 700; } .categories button.selected { border-color: #EB630F; background: #FDEAE0; color: #C24F0C; }
-    .result-row { display: flex; justify-content: space-between; gap: 12px; margin: 19px 2px 10px; color: #66758b; font-size: 11px; } .result-row span:first-child { color: #26324a; font-weight: 800; } .scam-list { display: grid; gap: 10px; } .scam-card { padding: 18px 20px; border: 1px solid #dce5ef; border-radius: 11px; background: #fff; } .scam-title { display: flex; align-items: flex-start; justify-content: space-between; width: 100%; padding: 0; border: 0; background: transparent; color: #00243A; cursor: pointer; text-align: left; } .scam-title small, .scam-title strong { display: block; } .scam-title small { margin-bottom: 6px; color: #C24F0C; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; } .scam-title strong { font-size: 16px; } .scam-title b { color: #EB630F; font-size: 21px; line-height: .8; } .scam-card > p { max-width: 850px; margin: 8px 0 0; color: #65738a; font-size: 12px; line-height: 1.45; } .scam-detail { display: grid; grid-template-columns: 1.1fr 1fr; gap: 24px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e6edf3; } .scam-detail h2 { margin: 0 0 9px; font-size: 12px; } .scam-detail ul { display: grid; gap: 6px; margin: 0; padding-left: 19px; color: #65738a; font-size: 11px; line-height: 1.4; } .scam-detail p { margin: 0; color: #293950; font-size: 11px; font-weight: 600; line-height: 1.45; } .empty { margin: 28px 0; color: #65738a; text-align: center; }
+    .library-tools { display: grid; grid-template-columns: minmax(280px, .8fr) 1.2fr; gap: 19px; margin-top: 30px; } .search { display: flex; align-items: center; gap: 9px; padding: 0 17px; border: 1px solid #e4ddd4; border-radius: 8px; background: #fff; color: #536179; } .search input { width: 100%; height: 54px; border: 0; outline: 0; background: transparent; color: #26324a; font: inherit; font-size: 12px; } .categories { display: flex; align-items: center; gap: 7px; overflow-x: auto; } .categories button { flex: 0 0 auto; padding: 9px 11px; border: 1px solid #e4ddd4; border-radius: 7px; background: #fff; color: #536179; cursor: pointer; font: inherit; font-size: 11px; font-weight: 700; } .categories button.selected { border-color: #EB630F; background: #FDEAE0; color: #C24F0C; }
+    .result-row { display: flex; justify-content: space-between; gap: 12px; margin: 19px 2px 10px; color: #66758b; font-size: 11px; } .result-row span:first-child { color: #26324a; font-weight: 800; } .scam-list { display: grid; gap: 10px; } .scam-card { padding: 18px 20px; border: 1px solid #e4ddd4; border-radius: 11px; background: #fff; } .scam-title { display: flex; align-items: flex-start; justify-content: space-between; width: 100%; padding: 0; border: 0; background: transparent; color: #00243A; cursor: pointer; text-align: left; } .scam-title small, .scam-title strong { display: block; } .scam-title small { margin-bottom: 6px; color: #C24F0C; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; } .scam-title strong { font-size: 16px; } .scam-title b { color: #EB630F; font-size: 21px; line-height: .8; } .scam-card > p { max-width: 850px; margin: 8px 0 0; color: #65738a; font-size: 12px; line-height: 1.45; } .scam-detail { display: grid; grid-template-columns: 1.1fr 1fr; gap: 24px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ece5dd; } .scam-detail h2 { margin: 0 0 9px; font-size: 12px; } .scam-detail ul { display: grid; gap: 6px; margin: 0; padding-left: 19px; color: #65738a; font-size: 11px; line-height: 1.4; } .scam-detail p { margin: 0; color: #293950; font-size: 11px; font-weight: 600; line-height: 1.45; } .empty { margin: 28px 0; color: #65738a; text-align: center; }
     @media (max-width: 1180px) { .sidebar { padding: 22px 16px 20px; } .library-content { padding: 27px 24px 42px; } .side-link { font-size: 13px; } .library-tools { grid-template-columns: 1fr; gap: 12px; } } @media (max-width: 850px) { .brand strong { font-size: 12px; } .brand small { font-size: 11px; } .side-link svg { width: 16px; height: 16px; }  .sidebar { padding: 11px 8px; } .brand { margin-bottom: 16px; justify-content: center; } .brand strong { font-size: 18px; } .brand small { font-size: 11px; } .side-nav { margin-top: 18px; gap: 3px; } .side-link { padding: 6px 6px; font-size: 11px; gap: 6px; } .side-link svg { width: 19px; }  .side-divider { margin: 4px 2px; } .footer-links { gap: 2px; } .footer-link { font-size: 11px; padding: 4px 6px; gap: 5px; } .emergency-card { padding: 8px; gap: 6px; } .emergency-card strong { font-size: 11px; } .emergency-card small { font-size: 11px; margin: 5px 0 4px; } .emergency-card b { font-size: 11px; } .user-chip { padding: 5px; gap: 5px; } .user-chip strong { font-size: 11px; } .user-chip small { font-size: 11px; } .chip-avatar { width: 20px; height: 20px; font-size: 11px; } .library-content { padding: 22px 14px 36px; } } @media (max-width: 600px) { .library-content { padding: 18px 11px 28px; } h1 { font-size: 27px; } .library-header { flex-direction: column; } .safety-banner { grid-template-columns: auto 1fr; padding: 15px; } .safety-banner button { grid-column: 1 / -1; } .scam-card { padding: 15px 14px; } .scam-title strong { font-size: 14px; } .scam-detail { grid-template-columns: 1fr; gap: 14px; } .result-row { flex-direction: column; gap: 3px; } }
   
     @media (min-width: 851px) {
@@ -404,12 +534,16 @@ export default function ScamLibraryPage() {
       .brand small { font-size: 11px !important; }
     }
 @media (min-width: 99999px) {
-    * { box-sizing: border-box; } .library-dashboard { min-height: 100vh; display: grid; grid-template-columns: 300px minmax(0, 1fr); background: #f6f9fd; color: #121a32; font-family: "DM Sans", Arial, sans-serif; } .sidebar { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; padding: 30px 28px 28px; border-right: 1px solid #e2e9f2; background: #fff; } .brand { display: flex; align-items: center; gap: 13px; padding: 0; border: 0; background: transparent; color: #121a32; cursor: pointer; text-align: left; } .brand-icon { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 15px; background: #e6faff; color: #31c7e6; } .brand strong { display: block; font-family: "Syne", Arial, sans-serif; font-size: 26px; line-height: 1; letter-spacing: -1px; } .brand small { display: block; margin-top: 5px; color: #31c7e6; font-size: 15px; font-weight: 700; } .side-nav { display: grid; gap: 9px; margin-top: 42px; } .side-link { display: flex; align-items: center; gap: 16px; width: 100%; padding: 14px 17px; border: 0; border-radius: 14px; background: transparent; color: #536179; cursor: pointer; font: inherit; font-size: 18px; font-weight: 600; text-align: left; } .side-link.active { background: #e5f9fd; color: #121a32; font-weight: 800; } .side-link.active svg { color: #31c7e6; } .emergency-card { display: flex; align-items: flex-start; gap: 13px; margin-top: auto; padding: 20px; border: 2px solid #ff5a5f; border-radius: 20px; background: #fff4f4; color: #ff5158; cursor: pointer; font: inherit; text-align: left; } .emergency-card strong, .emergency-card small, .emergency-card b { display: block; } .emergency-card strong { font-family: "Syne", Arial, sans-serif; font-size: 17px; } .emergency-card small { margin: 13px 0 7px; color: #536179; font-size: 13px; line-height: 1.4; } .emergency-card b { color: #ff5158; font-size: 14px; }
-    .library-content { min-width: 0; padding: 38px 42px 56px; } .library-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; padding-bottom: 26px; border-bottom: 1px solid #dce5ef; } .eyebrow { margin: 0 0 7px; color: #2fc4e4; font-size: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; } h1, h2, strong { font-family: "Syne", Arial, sans-serif; } h1 { margin: 0; font-size: clamp(32px, 3.4vw, 44px); letter-spacing: -2px; line-height: 1; } .library-header p:last-child { max-width: 780px; margin: 13px 0 0; color: #5b6980; font-size: 18px; line-height: 1.35; } .help-button { min-height: 50px; padding: 0 23px; border: 0; border-radius: 14px; background: #31c7e6; color: #102039; cursor: pointer; font: inherit; font-size: 16px; font-weight: 800; white-space: nowrap; }
+    * { box-sizing: border-box; } .library-dashboard { min-height: 100vh; display: grid; grid-template-columns: 300px minmax(0, 1fr); background: #f7f4ef; color: #121a32; font-family: "DM Sans", Arial, sans-serif; } .sidebar { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; padding: 30px 28px 28px; border-right: 1px solid #e4ddd4; background: #fff; } .brand { display: flex; align-items: center; gap: 13px; padding: 0; border: 0; background: transparent; color: #121a32; cursor: pointer; text-align: left; } .brand-icon { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 15px; background: #fdeae0; color: #eb630f; } .brand strong { display: block; font-family: "Syne", Arial, sans-serif; font-size: 26px; line-height: 1; letter-spacing: -1px; } .brand small { display: block; margin-top: 5px; color: #eb630f; font-size: 15px; font-weight: 700; } .side-nav { display: grid; gap: 9px; margin-top: 42px; } .side-link { display: flex; align-items: center; gap: 16px; width: 100%; padding: 14px 17px; border: 0; border-radius: 14px; background: transparent; color: #536179; cursor: pointer; font: inherit; font-size: 18px; font-weight: 600; text-align: left; } .side-link.active { background: #fdeae0; color: #121a32; font-weight: 800; } .side-link.active svg { color: #eb630f; } .emergency-card { display: flex; align-items: flex-start; gap: 13px; margin-top: auto; padding: 20px; border: 2px solid #ff5a5f; border-radius: 20px; background: #fff4f4; color: #ff5158; cursor: pointer; font: inherit; text-align: left; } .emergency-card strong, .emergency-card small, .emergency-card b { display: block; } .emergency-card strong { font-family: "Syne", Arial, sans-serif; font-size: 17px; } .emergency-card small { margin: 13px 0 7px; color: #536179; font-size: 13px; line-height: 1.4; } .emergency-card b { color: #ff5158; font-size: 14px; }
+    .library-content { min-width: 0; padding: 38px 42px 56px; } .library-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; padding-bottom: 26px; border-bottom: 1px solid #e4ddd4; } .eyebrow { margin: 0 0 7px; color: #eb630f; font-size: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; } h1, h2, strong { font-family: "Syne", Arial, sans-serif; } h1 { margin: 0; font-size: clamp(32px, 3.4vw, 44px); letter-spacing: -2px; line-height: 1; } .library-header p:last-child { max-width: 780px; margin: 13px 0 0; color: #5b6980; font-size: 18px; line-height: 1.35; } .help-button { min-height: 50px; padding: 0 23px; border: 0; border-radius: 14px; background: #eb630f; color: #102039; cursor: pointer; font: inherit; font-size: 16px; font-weight: 800; white-space: nowrap; }
     .safety-banner { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 17px; margin-top: 28px; padding: 22px 26px; border: 1px solid #ffc1c3; border-left: 5px solid #ff5a5f; border-radius: 19px; background: #fff4f4; } .safety-banner > span { display: grid; place-items: center; width: 50px; height: 50px; border-radius: 50%; background: #fff; color: #ff5158; } .safety-banner strong { font-size: 18px; } .safety-banner p { margin: 6px 0 0; color: #65738a; font-size: 14px; line-height: 1.4; } .safety-banner button { padding: 11px 15px; border: 0; border-radius: 11px; background: #ff5158; color: #fff; cursor: pointer; font: inherit; font-size: 14px; font-weight: 800; white-space: nowrap; }
-    .library-tools { display: grid; grid-template-columns: minmax(280px, .8fr) 1.2fr; gap: 24px; margin-top: 30px; } .search { display: flex; align-items: center; gap: 11px; padding: 0 17px; border: 1px solid #dce5ef; border-radius: 14px; background: #fff; color: #536179; } .search input { width: 100%; height: 54px; border: 0; outline: 0; background: transparent; color: #26324a; font: inherit; font-size: 15px; } .categories { display: flex; align-items: center; gap: 9px; overflow-x: auto; } .categories button { flex: 0 0 auto; padding: 11px 14px; border: 1px solid #dce5ef; border-radius: 11px; background: #fff; color: #536179; cursor: pointer; font: inherit; font-size: 14px; font-weight: 700; } .categories button.selected { border-color: #31c7e6; background: #e6faff; color: #20b6d8; }
-    .result-row { display: flex; justify-content: space-between; gap: 15px; margin: 24px 2px 13px; color: #66758b; font-size: 14px; } .result-row span:first-child { color: #26324a; font-weight: 800; } .scam-list { display: grid; gap: 13px; } .scam-card { padding: 22px 25px; border: 1px solid #dce5ef; border-radius: 18px; background: #fff; } .scam-title { display: flex; align-items: flex-start; justify-content: space-between; width: 100%; padding: 0; border: 0; background: transparent; color: #121a32; cursor: pointer; text-align: left; } .scam-title small, .scam-title strong { display: block; } .scam-title small { margin-bottom: 6px; color: #2fc4e4; font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; } .scam-title strong { font-size: 20px; } .scam-title b { color: #31c7e6; font-size: 27px; line-height: .8; } .scam-card > p { max-width: 850px; margin: 10px 0 0; color: #65738a; font-size: 15px; line-height: 1.45; } .scam-detail { display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; margin-top: 22px; padding-top: 22px; border-top: 1px solid #e6edf3; } .scam-detail h2 { margin: 0 0 10px; font-size: 16px; } .scam-detail ul { display: grid; gap: 9px; margin: 0; padding-left: 19px; color: #65738a; font-size: 14px; line-height: 1.5; } .scam-detail p { margin: 0; color: #293950; font-size: 14px; font-weight: 600; line-height: 1.5; } .scam-detail > div { align-self: stretch; padding: 20px; border: 1px solid #e3eaf2; border-radius: 16px; background: #fbfdff; } .empty { margin: 35px 0; color: #65738a; text-align: center; }
-    @media (max-width: 1180px) { .library-dashboard { grid-template-columns: 270px minmax(0, 1fr); } .sidebar { padding: 28px 20px 25px; } .library-content { padding: 34px 30px 52px; } .side-link { font-size: 17px; } .library-tools { grid-template-columns: 1fr; gap: 15px; } } @media (max-width: 850px) { .library-dashboard { display: block; } .sidebar { position: static; height: auto; padding: 18px; border-right: 0; border-bottom: 1px solid #dce5ef; } .brand { margin-bottom: 16px; } .brand strong { font-size: 23px; } .brand small { font-size: 13px; } .side-nav { display: flex; gap: 7px; overflow-x: auto; margin: 0; } .side-link { width: auto; min-width: max-content; padding: 10px 13px; border-radius: 11px; font-size: 14px; } .side-link svg { width: 19px; } .emergency-card { display: none; } .library-content { padding: 27px 18px 45px; } .scam-detail { grid-template-columns: 1fr; } .scam-detail > section[aria-labelledby$="-example-title"] { grid-template-columns: minmax(0, 1fr) !important; max-width: 100% !important; } } @media (max-width: 600px) { .library-content { padding: 22px 14px 35px; } h1 { font-size: 34px; } .library-header { flex-direction: column; } .safety-banner { grid-template-columns: auto 1fr; padding: 19px; } .safety-banner button { grid-column: 1 / -1; } .scam-card { padding: 19px 17px; } .scam-title strong { font-size: 18px; } .scam-detail { grid-template-columns: 1fr; gap: 14px; } .scam-detail > div { padding: 16px; } .scam-detail > section[aria-labelledby$="-example-title"] { grid-template-columns: minmax(0, 1fr) !important; max-width: 100% !important; } .scam-detail > section[aria-labelledby$="-example-title"] aside { padding: 18px !important; } .result-row { flex-direction: column; gap: 4px; } }
-}
+    .library-tools { display: grid; grid-template-columns: minmax(280px, .8fr) 1.2fr; gap: 24px; margin-top: 30px; } .search { display: flex; align-items: center; gap: 11px; padding: 0 17px; border: 1px solid #e4ddd4; border-radius: 14px; background: #fff; color: #536179; } .search input { width: 100%; height: 54px; border: 0; outline: 0; background: transparent; color: #26324a; font: inherit; font-size: 15px; } .categories { display: flex; align-items: center; gap: 9px; overflow-x: auto; } .categories button { flex: 0 0 auto; padding: 11px 14px; border: 1px solid #e4ddd4; border-radius: 11px; background: #fff; color: #536179; cursor: pointer; font: inherit; font-size: 14px; font-weight: 700; } .categories button.selected { border-color: #eb630f; background: #fdeae0; color: #c24f0c; }
+    .result-row { display: flex; justify-content: space-between; gap: 15px; margin: 24px 2px 13px; color: #66758b; font-size: 14px; } .result-row span:first-child { color: #26324a; font-weight: 800; } .scam-list { display: grid; gap: 13px; } .scam-card { padding: 22px 25px; border: 1px solid #e4ddd4; border-radius: 18px; background: #fff; } .scam-title { display: flex; align-items: flex-start; justify-content: space-between; width: 100%; padding: 0; border: 0; background: transparent; color: #121a32; cursor: pointer; text-align: left; } .scam-title small, .scam-title strong { display: block; } .scam-title small { margin-bottom: 6px; color: #eb630f; font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; } .scam-title strong { font-size: 20px; } .scam-title b { color: #eb630f; font-size: 27px; line-height: .8; } .scam-card > p { max-width: 850px; margin: 10px 0 0; color: #65738a; font-size: 15px; line-height: 1.45; } .scam-detail { display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; margin-top: 22px; padding-top: 22px; border-top: 1px solid #ece5dd; } .scam-detail h2 { margin: 0 0 10px; font-size: 16px; } .scam-detail ul { display: grid; gap: 9px; margin: 0; padding-left: 19px; color: #65738a; font-size: 14px; line-height: 1.5; } .scam-detail p { margin: 0; color: #293950; font-size: 14px; font-weight: 600; line-height: 1.5; } .scam-detail > div { align-self: stretch; padding: 20px; border: 1px solid #e6dfd7; border-radius: 16px; background: #fcfaf7; } .empty { margin: 35px 0; color: #65738a; text-align: center; }
+    @media (max-width: 1180px) { .library-dashboard { grid-template-columns: 270px minmax(0, 1fr); } .sidebar { padding: 28px 20px 25px; } .library-content { padding: 34px 30px 52px; } .side-link { font-size: 17px; } .library-tools { grid-template-columns: 1fr; gap: 15px; } } @media (max-width: 850px) { .library-dashboard { display: block; } .sidebar { position: static; height: auto; padding: 18px; border-right: 0; border-bottom: 1px solid #e4ddd4; } .brand { margin-bottom: 16px; } .brand strong { font-size: 23px; } .brand small { font-size: 13px; } .side-nav { display: flex; gap: 7px; overflow-x: auto; margin: 0; } .side-link { width: auto; min-width: max-content; padding: 10px 13px; border-radius: 11px; font-size: 14px; } .side-link svg { width: 19px; } .emergency-card { display: none; } .library-content { padding: 27px 18px 45px; } .scam-detail { grid-template-columns: 1fr; } .scam-detail > section[aria-labelledby$="-example-title"] { grid-template-columns: minmax(0, 1fr) !important; max-width: 100% !important; } } @media (max-width: 600px) { .library-content { padding: 22px 14px 35px; } h1 { font-size: 34px; } .library-header { flex-direction: column; } .safety-banner { grid-template-columns: auto 1fr; padding: 19px; } .safety-banner button { grid-column: 1 / -1; } .scam-card { padding: 19px 17px; } .scam-title strong { font-size: 18px; } .scam-detail { grid-template-columns: 1fr; gap: 14px; } .scam-detail > div { padding: 16px; } .scam-detail > section[aria-labelledby$="-example-title"] { grid-template-columns: minmax(0, 1fr) !important; max-width: 100% !important; } .scam-detail > section[aria-labelledby$="-example-title"] aside { padding: 18px !important; } .result-row { flex-direction: column; gap: 4px; } }
+    }
+    .scam-section-card { min-width: 0; align-self: stretch; padding: 20px; border: 1px solid #e6dfd7; border-radius: 16px; background: #fcfaf7; }
+    .scam-action-card { border-color: #f1c49f; background: #fff5eb; }
+    .scam-action-card h2 { color: #c24f0c; }
+    @media (max-width: 600px) { .scam-section-card { padding: 16px; } }
   `}</style></main>;
 }

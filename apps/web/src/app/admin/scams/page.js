@@ -360,25 +360,25 @@ export default function AdminScamGuidesPage() {
 
 const adminScamStyles = `
   * { box-sizing: border-box; }
-  .scam-admin-layout { min-height: 100vh; padding: 38px clamp(18px, 4vw, 56px) 56px; background: #f6f9fd; color: #121a32; font-family: "DM Sans", Arial, sans-serif; }
-  .scam-admin-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 22px; max-width: 1500px; margin: 0 auto 26px; padding-bottom: 24px; border-bottom: 1px solid #dce5ef; }
-  .back-link { display: block; margin: 0 0 19px; padding: 0; border: 0; background: transparent; color: #159eba; cursor: pointer; font: inherit; font-size: 14px; font-weight: 800; }
-  .scam-admin-eyebrow { margin: 0 0 6px; color: #20b6d8; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+  .scam-admin-layout { min-height: 100vh; padding: 38px clamp(18px, 4vw, 56px) 56px; background: #f7f4ef; color: #121a32; font-family: "DM Sans", Arial, sans-serif; }
+  .scam-admin-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 22px; max-width: 1500px; margin: 0 auto 26px; padding-bottom: 24px; border-bottom: 1px solid #e4ddd4; }
+  .back-link { display: block; margin: 0 0 19px; padding: 0; border: 0; background: transparent; color: #c24f0c; cursor: pointer; font: inherit; font-size: 14px; font-weight: 800; }
+  .scam-admin-eyebrow { margin: 0 0 6px; color: #c24f0c; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
   .scam-admin-header h1 { margin: 0; font-family: "Syne", Arial, sans-serif; font-size: clamp(30px, 3vw, 42px); letter-spacing: -1.5px; }
   .scam-admin-header > div > p:last-child { margin: 10px 0 0; color: #65738a; font-size: 16px; }
-  .new-guide-button, .save-button { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 17px; border: 0; border-radius: 12px; background: #31c7e6; color: #102039; cursor: pointer; font: inherit; font-weight: 800; white-space: nowrap; }
-  .new-guide-button:hover, .save-button:hover { background: #20b6d8; }
+  .new-guide-button, .save-button { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 17px; border: 0; border-radius: 12px; background: #eb630f; color: #102039; cursor: pointer; font: inherit; font-weight: 800; white-space: nowrap; }
+  .new-guide-button:hover, .save-button:hover { background: #c24f0c; }
   .scam-admin-workspace { display: grid; grid-template-columns: minmax(230px, 290px) minmax(0, 1fr); gap: 20px; max-width: 1500px; margin: 0 auto; align-items: start; }
-  .guide-list-panel, .guide-editor { min-width: 0; padding: 21px; border: 1px solid #dce5ef; border-radius: 18px; background: #fff; }
+  .guide-list-panel, .guide-editor { min-width: 0; padding: 21px; border: 1px solid #e4ddd4; border-radius: 18px; background: #fff; }
   .guide-list-panel { position: sticky; top: 20px; max-height: calc(100vh - 40px); overflow-y: auto; }
   .guide-list-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
   .guide-list-heading h2, .editor-heading h2, .preview-heading h2 { margin: 0; font-family: "Syne", Arial, sans-serif; font-size: 20px; }
-  .guide-list-heading span { display: grid; place-items: center; min-width: 28px; height: 28px; padding: 0 7px; border-radius: 999px; background: #e6faff; color: #159eba; font-size: 12px; font-weight: 800; }
+  .guide-list-heading span { display: grid; place-items: center; min-width: 28px; height: 28px; padding: 0 7px; border-radius: 999px; background: #fdeae0; color: #c24f0c; font-size: 12px; font-weight: 800; }
   .guide-list { display: grid; gap: 7px; }
   .guide-list-item { display: grid; gap: 5px; width: 100%; padding: 12px; border: 1px solid transparent; border-radius: 12px; background: transparent; color: #121a32; cursor: pointer; text-align: left; }
-  .guide-list-item:hover { background: #f6f9fd; }
-  .guide-list-item.selected { border-color: #bdebf4; background: #effbfe; }
-  .guide-list-category { color: #159eba; font-size: 11px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+  .guide-list-item:hover { background: #f7f4ef; }
+  .guide-list-item.selected { border-color: #f1c49f; background: #fff5eb; }
+  .guide-list-category { color: #c24f0c; font-size: 11px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
   .guide-list-item strong { font-family: "Syne", Arial, sans-serif; font-size: 14px; line-height: 1.3; }
   .publish-state { color: #8a6670; font-size: 11px; font-weight: 800; }
   .publish-state.published { color: #13835b; }
@@ -390,39 +390,39 @@ const adminScamStyles = `
   .success-message { border: 1px solid #b9e8d3; background: #f0fbf5; color: #16704f; }
   .editor-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
   .editor-fields > label, .image-field { display: grid; gap: 7px; color: #26324a; font-size: 13px; font-weight: 800; }
-  .editor-fields input:not([type="checkbox"]), .editor-fields textarea { width: 100%; padding: 11px 12px; border: 1px solid #dce5ef; border-radius: 10px; outline: none; background: #fff; color: #121a32; font: inherit; font-size: 14px; font-weight: 400; line-height: 1.45; }
-  .editor-fields input:focus, .editor-fields textarea:focus { border-color: #31c7e6; box-shadow: 0 0 0 3px rgba(49, 199, 230, .13); }
+  .editor-fields input:not([type="checkbox"]), .editor-fields textarea { width: 100%; padding: 11px 12px; border: 1px solid #e4ddd4; border-radius: 10px; outline: none; background: #fff; color: #121a32; font: inherit; font-size: 14px; font-weight: 400; line-height: 1.45; }
+  .editor-fields input:focus, .editor-fields textarea:focus { border-color: #eb630f; box-shadow: 0 0 0 3px rgba(235, 99, 15, .13); }
   .editor-fields textarea { resize: vertical; }
   .wide-field { grid-column: 1 / -1; }
   .field-hint { color: #79879a; font-size: 12px; font-weight: 400; line-height: 1.4; }
   .field-label { color: #26324a; font-size: 13px; font-weight: 800; }
   .image-field input[type="file"] { width: 100%; padding: 10px; border: 1px dashed #b8c8d9; border-radius: 10px; color: #536179; font-size: 13px; }
   .remove-image-button { justify-self: start; padding: 0; border: 0; background: transparent; color: #c43e48; cursor: pointer; font: inherit; font-size: 12px; font-weight: 800; }
-  .publish-toggle { display: flex !important; align-items: center; gap: 11px !important; grid-column: 1 / -1; padding: 13px; border: 1px solid #dce5ef; border-radius: 12px; background: #fbfdff; cursor: pointer; }
-  .publish-toggle input { width: 18px; height: 18px; accent-color: #20b6d8; }
+  .publish-toggle { display: flex !important; align-items: center; gap: 11px !important; grid-column: 1 / -1; padding: 13px; border: 1px solid #e4ddd4; border-radius: 12px; background: #fcfaf7; cursor: pointer; }
+  .publish-toggle input { width: 18px; height: 18px; accent-color: #c24f0c; }
   .publish-toggle span, .publish-toggle strong, .publish-toggle small { display: block; }
   .publish-toggle strong { color: #121a32; font-size: 13px; }
   .publish-toggle small { margin-top: 3px; color: #79879a; font-size: 12px; font-weight: 400; }
   .editor-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
-  .cancel-button { min-height: 44px; padding: 0 14px; border: 1px solid #dce5ef; border-radius: 11px; background: #fff; color: #536179; cursor: pointer; font: inherit; font-size: 13px; font-weight: 800; }
+  .cancel-button { min-height: 44px; padding: 0 14px; border: 1px solid #e4ddd4; border-radius: 11px; background: #fff; color: #536179; cursor: pointer; font: inherit; font-size: 13px; font-weight: 800; }
   .save-button:disabled { cursor: wait; opacity: .6; }
-  .guide-preview { margin-top: 23px; padding: 20px; border: 1px solid #dce5ef; border-radius: 15px; background: #f9fbfe; }
+  .guide-preview { margin-top: 23px; padding: 20px; border: 1px solid #e4ddd4; border-radius: 15px; background: #fbf9f5; }
   .preview-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
   .preview-heading h2 { font-size: 19px; }
-  .preview-heading > span { flex: 0 0 auto; padding: 6px 9px; border-radius: 999px; background: #e6faff; color: #159eba; font-size: 11px; font-weight: 800; }
+  .preview-heading > span { flex: 0 0 auto; padding: 6px 9px; border-radius: 999px; background: #fdeae0; color: #c24f0c; font-size: 11px; font-weight: 800; }
   .preview-summary { margin: 9px 0 15px; color: #65738a; font-size: 14px; line-height: 1.5; }
   .preview-image { display: block; max-width: 100%; max-height: 380px; margin: 0 auto 16px; border-radius: 10px; object-fit: contain; }
   .preview-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .preview-columns > div { padding: 14px; border: 1px solid #e3eaf2; border-radius: 12px; background: #fff; }
+  .preview-columns > div { padding: 14px; border: 1px solid #e6dfd7; border-radius: 12px; background: #fff; }
   .preview-columns h3 { margin: 0 0 8px; font-family: "Syne", Arial, sans-serif; font-size: 14px; }
   .preview-columns ul, .preview-columns p { margin: 0; padding-left: 17px; color: #536179; font-size: 13px; line-height: 1.5; }
   .preview-columns p { padding: 0; }
   .guide-list-status { color: #79879a; font-size: 13px; line-height: 1.5; }
-  .scam-admin-gate { display: grid; place-items: center; min-height: 100vh; padding: 24px; background: #f6f9fd; color: #121a32; font-family: "DM Sans", Arial, sans-serif; }
-  .scam-admin-gate-card { width: min(100%, 480px); padding: 32px; border: 1px solid #dce5ef; border-radius: 18px; background: #fff; text-align: center; }
+  .scam-admin-gate { display: grid; place-items: center; min-height: 100vh; padding: 24px; background: #f7f4ef; color: #121a32; font-family: "DM Sans", Arial, sans-serif; }
+  .scam-admin-gate-card { width: min(100%, 480px); padding: 32px; border: 1px solid #e4ddd4; border-radius: 18px; background: #fff; text-align: center; }
   .scam-admin-gate-card h1 { margin: 0 0 9px; font-family: "Syne", Arial, sans-serif; font-size: 24px; }
   .scam-admin-gate-card p { color: #65738a; font-size: 14px; line-height: 1.5; }
-  .scam-admin-gate-card button { margin-top: 18px; padding: 11px 15px; border: 0; border-radius: 10px; background: #31c7e6; color: #102039; cursor: pointer; font: inherit; font-weight: 800; }
+  .scam-admin-gate-card button { margin-top: 18px; padding: 11px 15px; border: 0; border-radius: 10px; background: #eb630f; color: #102039; cursor: pointer; font: inherit; font-weight: 800; }
   @media (max-width: 900px) { .scam-admin-workspace { grid-template-columns: 1fr; } .guide-list-panel { position: static; max-height: none; } .guide-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 600px) { .scam-admin-layout { padding: 24px 14px 35px; } .scam-admin-header { align-items: flex-start; flex-direction: column; } .guide-list { grid-template-columns: 1fr; } .editor-fields, .preview-columns { grid-template-columns: 1fr; } .wide-field, .publish-toggle { grid-column: 1; } .editor-heading { align-items: flex-start; flex-direction: column; } .editor-actions { flex-direction: column-reverse; } .editor-actions button { width: 100%; } }
 `;

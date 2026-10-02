@@ -97,7 +97,7 @@ export default function BottomNav() {
           <button
             key={item.label}
             type="button"
-            style={{ ...styles.button, color: active ? "#30c9e8" : "#666" }}
+            style={{ ...styles.button, color: active ? "#eb630f" : "#666" }}
             onClick={() => router.push(item.route)}
           >
             <svg

@@ -2,7 +2,7 @@
   "name": "CyberSafe",
   "short_name": "CyberSafe",
   "description": "Cyber safety guidance for everyday life",
-  "start_url": "/",
+  "start_url": "/login",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#30c9e8",

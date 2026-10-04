@@ -14,9 +14,13 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "CyberSafe",
   description: "Cyber safety guidance for everyday life",
-  manifest: "/manifest.json",
+ 
+  
+};
+export const viewport = {
   themeColor: "#30c9e8",
 };
+
 
 export default function RootLayout({ children }) {
   return (

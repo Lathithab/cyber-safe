@@ -19,6 +19,17 @@ const scamExampleRowStyle = {
   margin: "0 auto 4px",
 };
 
+const scamGuidesWithCustomExampleLayout = new Set([
+  "whatsapp",
+  "bank",
+  "sim",
+  "market",
+  "delivery",
+  "job",
+  "account-recovery",
+  "sars",
+]);
+
 function Icon({ name, size = 22 }) {
   const shared = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true };
   if (name === "menu") return <svg {...shared}><path d="M4 6h16M4 12h16M4 18h16" /></svg>;
@@ -315,6 +326,23 @@ function SarsNoticeExample({ imageSrc }) {
   );
 }
 
+function GenericScamExample({ imageSrc, category, title }) {
+  return (
+    <section aria-label={`Example image for ${title}`} style={{ gridColumn: "1 / -1", width: "100%", margin: "0 auto 4px" }}>
+      <figure style={{ margin: 0, padding: 16, border: "1px solid #e4ddd4", borderRadius: 16, background: "#f7f4ef" }}>
+        <figcaption style={{ margin: "0 0 12px", color: "#536179", fontSize: 13, fontWeight: 800, textTransform: "uppercase" }}>
+          {category} example · {title}
+        </figcaption>
+        <img
+          src={imageSrc}
+          alt={`Example image for the ${title} scam guide`}
+          style={{ display: "block", width: "100%", height: "auto", maxHeight: 620, maxWidth: 760, objectFit: "contain", margin: "0 auto", borderRadius: 8 }}
+        />
+      </figure>
+    </section>
+  );
+}
+
 function BankSmsExample({ imageSrc }) {
   return (
     <section
@@ -477,6 +505,7 @@ export default function ScamLibraryPage() {
               {scam.id === "job" && scam.example_image_path && <JobOfferExample imageSrc={scam.example_image_path} />}
               {scam.id === "account-recovery" && scam.example_image_path && <AccountRecoveryExample imageSrc={scam.example_image_path} />}
               {scam.id === "sars" && scam.example_image_path && <SarsNoticeExample imageSrc={scam.example_image_path} />}
+              {scam.example_image_path && !scamGuidesWithCustomExampleLayout.has(scam.id) && <GenericScamExample imageSrc={scam.example_image_path} category={scam.category} title={scam.title} />}
               <div className="scam-section-card">
                 <h2>Warning signs</h2>
                 <ul>{scam.signs.map((sign) => <li key={sign}>{sign}</li>)}</ul>

@@ -149,7 +149,7 @@ export default function SettingsPage() {
 
             <section className="popia-card">
               <h2>POPIA Compliance Hub</h2>
-              <p>Under South Africa's Protection of Personal Information Act, you maintain full control of your threat reports and user logs. Request data deletion instantly at any time.</p>
+              <p>Under South Africa&apos;s Protection of Personal Information Act, you maintain full control of your threat reports and user logs. Request data deletion instantly at any time.</p>
               <button type="button" className="popia-link" disabled title="Coming soon">Request POPIA Data Extract →</button>
             </section>
           </aside>

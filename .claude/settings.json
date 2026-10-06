@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xxd whatsapp-bot/.gitignore)",
+      "Bash(git rm *)",
+      "Bash(git check-ignore *)",
+      "Bash(grep -E \"\\\\.env$|__pycache__|\\\\.pyc$\")",
+      "Bash(echo \"\\(exit: $?, empty is good\\)\")",
+      "Bash(git grep *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(GROQ_API_KEY=dummy node -e \"require\\('./bot-logic'\\)\")",
+      "Bash(GROQ_API_KEY=dummy node -e ' *)"
+    ]
+  }
+}

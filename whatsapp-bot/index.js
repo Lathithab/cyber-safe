@@ -80,8 +80,19 @@ app.post("/webhook", async (req, res) => {
       // still let their first real message get a proper AI reply too
     }
 
-    const reply = await getAIReply(conversations, from, text);
-    await sendWhatsAppMessage(from, reply);
+    try {
+      const reply = await getAIReply(conversations, from, text);
+      await sendWhatsAppMessage(from, reply);
+    } catch (err) {
+      console.error("Error getting/sending AI reply:", err.response?.data || err.message);
+      // let the user know something went wrong instead of leaving them with silence
+      await sendWhatsAppMessage(
+        from,
+        "Sorry, I'm having trouble replying right now. Please try again in a moment.",
+      ).catch((sendErr) =>
+        console.error("Error sending fallback message:", sendErr.response?.data || sendErr.message),
+      );
+    }
   } catch (err) {
     console.error("Error handling webhook:", err.response?.data || err.message);
   }

@@ -91,9 +91,9 @@ export default function ProfilePage() {
         console.error("Could not load module badges:", progressError);
       } else {
         setEarnedBadges((progressRows || []).map((row) => {
-          const module = Array.isArray(row.modules) ? row.modules[0] : row.modules;
+          const moduleData = Array.isArray(row.modules) ? row.modules[0] : row.modules;
           return {
-            ...getModuleBadge(module),
+            ...getModuleBadge(moduleData),
             tone: "cyan",
             meta: `Unlocked ${new Date(row.completed_at).toLocaleDateString("en-ZA", {
               day: "numeric",

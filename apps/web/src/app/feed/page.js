@@ -7,6 +7,7 @@ import DashboardNavIcon from "../components/DashboardNavIcon";
 import C3saLogo from "../components/C3saLogo";
 import LogoutButton from "../components/LogoutButton";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
+import PlatformSearch from "../components/PlatformSearch";
 import { SEED_POSTS, loadStoredComments, appendStoredComment } from "./posts";
 
 function Icon({ name, size = 22 }) {
@@ -48,11 +49,11 @@ const TRENDING = [
 ];
 
 const CATEGORIES = ["General Tip", "Scam Alert", "Cyberbullying", "Phishing", "Malware"];
-const CURRENT_USER = { name: "Sipho Ndlovu", role: "Gauteng Community" };
 
 export default function FeedPage() {
   const router = useRouter();
   const [posts, setPosts] = useState([]);
+  const [currentUserName, setCurrentUserName] = useState("Guest");
   const [loading, setLoading] = useState(true);
   const [openMenuId, setOpenMenuId] = useState(null);
   const [openShareId, setOpenShareId] = useState(null);
@@ -125,6 +126,21 @@ export default function FeedPage() {
     loadPosts();
   }, []);
 
+  useEffect(() => {
+    async function loadCurrentUser() {
+      if (!isSupabaseConfigured || !supabase) return;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("username, full_name")
+        .eq("id", user.id)
+        .maybeSingle();
+      setCurrentUserName(profile?.full_name || profile?.username || user.email || "Guest");
+    }
+    loadCurrentUser();
+  }, []);
+
   const unreadTrending = useMemo(() => TRENDING, []);
 
   function likePost(index) {
@@ -192,7 +208,7 @@ export default function FeedPage() {
     const post = posts[index];
     const text = (commentDrafts[post.id] || "").trim();
     if (!text) return;
-    const comment = { name: CURRENT_USER.name, text, time: "Just now" };
+    const comment = { name: currentUserName, text, time: "Just now" };
     appendStoredComment(post.id, comment);
     setPosts((current) => {
       const updated = [...current];
@@ -307,7 +323,7 @@ export default function FeedPage() {
             <p>Stay updated with the latest scams, alerts, and cybersecurity advice across South Africa.</p>
           </div>
           <div className="header-actions">
-            <label className="platform-search"><Icon name="search" size={18} /><input aria-label="Search platform" placeholder="Search platform..." /></label>
+            <PlatformSearch />
             <button className="help-button" type="button" onClick={() => router.push("/help")}>Get Help Now</button>
           </div>
         </header>
@@ -316,7 +332,7 @@ export default function FeedPage() {
           <div className="feed-column">
             <form className="composer" onSubmit={submitPost}>
               <div className="composer-top">
-                <div className="composer-avatar">{initials(CURRENT_USER.name)}</div>
+                <div className="composer-avatar">{initials(currentUserName)}</div>
                 <input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Share a warning, question, or cyber safety tip with your community..." aria-label="Share a post" />
               </div>
 
@@ -401,7 +417,7 @@ export default function FeedPage() {
                       {!post.commentsList.length && <p className="no-comments">Be the first to comment.</p>}
                     </div>
                     <div className="comment-input-row">
-                      <div className="comment-avatar">{initials(CURRENT_USER.name)}</div>
+                      <div className="comment-avatar">{initials(currentUserName)}</div>
                       <input
                         placeholder="Write a comment..."
                         value={commentDrafts[post.id] || ""}

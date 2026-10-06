@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import DashboardNavIcon from "../components/DashboardNavIcon";
 import C3saLogo from "../components/C3saLogo";
 import LogoutButton from "../components/LogoutButton";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
 import PlatformSearch from "../components/PlatformSearch";
+import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
 
 function Icon({ name, size = 22 }) {
   const shared = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true };
@@ -29,6 +30,7 @@ function Toggle({ checked, onChange, label }) {
 
 export default function SettingsPage() {
   const router = useRouter();
+  const [email, setEmail] = useState("");
   const [twoFA, setTwoFA] = useState(true);
   const [smsAdvisories, setSmsAdvisories] = useState(true);
   const [emailReminders, setEmailReminders] = useState(false);
@@ -43,6 +45,14 @@ export default function SettingsPage() {
   const primaryNav = links.filter(([, route]) => PRIMARY_ROUTES.includes(route));
   const menuNav = links.filter(([, route]) => !MENU_EXCLUDED_ROUTES.includes(route));
 
+  useEffect(() => {
+    async function loadCurrentUser() {
+      if (!isSupabaseConfigured || !supabase) return;
+      const { data: { user } } = await supabase.auth.getUser();
+      setEmail(user?.email || "");
+    }
+    loadCurrentUser();
+  }, []);
 
   return (
     <main className="settings-dashboard">
@@ -111,8 +121,8 @@ export default function SettingsPage() {
           <div className="main-col">
             <section className="settings-card">
               <h2>Account Settings</h2>
-              <div className="row"><div><strong>Email Address</strong><small>sipho.ndlovu@gmail.com</small></div><button type="button" className="modify">Modify</button></div>
-              <div className="row"><div><strong>Security Password</strong><small>Last updated 4 months ago</small></div><button type="button" className="modify">Modify</button></div>
+              <div className="row"><div><strong>Email Address</strong><small>{email || "Guest"}</small></div><button type="button" className="modify" disabled title="Coming soon">Modify</button></div>
+              <div className="row"><div><strong>Security Password</strong><small>Last updated 4 months ago</small></div><button type="button" className="modify" disabled title="Coming soon">Modify</button></div>
               <div className="row"><div><strong>Two-Factor Authentication (2FA)</strong><small>Secure verification using an authenticator app.</small></div><Toggle checked={twoFA} onChange={() => setTwoFA((v) => !v)} label="Two-factor authentication" /></div>
             </section>
 
@@ -125,7 +135,7 @@ export default function SettingsPage() {
 
             <section className="settings-card">
               <h2>Language &amp; Translation Preferences</h2>
-              <div className="row"><div><strong>Primary Language Selection</strong><small>Choose active dialect: English, Afrikaans, Zulu, Xhosa, Sotho.</small></div><button type="button" className="modify">Modify</button></div>
+              <div className="row"><div><strong>Primary Language Selection</strong><small>Choose active dialect: English, Afrikaans, Zulu, Xhosa, Sotho.</small></div><button type="button" className="modify" disabled title="Coming soon">Modify</button></div>
             </section>
           </div>
 
@@ -140,7 +150,7 @@ export default function SettingsPage() {
             <section className="popia-card">
               <h2>POPIA Compliance Hub</h2>
               <p>Under South Africa's Protection of Personal Information Act, you maintain full control of your threat reports and user logs. Request data deletion instantly at any time.</p>
-              <button type="button" className="popia-link">Request POPIA Data Extract →</button>
+              <button type="button" className="popia-link" disabled title="Coming soon">Request POPIA Data Extract →</button>
             </section>
           </aside>
         </div>
@@ -192,11 +202,11 @@ export default function SettingsPage() {
         .main-col, .side-col { display: grid; gap: 18px; }
         .settings-card { padding: 22px; border: 1px solid #e4ddd4; border-radius: 11px; background: #fff; box-shadow: 0 8px 24px rgba(36, 56, 87, .035); } .settings-card h2 { margin: 0 0 18px; font-size: 16px; }
         .row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 13px 0; border-top: 1px solid #eee8e0; } .row:first-of-type { border-top: 0; padding-top: 0; } .row strong { display: block; font-size: 12px; font-weight: 700; } .row small { display: block; margin-top: 5px; color: #8996a8; font-size: 11px; line-height: 1.4; max-width: 380px; }
-        .modify { flex: 0 0 auto; padding: 8px 14px; border: 1px solid #e4ddd4; border-radius: 7px; background: #fff; color: #26324a; cursor: pointer; font: inherit; font-size: 11px; font-weight: 800; }
+        .modify { flex: 0 0 auto; padding: 8px 14px; border: 1px solid #e4ddd4; border-radius: 7px; background: #fff; color: #26324a; cursor: pointer; font: inherit; font-size: 11px; font-weight: 800; } .modify:disabled { opacity: .5; cursor: not-allowed; }
         .value-pill { padding: 5px 10px; border-radius: 999px; background: #FCE0D0; color: #C24F0C; font-size: 11px; font-weight: 800; }
         .toggle { position: relative; flex: 0 0 auto; width: 39px; height: 22px; } .toggle input { position: absolute; opacity: 0; } .toggle i { position: absolute; inset: 0; border-radius: 999px; background: #cfd8e3; transition: background .15s; } .toggle i::after { content: ""; position: absolute; top: 3px; left: 3px; width: 17px; height: 17px; border-radius: 50%; background: #fff; transition: transform .15s; } .toggle input:checked + i { background: #EB630F; } .toggle input:checked + i::after { transform: translateX(22px); }
 
-        .popia-card { padding: 21px; border-radius: 11px; background: #FDEAE0; } .popia-card h2 { margin: 0 0 12px; font-size: 14px; } .popia-card p { margin: 0 0 16px; color: #4a6572; font-size: 11px; line-height: 1.5; } .popia-link { border: 0; background: transparent; color: #C24F0C; cursor: pointer; font: inherit; font-size: 11px; font-weight: 800; padding: 0; }
+        .popia-card { padding: 21px; border-radius: 11px; background: #FDEAE0; } .popia-card h2 { margin: 0 0 12px; font-size: 14px; } .popia-card p { margin: 0 0 16px; color: #4a6572; font-size: 11px; line-height: 1.5; } .popia-link { border: 0; background: transparent; color: #C24F0C; cursor: pointer; font: inherit; font-size: 11px; font-weight: 800; padding: 0; } .popia-link:disabled { opacity: .5; cursor: not-allowed; }
 
         @media (max-width: 1180px) { .sidebar { padding: 22px 16px 20px; } .dashboard-content { padding: 27px 24px 42px; } .side-link { font-size: 13px; } .content-grid { grid-template-columns: 1fr; } }
         @media (max-width: 850px) {   .sidebar { padding: 11px 8px; } .brand strong { font-size: 12px; } .brand small { font-size: 11px; } .side-nav { margin-top: 18px; gap: 3px; } .side-link { padding: 6px 6px; font-size: 11px; gap: 6px; } .side-link svg { width: 16px; height: 16px; } .side-divider, .footer-links,  .side-divider { margin: 4px 2px; } .footer-links { gap: 2px; } .footer-link { font-size: 11px; padding: 4px 6px; gap: 5px; } .emergency-card { padding: 8px; gap: 6px; } .emergency-card strong { font-size: 11px; } .emergency-card small { font-size: 11px; margin: 5px 0 4px; } .emergency-card b { font-size: 11px; } .user-chip { padding: 5px; gap: 5px; } .user-chip strong { font-size: 11px; } .user-chip small { font-size: 11px; } .chip-avatar { width: 20px; height: 20px; font-size: 11px; } .dashboard-content { padding: 22px 14px 36px; } }

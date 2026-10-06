@@ -103,11 +103,6 @@ export default function LoginPage() {
             <h1>Empowering South African Communities to Stay Safe Online.</h1>
             <p>Join CyberSafe SA, a cybersecurity awareness platform built specifically for students, schools, and local communities. Learn how to spot scams, report online incidents, and get instant emergency assistance.</p>
           </div>
-
-          <div className="hero-trust">
-            <small>Trusted by education departments &amp; local communities</small>
-            <div className="trust-row"><span>SAPS Connected</span><span>SA Banks Alliance</span><span>EduNet</span></div>
-          </div>
         </div>
       </section>
 
@@ -134,7 +129,7 @@ export default function LoginPage() {
             <label className="field-label" htmlFor="email">Email Address</label>
             <input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
 
-            <div className="password-row"><label className="field-label" htmlFor="password">Password</label><button type="button" className="forgot">Forgot?</button></div>
+            <div className="password-row"><label className="field-label" htmlFor="password">Password</label><button type="button" className="forgot" disabled title="Coming soon">Forgot?</button></div>
             <div className="password-shell">
               <input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••••••" value={password} onChange={(event) => setPassword(event.target.value)} required minLength={6} />
               <button type="button" className="toggle-visibility" onClick={() => setShowPassword((v) => !v)} aria-label="Toggle password visibility"><EyeIcon /></button>
@@ -145,8 +140,8 @@ export default function LoginPage() {
 
           <div className="divider"><span>or connect with</span></div>
           <div className="oauth-row">
-            <button type="button" className="oauth-button"><GoogleIcon />Google</button>
-            <button type="button" className="oauth-button"><MicrosoftIcon />Microsoft</button>
+            <button type="button" className="oauth-button" disabled title="Coming soon"><GoogleIcon />Google</button>
+            <button type="button" className="oauth-button" disabled title="Coming soon"><MicrosoftIcon />Microsoft</button>
           </div>
           <p className="demo-note">Email and password authentication is active. Google and Microsoft sign-in are not connected yet.</p>
         </div>
@@ -172,11 +167,11 @@ export default function LoginPage() {
         .mode-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 24px; padding: 4px; border-radius: 8px; background: #f3eee8; } .mode-toggle button { padding: 10px; min-height: 40px; border: 0; border-radius: 6px; background: transparent; color: #65738a; cursor: pointer; font: inherit; font-size: 12px; font-weight: 800; } .mode-toggle button.selected { background: #fff; color: #00243A; box-shadow: 0 4px 10px rgba(15,30,60,.08); }
         .field-label { display: block; margin: 13px 0 8px; color: #26324a; font-size: 12px; font-weight: 700; }
         input { width: 100%; height: 46px; padding: 0 15px; border: 1px solid #e4ddd4; border-radius: 8px; background: #fbf9f5; color: #00243A; font: inherit; font-size: 13px; outline: none; } input:focus { border-color: #EB630F; box-shadow: 0 0 0 3px rgba(235,99,15,.15); }
-        .password-row { display: flex; align-items: center; justify-content: space-between; } .password-row .field-label { margin: 13px 0 8px; } .forgot { border: 0; background: transparent; color: #C24F0C; cursor: pointer; font: inherit; font-size: 12px; font-weight: 700; }
+        .password-row { display: flex; align-items: center; justify-content: space-between; } .password-row .field-label { margin: 13px 0 8px; } .forgot { border: 0; background: transparent; color: #C24F0C; cursor: pointer; font: inherit; font-size: 12px; font-weight: 700; } .forgot:disabled { opacity: .5; cursor: not-allowed; }
         .password-shell { position: relative; } .password-shell input { padding-right: 46px; } .toggle-visibility { position: absolute; top: 50%; right: 13px; transform: translateY(-50%); border: 0; background: transparent; color: #8996a8; cursor: pointer; }
         .submit-button { width: 100%; margin-top: 22px; padding: 13px; min-height: 46px; border: 0; border-radius: 8px; background: #EB630F; color: #00243A; cursor: pointer; font: inherit; font-size: 13px; font-weight: 800; }
         .divider { position: relative; margin: 20px 0 16px; text-align: center; } .divider::before { content: ""; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #e4ddd4; } .divider span { position: relative; padding: 0 14px; background: #fff; color: #8996a8; font-size: 10.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
-        .oauth-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } .oauth-button { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 11px; min-height: 44px; border: 1px solid #e4ddd4; border-radius: 8px; background: #fff; color: #26324a; cursor: pointer; font: inherit; font-size: 12px; font-weight: 700; }
+        .oauth-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } .oauth-button { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 11px; min-height: 44px; border: 1px solid #e4ddd4; border-radius: 8px; background: #fff; color: #26324a; cursor: pointer; font: inherit; font-size: 12px; font-weight: 700; } .oauth-button:disabled { opacity: .5; cursor: not-allowed; }
         .demo-note { margin: 14px 0 0; color: #a4afbe; font-size: 10.5px; text-align: center; line-height: 1.4; }
 
         @media (min-width: 851px) {

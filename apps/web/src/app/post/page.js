@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useRef, useState, Suspense } from "react";
 import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
@@ -75,6 +75,16 @@ function PostPage() {
   const [likeCount, setLikeCount] = useState(0);
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
+  const [openMenu, setOpenMenu] = useState(false);
+  const [toast, setToast] = useState("");
+  const commentsRef = useRef(null);
+
+  useEffect(() => {
+    if (!openMenu) return;
+    const closeMenu = () => setOpenMenu(false);
+    window.addEventListener("click", closeMenu);
+    return () => window.removeEventListener("click", closeMenu);
+  }, [openMenu]);
 
   useEffect(() => {
   async function loadPost() {
@@ -152,6 +162,30 @@ function PostPage() {
     const updated = appendStoredComment(id, comment);
     setComments(updated || [...comments, comment]);
     setCommentText("");
+  }
+
+  function showToast(message) {
+    setToast(message);
+    setTimeout(() => setToast(""), 2200);
+  }
+
+  function copyPostLink() {
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(url).then(() => showToast("Link copied to clipboard")).catch(() => showToast("Couldn't copy the link"));
+    } else {
+      showToast("Couldn't copy the link");
+    }
+    setOpenMenu(false);
+  }
+
+  function reportPost() {
+    setOpenMenu(false);
+    showToast("Post reported. Thank you for keeping the community safe.");
+  }
+
+  function scrollToComments() {
+    commentsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   return (
@@ -298,7 +332,6 @@ function PostPage() {
         }
 
         .more-btn {
-          margin-left: auto;
           background: none;
           border: none;
           color: #6b7c86;
@@ -311,6 +344,13 @@ function PostPage() {
           justify-content: center;
           flex: none;
         }
+
+        .more-wrap { position: relative; margin-left: auto; flex: none; }
+        .more-menu { position: absolute; z-index: 20; top: 38px; right: 0; min-width: 150px; padding: 5px; border-radius: 10px; background: #fff; box-shadow: 0 8px 20px rgba(14,27,36,.16); display: grid; }
+        .more-menu button { width: 100%; padding: 9px 10px; border: 0; border-radius: 7px; background: transparent; color: #0e1b24; cursor: pointer; font: inherit; font-size: 13px; font-weight: 700; text-align: left; }
+        .more-menu button:hover { background: #f5f7fa; }
+
+        .post-toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); z-index: 40; padding: 12px 22px; border-radius: 999px; background: #0e1b24; color: #fff; font-size: 13px; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
         .more-btn:hover { background: rgba(235, 99, 15, 0.1); color: #eb630f; }
 
         /* Post body */
@@ -605,13 +645,21 @@ function PostPage() {
                     )}
                   </div>
 
-                  <button className="more-btn" aria-label="More options">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                      <circle cx="5" cy="12" r="1.5" />
-                      <circle cx="12" cy="12" r="1.5" />
-                      <circle cx="19" cy="12" r="1.5" />
-                    </svg>
-                  </button>
+                  <div className="more-wrap">
+                    <button className="more-btn" aria-label="More options" onClick={() => setOpenMenu((current) => !current)}>
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                        <circle cx="5" cy="12" r="1.5" />
+                        <circle cx="12" cy="12" r="1.5" />
+                        <circle cx="19" cy="12" r="1.5" />
+                      </svg>
+                    </button>
+                    {openMenu && (
+                      <div className="more-menu">
+                        <button type="button" onClick={copyPostLink}>Copy link</button>
+                        <button type="button" onClick={reportPost}>Report post</button>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <p className="post-content">{post.text}</p>
@@ -634,7 +682,7 @@ function PostPage() {
                     <span className="action-count">{likeCount}</span>
                   </button>
 
-                  <button className="action-btn" aria-label="Comments">
+                  <button className="action-btn" aria-label="Jump to comments" onClick={scrollToComments}>
                     <CommentIcon />
                     <span className="action-count">
                       {(post.comments || 0) + comments.length}
@@ -653,7 +701,7 @@ function PostPage() {
               </button>
 
               {/* Comments */}
-              <div className="comments-heading">Comments</div>
+              <div className="comments-heading" ref={commentsRef}>Comments</div>
 
               {[...(post.topComments || []), ...comments].map((c, idx) => (
                 <div className="comment-row" key={idx}>
@@ -690,6 +738,8 @@ function PostPage() {
           </div>
         </form>
       )}
+
+      {toast && <div className="post-toast">{toast}</div>}
     </>
   );
 }

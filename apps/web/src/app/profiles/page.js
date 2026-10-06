@@ -231,9 +231,7 @@ export default function ProfilePage() {
 
         <div className="stat-grid">
           <div className="stat-card"><span>Security Badges</span><strong>{earnedBadges.length}</strong><small>Module completion badges earned</small></div>
-          <div className="stat-card"><span>Incident Reports</span><strong>3 Active</strong><small>2 SAPS Escalated</small></div>
-          <div className="stat-card"><span>Safety Tips Shared</span><strong>18 Posts</strong><small>124 Helpful votes</small></div>
-          <div className="stat-card"><span>Security Score</span><strong>920 XP</strong><small>Top 5% Gauteng</small></div>
+          <div className="stat-card"><span>Incident Reports</span><strong>{myPosts.length}</strong><small>Submitted by you</small></div>
         </div>
 
         <section className="profile-tools" aria-labelledby="profile-tools-title">
@@ -335,7 +333,7 @@ export default function ProfilePage() {
         .profile-card { display: flex; align-items: center; gap: 18px; margin-top: 28px; padding: 24px; border: 1px solid #e4ddd4; border-radius: 12px; background: #fff; box-shadow: 0 8px 24px rgba(36, 56, 87, .035); } .avatar { display: grid; place-items: center; width: 58px; height: 58px; flex: 0 0 auto; border-radius: 50%; background: #FDEAE0; color: #C24F0C; font-size: 19px; font-weight: 800; } .profile-info { flex: 1; min-width: 0; } .profile-info h2 { margin: 0; font-size: 19px; } .profile-info p { margin: 5px 0 0; color: #536179; font-size: 12px; } .profile-info small { color: #8996a8; font-size: 11px; } .edit-button { flex: 0 0 auto; padding: 10px 18px; border: 1px solid #e4ddd4; border-radius: 8px; background: #fff; color: #26324a; cursor: pointer; font: inherit; font-size: 12px; font-weight: 800; }
         .profile-actions { display: flex; align-items: center; gap: 10px; }
 
-        .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 22px; } .stat-card { padding: 18px; border: 1px solid #e4ddd4; border-radius: 10px; background: #fff; } .stat-card span { color: #65738a; font-size: 11px; font-weight: 700; } .stat-card strong { display: block; margin: 8px 0 6px; font-size: 20px; letter-spacing: -0.55px; } .stat-card small { color: #8996a8; font-size: 11px; }
+        .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 22px; max-width: 420px; } .stat-card { padding: 18px; border: 1px solid #e4ddd4; border-radius: 10px; background: #fff; } .stat-card span { color: #65738a; font-size: 11px; font-weight: 700; } .stat-card strong { display: block; margin: 8px 0 6px; font-size: 20px; letter-spacing: -0.55px; } .stat-card small { color: #8996a8; font-size: 11px; }
         .profile-tools { display: grid; grid-template-columns: minmax(190px, .6fr) minmax(0, 1.4fr); gap: 18px; align-items: center; margin-top: 22px; padding: 20px; border: 1px solid #e4ddd4; border-radius: 12px; background: #fff; }
         .profile-tools h2 { margin: 0; color: #18223b; font-size: 17px; }
         .profile-tools p { margin: 6px 0 0; color: #66758d; font-size: 12px; line-height: 1.5; }

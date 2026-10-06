@@ -6,6 +6,7 @@ import DashboardNavIcon from "../components/DashboardNavIcon";
 import C3saLogo from "../components/C3saLogo";
 import LogoutButton from "../components/LogoutButton";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
+import PlatformSearch from "../components/PlatformSearch";
 
 function Icon({ name, size = 22 }) {
   const shared = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true };
@@ -127,7 +128,7 @@ export default function NotificationsPage() {
             <p>View threat advisories, emergency escalation reports, and community support metrics.</p>
           </div>
           <div className="header-actions">
-            <label className="platform-search"><Icon name="search" size={18} /><input aria-label="Search platform" placeholder="Search platform..." /></label>
+            <PlatformSearch />
             <button className="help-button" type="button" onClick={() => router.push("/help")}>Get Help Now</button>
           </div>
         </header>

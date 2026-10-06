@@ -25,8 +25,8 @@ body {
   max-width: 598px;
   margin: 0 auto;
   min-height: 100vh;
-  border-left: 1px solid #e5ddd4;
-  border-right: 1px solid #e5ddd4;
+  border-left: 1px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb;
 }
 
 /* Shared topbar */
@@ -35,7 +35,7 @@ body {
   top: 0;
   z-index: 10;
   background: #ffffff;
-  border-bottom: 1px solid #e5ddd4;
+  border-bottom: 1px solid #e5e7eb;
   padding: 14px 16px;
   display: flex;
   align-items: center;
@@ -62,7 +62,7 @@ body {
   width: 100%;
   padding: 10px 14px;
   border-radius: 8px;
-  border: 1px solid #e5ddd4;
+  border: 1px solid #e5e7eb;
   font-family: "DM Sans", sans-serif;
   font-size: 15px;
   color: #000;
@@ -70,12 +70,12 @@ body {
   transition: border-color 0.15s;
 }
 .field:focus {
-  border-color: #eb630f;
+  border-color: #1d9bf0;
 }
 
 /* Shared button */
 .btn-primary {
-  background: #eb630f;
+  background: #1d9bf0;
   color: #fff;
   border: none;
   padding: 10px 20px;
@@ -87,7 +87,7 @@ body {
   transition: background 0.15s;
 }
 .btn-primary:hover {
-  background: #c24f0c;
+  background: #1a8cd8;
 }
 
 /* Shared username display */
@@ -95,104 +95,12 @@ body {
   font-family: "Syne", sans-serif;
   font-weight: 700;
   font-size: 15px;
-  color: #eb630f;
-}
-
-/* Shared dashboard sidebar: one brand, palette, and nav rhythm on every route. */
-.sidebar {
-  background: #00243a !important;
-  border-color: #0d3557 !important;
-  color: #fff;
-}
-
-.sidebar .brand {
-  color: #fff !important;
-  gap: 12px !important;
-  flex: 0 0 auto;
-}
-
-.sidebar .brand .brand-icon {
-  flex: 0 0 92px !important;
-  width: 92px !important;
-  height: 92px !important;
-  border-radius: 0 !important;
-  background: #fff url("/c3sa-logo.jpeg") center / contain no-repeat !important;
-}
-
-.sidebar .brand .brand-icon svg {
-  display: none !important;
-}
-
-.sidebar .brand strong {
-  color: #fff !important;
-}
-
-.sidebar .brand small {
-  color: #eb630f !important;
-}
-
-.sidebar .side-nav {
-  display: grid !important;
-  gap: 10px !important;
-  margin-top: 38px !important;
-  width: 100%;
-}
-
-.sidebar .side-link {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  gap: 14px !important;
-  width: 100% !important;
-  min-width: 0;
-  min-height: 58px !important;
-  padding: 12px 14px !important;
-  border: 0 !important;
-  border-radius: 16px !important;
-  background: transparent !important;
-  color: #a9bac5 !important;
-  font-size: 16px !important;
-  font-weight: 600 !important;
-  line-height: 1.25 !important;
-  text-align: left;
-  text-decoration: none;
-  white-space: nowrap;
-  transform: none !important;
-  transition: background-color .15s ease, color .15s ease;
-}
-
-.sidebar .side-link:hover {
-  background: rgba(235, 99, 15, .12) !important;
-  color: #fff !important;
-}
-
-.sidebar .side-link.active {
-  background: rgba(235, 99, 15, .25) !important;
-  color: #fff !important;
-  font-size: 16px !important;
-  font-weight: 700 !important;
-  transform: none !important;
-}
-
-.sidebar .side-link svg {
-  display: block;
-  flex: 0 0 24px !important;
-  width: 24px !important;
-  height: 24px !important;
-  color: currentColor;
-}
-
-.sidebar .side-link.active svg {
-  color: #eb630f !important;
-}
-
-.sidebar .platform-admin-nav {
-  border-color: rgba(255, 255, 255, .22) !important;
+  color: #1d9bf0;
 }
 
 /* Shared banner */
 .banner {
-  background: #eb630f;
+  background: #1d9bf0;
   padding: 20px;
   color: white;
   font-family: "Syne", sans-serif;
@@ -201,223 +109,23 @@ body {
   font-weight: bold;
 }
 
-/*
- * Dashboard sidebar
- *
- * Every dashboard page shares the same navigation, so keep its spacing compact
- * enough for the complete menu and emergency card to remain visible on standard
- * laptop-height screens. Individual pages still own their page-specific layout.
- */
-@media (min-width: 851px) {
-  .sidebar {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-    padding: 22px 22px 20px !important;
-    overflow-y: auto !important;
-  }
-
-  .sidebar .brand .brand-icon {
-    width: 92px !important;
-    height: 92px !important;
-  }
-
-  .brand strong {
-    font-size: 24px !important;
-  }
-
-  .brand small {
-    margin-top: 3px !important;
-    font-size: 13px !important;
-  }
-
-  .sidebar .side-nav {
-    gap: 10px !important;
-    margin-top: 38px !important;
-  }
-
-  .platform-admin-nav {
-    margin-top: 14px;
-    padding-top: 14px;
-    border-top: 1px solid #e4ddd4;
-  }
-
-  .sidebar .side-link {
-    gap: 14px !important;
-    min-height: 58px !important;
-    padding: 12px 14px !important;
-    border-radius: 16px !important;
-    font-size: 16px !important;
-    font-weight: 600 !important;
-  }
-
-  .sidebar .side-link.active {
-    font-size: 16px !important;
-    font-weight: 700 !important;
-  }
-
-  .sidebar .side-link svg {
-    width: 22px !important;
-    height: 22px !important;
-  }
-
-  .emergency-card {
-    flex: 0 0 auto;
-    margin-top: auto !important;
-    gap: 10px !important;
-    padding: 14px !important;
-    border-radius: 16px !important;
-    border-color: #e68178 !important;
-    background: #fff7f2 !important;
-    color: #bd3f3f !important;
-  }
-
-  .emergency-card strong {
-    font-size: 15px !important;
-    color: #bd3f3f !important;
-  }
-
-  .emergency-card small {
-    margin: 7px 0 4px !important;
-    font-size: 12px !important;
-    line-height: 1.25 !important;
-    color: #536179 !important;
-  }
-
-  .emergency-card b {
-    font-size: 13px !important;
-    color: #c24f0c !important;
-  }
-
-  .emergency-icon svg {
-    width: 20px !important;
-    height: 20px !important;
-    color: #bd3f3f !important;
-  }
-
-  aside.sidebar > button.sidebar-logout {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 8px;
-    width: 100%;
-    min-height: 46px;
-    margin-top: auto;
-    padding: 11px 13px;
-    border: 1px solid rgba(235, 99, 15, .4);
-    border-radius: 12px;
-    background: #fff5ed;
-    color: #a94213;
-    cursor: pointer;
-    font: inherit;
-    font-size: 14px;
-    font-weight: 800;
-    line-height: 1.2;
-    text-align: left;
-  }
-
-  aside.sidebar > button.sidebar-logout:hover {
-    border-color: #eb630f;
-    background: #ffebdd;
-    color: #8c3610;
-  }
-
-  .sidebar-logout svg {
-    flex: 0 0 20px;
-  }
-
-  .sidebar-logout span {
-    white-space: nowrap;
-  }
-
-  .sidebar-logout:disabled {
-    cursor: wait;
-    opacity: .65;
-  }
-
-  .sidebar-logout + .emergency-card {
-    margin-top: 12px !important;
-  }
+/* Hide scrollbars site-wide while keeping scroll functionality */
+html {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+html::-webkit-scrollbar {
+  display: none;
 }
 
-/* Preserve the whole menu on shorter laptop screens too. */
-@media (min-width: 851px) and (max-height: 760px) {
-  .sidebar {
-    padding-block: 14px !important;
-  }
-
-  .sidebar .side-nav {
-    gap: 6px !important;
-    margin-top: 22px !important;
-  }
-
-  .sidebar .side-link {
-    min-height: 48px !important;
-    padding: 10px 12px !important;
-    font-size: 16px !important;
-  }
-
-  .sidebar .side-link.active {
-    font-size: 16px !important;
-  }
-
-  .emergency-card {
-    padding: 11px !important;
-  }
-
-  .emergency-card small {
-    display: none !important;
-  }
+/* Cross-device fixes */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
-
-.profile-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-left: auto;
-}
-
-.profile-logout-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 46px;
-  padding: 0 17px;
-  border: 1px solid rgba(235, 99, 15, .4);
-  border-radius: 13px;
-  background: #fff5ed;
-  color: #a94213;
-  cursor: pointer;
-  font: inherit;
-  font-size: 14px;
-  font-weight: 800;
-}
-
-.profile-logout-button:hover {
-  border-color: #eb630f;
-  background: #ffebdd;
-  color: #8c3610;
-}
-
-.profile-logout-button:disabled {
-  cursor: wait;
-  opacity: .65;
-}
-
+/* iOS Safari zooms the page when a focused input is under 16px */
 @media (max-width: 850px) {
-  .sidebar-logout {
-    display: none;
-  }
-
-  .platform-admin-nav {
-    margin-top: 8px !important;
-    padding-top: 0 !important;
-    border-top: 0 !important;
-  }
-
-  .profile-actions {
-    width: 100%;
-    margin: 0;
+  input, select, textarea {
+    font-size: 16px !important;
   }
 }

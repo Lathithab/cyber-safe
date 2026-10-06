@@ -18,6 +18,25 @@ const conversations = {};
 // tracks whether a user has already gotten the intro message
 const hasGreeted = {};
 
+// WhatsApp can redeliver the same webhook event (e.g. if it doesn't get a
+// clean ack in time); track recently seen message IDs so we don't process
+// (and reply to) the same message twice. Map preserves insertion order so
+// we can evict the oldest entries once it grows too large.
+const seenMessageIds = new Map();
+const MAX_SEEN_MESSAGE_IDS = 1000;
+
+function isDuplicateMessage(messageId) {
+  if (!messageId) return false;
+  if (seenMessageIds.has(messageId)) return true;
+
+  seenMessageIds.set(messageId, true);
+  if (seenMessageIds.size > MAX_SEEN_MESSAGE_IDS) {
+    const oldestKey = seenMessageIds.keys().next().value;
+    seenMessageIds.delete(oldestKey);
+  }
+  return false;
+}
+
 // ---------- 1. Webhook verification (Meta calls this once when you set up the webhook) ----------
 app.get("/webhook", (req, res) => {
   const mode = req.query["hub.mode"];
@@ -42,6 +61,11 @@ app.post("/webhook", async (req, res) => {
     const message = change?.value?.messages?.[0];
 
     if (!message) return; // could be a status update, not a message
+
+    if (isDuplicateMessage(message.id)) {
+      console.log(`Skipping duplicate message ${message.id}`);
+      return;
+    }
 
     const from = message.from; // sender's phone number
     const text = message.text?.body;
@@ -77,6 +101,7 @@ async function sendWhatsAppMessage(to, text) {
         Authorization: `Bearer ${WHATSAPP_TOKEN}`,
         "Content-Type": "application/json",
       },
+      timeout: 10000,
     },
   );
 }

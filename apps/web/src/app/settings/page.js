@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import DashboardNavIcon from "../components/DashboardNavIcon";
+import C3saLogo from "../components/C3saLogo";
 import LogoutButton from "../components/LogoutButton";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
 import PlatformSearch from "../components/PlatformSearch";
@@ -50,7 +51,7 @@ export default function SettingsPage() {
           <Icon name="menu" size={21} />
         </button>
         <button className="mobile-topbar-brand" type="button" onClick={() => router.push("/feed")}>
-          <span className="mobile-topbar-icon"><Icon name="shield" size={18} /></span>
+          <C3saLogo size={34} />
           <strong>CyberSafe</strong>
         </button>
         <button className="mobile-topbar-bell" type="button" onClick={() => router.push("/profiles")} aria-label="User Profile">
@@ -59,7 +60,7 @@ export default function SettingsPage() {
       </header>
 
 <aside className="sidebar">
-        <button className="brand" type="button" onClick={() => router.push("/")}><span className="brand-icon"><Icon name="shield" size={22} /></span><span><strong>CyberSafe</strong><small>South Africa</small></span></button>
+        <button className="brand" type="button" onClick={() => router.push("/")}><C3saLogo /><span><strong>CyberSafe</strong><small>South Africa</small></span></button>
         <nav className="side-nav" aria-label="Dashboard navigation">
           {links.map(([label, route, icon]) => <button key={label} className={`side-link ${route === "/profiles" ? "active" : ""}`} type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={19} /><span>{label}</span></button>)}
         </nav>

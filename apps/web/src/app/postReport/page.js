@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
 import DashboardNavIcon from "../components/DashboardNavIcon";
+import C3saLogo from "../components/C3saLogo";
+import LogoutButton from "../components/LogoutButton";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
 
 const INCIDENT_TYPES = [
@@ -37,7 +39,7 @@ function Sidebar({ router }) {
   return (
     <aside className="sidebar">
       <button className="brand" type="button" onClick={() => router.push("/")}>
-        <span className="brand-icon"><Icon name="shield" size={22} /></span>
+        <C3saLogo />
         <span><strong>CyberSafe</strong><small>South Africa</small></span>
       </button>
       <nav className="side-nav" aria-label="Dashboard navigation">
@@ -47,6 +49,7 @@ function Sidebar({ router }) {
           </button>
         ))}
       </nav>
+      <LogoutButton />
       <button className="emergency-card" type="button" onClick={() => router.push("/help")}>
         <span className="emergency-icon"><Icon name="phone" size={18} /></span>
         <span><strong>EMERGENCY</strong><small>Victim of a scam or cyber hack?</small><b>Get Help Now</b></span>
@@ -149,7 +152,7 @@ export default function PostReportPage() {
     <main className="report-dashboard">
       <header className="mobile-topbar">
         <button className="mobile-topbar-menu" type="button" onClick={() => setMenuOpen(true)} aria-label="Open menu"><Icon name="menu" size={21} /></button>
-        <button className="mobile-topbar-brand" type="button" onClick={() => router.push("/feed")}><span className="mobile-topbar-icon"><Icon name="shield" size={18} /></span><strong>CyberSafe</strong></button>
+        <button className="mobile-topbar-brand" type="button" onClick={() => router.push("/feed")}><C3saLogo size={34} /><strong>CyberSafe</strong></button>
         <button className="mobile-topbar-bell" type="button" onClick={() => router.push("/notification")} aria-label="Notifications"><DashboardNavIcon name="bell" size={21} /></button>
       </header>
       <Sidebar router={router} />
@@ -172,6 +175,7 @@ export default function PostReportPage() {
                 </button>
               ))}
             </div>
+            <LogoutButton />
           </div>
         </div>
       )}

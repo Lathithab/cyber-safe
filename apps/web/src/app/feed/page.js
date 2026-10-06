@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
 import DashboardNavIcon from "../components/DashboardNavIcon";
+import C3saLogo from "../components/C3saLogo";
+import LogoutButton from "../components/LogoutButton";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
 import { SEED_POSTS, loadStoredComments, appendStoredComment } from "./posts";
 
@@ -253,7 +255,7 @@ export default function FeedPage() {
           <Icon name="menu" size={21} />
         </button>
         <button className="mobile-topbar-brand" type="button" onClick={() => router.push("/feed")}>
-          <span className="mobile-topbar-icon"><Icon name="shield" size={18} /></span>
+          <C3saLogo size={34} />
           <strong>CyberSafe</strong>
         </button>
         <button className="mobile-topbar-bell" type="button" onClick={() => router.push("/notification")} aria-label="Notifications">
@@ -262,11 +264,11 @@ export default function FeedPage() {
       </header>
 
       <aside className="sidebar">
-        <button className="brand" type="button" onClick={() => router.push("/")}><span className="brand-icon"><Icon name="shield" size={22} /></span><span><strong>CyberSafe</strong><small>South Africa</small></span></button>
+        <button className="brand" type="button" onClick={() => router.push("/")}><C3saLogo /><span><strong>CyberSafe</strong><small>South Africa</small></span></button>
         <nav className="side-nav" aria-label="Dashboard navigation">
           {links.map(([label, route, icon]) => <button key={label} className={`side-link ${route === "/feed" ? "active" : ""}`} type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={19} /><span>{label}</span></button>)}
         </nav>
-        <button className="emergency-card" type="button" onClick={() => router.push("/help")}><span className="emergency-icon"><Icon name="phone" size={18} /></span><span><strong>EMERGENCY</strong><small>Victim of a scam or cyber hack?</small><b>Get Help Now</b></span></button>
+        <LogoutButton />
       </aside>
 
       <nav className="bottom-nav" aria-label="Primary navigation">
@@ -293,6 +295,7 @@ export default function FeedPage() {
                 </button>
               ))}
             </div>
+            <LogoutButton />
           </div>
         </div>
       )}
@@ -453,20 +456,17 @@ export default function FeedPage() {
 
         .sidebar { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 14px 6px; border-right: 1px solid #0d3557; background: #00243A; overflow-y: auto; }
         .brand { display: flex; align-items: center; gap: 10px; padding: 0; border: 0; background: transparent; color: #fff; cursor: pointer; text-align: left; }
-        .brand-icon { display: grid; place-items: center; width: 34px; height: 34px; flex: 0 0 auto; border-radius: 8px; background: rgba(235,99,15,.22); color: #EB630F; }
+        .brand-icon { display: grid; place-items: center; width: 41px; height: 41px; flex: 0 0 auto; border-radius: 12px; background: rgba(235,99,15,.22); color: #EB630F; }
         .brand span:not(.brand-icon) { display: none; }
 
-        .side-nav { display: grid; gap: 4px; margin-top: 20px; width: 100%; }
-        .side-link { display: flex; align-items: center; justify-content: center; gap: 0; width: 100%; padding: 11px 0; border: 0; border-radius: 9px; background: transparent; color: #fff; cursor: pointer; font: inherit; font-size: 11px; font-weight: 600; text-align: left; min-height: 42px; }
+        .side-nav { display: grid; gap: 7px; margin-top: 33px; width: 100%; }
+        .side-link { display: flex; align-items: center; justify-content: flex-start; gap: 13px; width: 100%; padding: 11px 13px; border: 0; border-radius: 11px; background: transparent; color: rgba(255,255,255,.68); cursor: pointer; font: inherit; font-size: 14px; font-weight: 600; text-align: left; min-height: 42px; }
         .side-link span { display: none; }
         .side-link.active { background: rgba(235,99,15,.25); color: #fff; font-weight: 800; }
         .side-link.active svg { color: #EB630F; }
 
         .side-divider { width: 100%; height: 1px; margin: 6px 0; background: #e2e9f2; }
         .footer-links { display: none; }
-        .emergency-card { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; margin-top: 14px; padding: 10px 4px; border: 2px solid #ff5a5f; border-radius: 10px; background: #fff4f4; color: #ff5158; cursor: pointer; font: inherit; text-align: center; }
-        .emergency-card span:not(.emergency-icon) { display: none; }
-        .emergency-card strong, .emergency-card small, .emergency-card b { display: block; }
         .user-chip { display: flex; align-items: center; justify-content: center; width: 100%; margin-top: 10px; padding: 6px; border: 0; border-radius: 7px; background: transparent; cursor: pointer; font: inherit; }
         .user-chip:hover { background: #f6f9fd; }
         .chip-avatar { display: grid; place-items: center; width: 26px; height: 26px; flex: 0 0 auto; border-radius: 50%; background: #FDEAE0; color: #C24F0C; font-weight: 800; font-size: 10px; }
@@ -601,21 +601,17 @@ export default function FeedPage() {
           .mobile-topbar { display: none; }
           .bottom-nav, .nav-menu-overlay { display: none; }
           .dashboard-content { padding-top: 30px; padding-bottom: 36px; }
-          .feed-dashboard { grid-template-columns: 168px minmax(0, 1fr); }
-          .sidebar { align-items: stretch; padding: 22px 16px 20px; }
+          .feed-dashboard { grid-template-columns: 230px minmax(0, 1fr); }
+          .sidebar { align-items: stretch; padding: 24px 22px 22px; }
           .brand span:not(.brand-icon) { display: block; }
-          .brand strong { font-size: 15px; }
-          .brand small { display: block; margin-top: 4px; font-size: 11px; }
-          .side-nav { margin-top: 24px; gap: 6px; }
-          .side-link { justify-content: flex-start; gap: 10px; padding: 10px 10px; font-size: 12px; }
+          .brand strong { font-size: 20px; }
+          .brand small { display: block; margin-top: 4px; font-size: 12px; }
+          .side-nav { margin-top: 33px; gap: 7px; }
+          .side-link { justify-content: flex-start; gap: 13px; padding: 11px 13px; font-size: 14px; }
           .side-link span { display: inline; }
           .footer-links { display: grid; gap: 2px; margin-top: auto; padding-top: 12px; }
           .footer-link { display: flex; align-items: center; gap: 7px; padding: 7px 10px; border: 0; background: transparent; color: #8996a8; cursor: pointer; font: inherit; font-size: 11px; font-weight: 700; text-align: left; }
           .footer-link:hover { color: #536179; }
-          .emergency-card { flex-direction: row; align-items: flex-start; text-align: left; padding: 14px; }
-          .emergency-card span:not(.emergency-icon) { display: block; }
-          .emergency-card strong { font-size: 12px; }
-          .emergency-card small { margin: 8px 0 5px; font-size: 11px; }
           .user-chip { justify-content: flex-start; }
           .user-chip span:not(.chip-avatar) { display: block; }
           .user-chip strong { font-size: 11px; }

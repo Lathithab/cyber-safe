@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
 import DashboardNavIcon from "../components/DashboardNavIcon";
+import C3saLogo from "../components/C3saLogo";
 import LogoutButton from "../components/LogoutButton";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
 
@@ -60,7 +61,7 @@ export default function PlatformAdminPage() {
     <main className="admin-layout">
       <aside className="sidebar">
         <button className="brand" type="button" onClick={() => router.push("/")}>
-          <span className="brand-icon"><DashboardNavIcon name="admin" size={27} /></span>
+          <C3saLogo />
           <span><strong>CyberSafe</strong><small>South Africa</small></span>
         </button>
         <nav className="side-nav" aria-label="Dashboard navigation">

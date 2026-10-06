@@ -39,7 +39,30 @@ export default function LogoutButton({ className = "sidebar-logout", label = "Lo
   return (
     <>
       {className === "sidebar-logout" && <PlatformAdminLink />}
-      <button className={className} type="button" onClick={handleLogout} disabled={isSigningOut}>
+      <button
+        className={className}
+        type="button"
+        onClick={handleLogout}
+        disabled={isSigningOut}
+        style={className === "sidebar-logout" ? {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-start",
+          gap: 10,
+          width: "100%",
+          minHeight: 46,
+          marginTop: 12,
+          padding: "10px 14px",
+          border: "1px solid #ff9a9e",
+          borderRadius: 12,
+          background: "#fff4f4",
+          color: "#c2413d",
+          cursor: isSigningOut ? "wait" : "pointer",
+          font: "inherit",
+          fontWeight: 700,
+          textAlign: "left",
+        } : undefined}
+      >
         <LogoutIcon />
         <span>{isSigningOut ? "Logging out..." : label}</span>
       </button>

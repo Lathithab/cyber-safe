@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
 import DashboardNavIcon from "../components/DashboardNavIcon";
+import C3saLogo from "../components/C3saLogo";
 import LogoutButton from "../components/LogoutButton";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
 
@@ -71,10 +72,10 @@ export default function LearnPage() {
   return <main className="learn-dashboard">
     <header className="mobile-topbar">
       <button className="mobile-topbar-menu" type="button" onClick={() => setMenuOpen(true)} aria-label="Open menu"><Icon name="menu" size={21} /></button>
-      <button className="mobile-topbar-brand" type="button" onClick={() => router.push("/feed")}><span className="mobile-topbar-icon"><Icon name="shield" size={18} /></span><strong>CyberSafe</strong></button>
+      <button className="mobile-topbar-brand" type="button" onClick={() => router.push("/feed")}><C3saLogo size={34} /><strong>CyberSafe</strong></button>
       <button className="mobile-topbar-bell" type="button" onClick={() => router.push("/profiles")} aria-label="User Profile"><DashboardNavIcon name="user" size={21} /></button>
     </header>
-    <aside className="sidebar"><button className="brand" onClick={() => router.push("/feed")} type="button"><span className="brand-icon"><Icon name="shield" size={28} /></span><span><strong>CyberSafe</strong><small>South Africa</small></span></button><nav className="side-nav">{links.map(([label, route, icon]) => <button key={label} type="button" className={`side-link ${route === "/learn" ? "active" : ""}`} onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={24} />{label}</button>)}</nav><LogoutButton /></aside>
+    <aside className="sidebar"><button className="brand" onClick={() => router.push("/feed")} type="button"><C3saLogo /><span><strong>CyberSafe</strong><small>South Africa</small></span></button><nav className="side-nav">{links.map(([label, route, icon]) => <button key={label} type="button" className={`side-link ${route === "/learn" ? "active" : ""}`} onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={24} />{label}</button>)}</nav><LogoutButton /></aside>
     <nav className="bottom-nav" aria-label="Primary navigation">
       {primaryNav.map(([label, route, icon]) => (
         <button key={label} type="button" className={`bottom-nav-item ${route === "/learn" ? "active" : ""}`} onClick={() => router.push(route)}>

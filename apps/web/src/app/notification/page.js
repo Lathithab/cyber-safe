@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import DashboardNavIcon from "../components/DashboardNavIcon";
+import C3saLogo from "../components/C3saLogo";
+import LogoutButton from "../components/LogoutButton";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
 
 function Icon({ name, size = 22 }) {
@@ -72,7 +74,7 @@ export default function NotificationsPage() {
           <Icon name="menu" size={21} />
         </button>
         <button className="mobile-topbar-brand" type="button" onClick={() => router.push("/feed")}>
-          <span className="mobile-topbar-icon"><Icon name="shield" size={18} /></span>
+          <C3saLogo size={34} />
           <strong>CyberSafe</strong>
         </button>
         <button className="mobile-topbar-bell" type="button" onClick={() => router.push("/notification")} aria-label="Notifications">
@@ -81,10 +83,11 @@ export default function NotificationsPage() {
       </header>
 
 <aside className="sidebar">
-        <button className="brand" type="button" onClick={() => router.push("/")}><span className="brand-icon"><Icon name="shield" size={22} /></span><span><strong>CyberSafe</strong><small>South Africa</small></span></button>
+        <button className="brand" type="button" onClick={() => router.push("/")}><C3saLogo /><span><strong>CyberSafe</strong><small>South Africa</small></span></button>
         <nav className="side-nav" aria-label="Dashboard navigation">
           {links.map(([label, route, icon]) => <button key={label} className={`side-link ${route === "/notification" ? "active" : ""}`} type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={19} /><span>{label}</span></button>)}
         </nav>
+        <LogoutButton />
         <button className="emergency-card" type="button" onClick={() => router.push("/help")}><span className="emergency-icon"><Icon name="phone" size={18} /></span><span><strong>EMERGENCY</strong><small>Victim of a scam or cyber hack?</small><b>Get Help Now</b></span></button>
       </aside>
 
@@ -112,6 +115,7 @@ export default function NotificationsPage() {
                 </button>
               ))}
             </div>
+            <LogoutButton />
           </div>
         </div>
       )}

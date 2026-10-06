@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import QRCode from "qrcode";
 import DashboardNavIcon from "../components/DashboardNavIcon";
+import C3saLogo from "../components/C3saLogo";
 import LogoutButton from "../components/LogoutButton";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
 
@@ -44,7 +45,7 @@ export default function CyberBotPage() {
           <Icon name="menu" size={21} />
         </button>
         <button className="mobile-topbar-brand" type="button" onClick={() => router.push("/feed")}>
-          <span className="mobile-topbar-icon"><Icon name="shield" size={18} /></span>
+          <C3saLogo size={34} />
           <strong>CyberSafe</strong>
         </button>
         <button className="mobile-topbar-bell" type="button" onClick={() => router.push("/profiles")} aria-label="User Profile">
@@ -53,7 +54,7 @@ export default function CyberBotPage() {
       </header>
 
 <aside className="sidebar">
-      <button className="brand" type="button" onClick={() => router.push("/")}><span className="brand-icon"><Icon name="shield" size={22} /></span><span><strong>CyberSafe</strong><small>South Africa</small></span></button>
+      <button className="brand" type="button" onClick={() => router.push("/")}><C3saLogo /><span><strong>CyberSafe</strong><small>South Africa</small></span></button>
       <nav className="side-nav" aria-label="Dashboard navigation">{links.map(([label, route, icon]) => <button key={label} className={`side-link ${route === "/cyberbot" ? "active" : ""}`} type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} /><span>{label}</span></button>)}</nav>
       <LogoutButton />
     </aside>

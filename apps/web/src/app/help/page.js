@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { emergency, banks, networks, geoLinks } from "./contacts";
 import DashboardNavIcon from "../components/DashboardNavIcon";
+import C3saLogo from "../components/C3saLogo";
 import LogoutButton from "../components/LogoutButton";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
 
@@ -26,7 +27,7 @@ function Icon({ name, size = 22 }) {
 function Sidebar({ router }) {
   const links = DASHBOARD_NAV;
   return <aside className="sidebar">
-     <button className="brand" type="button" onClick={() => router.push("/")}><span className="brand-icon"><Icon name="shield" size={28} /></span><span><strong>CyberSafe</strong><small>South Africa</small></span></button>
+     <button className="brand" type="button" onClick={() => router.push("/")}><C3saLogo /><span><strong>CyberSafe</strong><small>South Africa</small></span></button>
      <nav className="side-nav" aria-label="Dashboard navigation">{links.map(([label, route, icon]) => <button key={label} className={`side-link ${route === "/help" ? "active" : ""}`} type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={25} /><span>{label}</span></button>)}</nav>
      <LogoutButton />
   </aside>;
@@ -63,7 +64,7 @@ export default function HelpPage() {
   return <main className="hub-dashboard">
     <header className="mobile-topbar">
       <button className="mobile-topbar-menu" type="button" onClick={() => setMenuOpen(true)} aria-label="Open menu"><Icon name="menu" size={21} /></button>
-      <button className="mobile-topbar-brand" type="button" onClick={() => router.push("/feed")}><span className="mobile-topbar-icon"><Icon name="shield" size={18} /></span><strong>CyberSafe</strong></button>
+      <button className="mobile-topbar-brand" type="button" onClick={() => router.push("/feed")}><C3saLogo size={34} /><strong>CyberSafe</strong></button>
       <button className="mobile-topbar-bell" type="button" onClick={() => router.push("/profiles")} aria-label="User Profile"><DashboardNavIcon name="user" size={21} /></button>
     </header>
     <Sidebar router={router} />

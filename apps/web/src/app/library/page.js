@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
 import DashboardNavIcon from "../components/DashboardNavIcon";
+import C3saLogo from "../components/C3saLogo";
 import LogoutButton from "../components/LogoutButton";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
 
@@ -46,7 +47,7 @@ function Icon({ name, size = 22 }) {
 
 function Sidebar({ router }) {
   const links = DASHBOARD_NAV;
-  return <aside className="sidebar"><button className="brand" type="button" onClick={() => router.push("/")}><span className="brand-icon"><Icon name="shield" size={22} /></span><span><strong>CyberSafe</strong><small>South Africa</small></span></button><nav className="side-nav" aria-label="Dashboard navigation">{links.map(([label, route, icon]) => <button key={label} className={`side-link ${route === "/library" ? "active" : ""}`} type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={19} /><span>{label}</span></button>)}</nav><LogoutButton /></aside>;
+  return <aside className="sidebar"><button className="brand" type="button" onClick={() => router.push("/")}><C3saLogo /><span><strong>CyberSafe</strong><small>South Africa</small></span></button><nav className="side-nav" aria-label="Dashboard navigation">{links.map(([label, route, icon]) => <button key={label} className={`side-link ${route === "/library" ? "active" : ""}`} type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={19} /><span>{label}</span></button>)}</nav><LogoutButton /></aside>;
 }
 
 function WhatsAppExample({ imageSrc }) {
@@ -456,7 +457,7 @@ export default function ScamLibraryPage() {
   return <main className="library-dashboard">
     <header className="mobile-topbar">
       <button className="mobile-topbar-menu" type="button" onClick={() => setMenuOpen(true)} aria-label="Open menu"><Icon name="menu" size={21} /></button>
-      <button className="mobile-topbar-brand" type="button" onClick={() => router.push("/feed")}><span className="mobile-topbar-icon"><Icon name="shield" size={18} /></span><strong>CyberSafe</strong></button>
+      <button className="mobile-topbar-brand" type="button" onClick={() => router.push("/feed")}><C3saLogo size={34} /><strong>CyberSafe</strong></button>
       <button className="mobile-topbar-bell" type="button" onClick={() => router.push("/profiles")} aria-label="User Profile"><DashboardNavIcon name="user" size={21} /></button>
     </header>
     <Sidebar router={router} />
@@ -574,5 +575,15 @@ export default function ScamLibraryPage() {
     .scam-action-card { border-color: #f1c49f; background: #fff5eb; }
     .scam-action-card h2 { color: #c24f0c; }
     @media (max-width: 600px) { .scam-section-card { padding: 16px; } }
+    @media (min-width: 851px) {
+      .library-dashboard { grid-template-columns: 230px minmax(0, 1fr); }
+      .library-dashboard > .sidebar { padding: 24px 22px 22px; }
+      .library-dashboard .brand { gap: 13px; }
+      .library-dashboard .brand-icon { width: 41px; height: 41px; border-radius: 12px; }
+      .library-dashboard .brand strong { font-size: 20px !important; letter-spacing: -0.6px; }
+      .library-dashboard .brand small { font-size: 12px !important; }
+      .library-dashboard .side-nav { gap: 7px; margin-top: 33px; }
+      .library-dashboard .side-link { gap: 13px !important; padding: 11px 13px !important; border-radius: 11px; font-size: 14px !important; }
+    }
   `}</style></main>;
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import DashboardNavIcon from "../components/DashboardNavIcon";
+import C3saLogo from "../components/C3saLogo";
 import LogoutButton from "../components/LogoutButton";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
 import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
@@ -130,7 +131,7 @@ export default function ProfilePage() {
           <Icon name="menu" size={21} />
         </button>
         <button className="mobile-topbar-brand" type="button" onClick={() => router.push("/feed")}>
-          <span className="mobile-topbar-icon"><Icon name="shield" size={18} /></span>
+          <C3saLogo size={34} />
           <strong>CyberSafe</strong>
         </button>
         <button className="mobile-topbar-bell" type="button" onClick={() => router.push("/profiles")} aria-label="User Profile">
@@ -139,7 +140,7 @@ export default function ProfilePage() {
       </header>
 
 <aside className="sidebar">
-        <button className="brand" type="button" onClick={() => router.push("/")}><span className="brand-icon"><Icon name="shield" size={22} /></span><span><strong>CyberSafe</strong><small>South Africa</small></span></button>
+        <button className="brand" type="button" onClick={() => router.push("/")}><C3saLogo /><span><strong>CyberSafe</strong><small>South Africa</small></span></button>
         <nav className="side-nav" aria-label="Dashboard navigation">
           {links.map(([label, route, icon]) => <button key={label} className={`side-link ${route === "/profiles" ? "active" : ""}`} type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={19} /><span>{label}</span></button>)}
         </nav>
@@ -224,7 +225,6 @@ export default function ProfilePage() {
       >
         Edit Profile
       </button>
-      <LogoutButton className="profile-logout-button" label="Logout" />
     </div>
   </section>
 ) : null}
@@ -316,7 +316,7 @@ export default function ProfilePage() {
 
                 .dashboard-content { padding-top: calc(18px + 52px + env(safe-area-inset-top, 0px)); padding-bottom: 78px; }
 
-                .sidebar { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; padding: 24px 22px 22px; border-right: 1px solid #e4ddd4; background: #fff; } .sidebar { display: none; }
+                .sidebar { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; padding: 24px 22px 22px; border-right: 1px solid #0d3557; background: #00243A; } .sidebar { display: none; }
         @media (min-width: 851px) {
           .sidebar { display: flex; }
           .profile-dashboard { grid-template-columns: 230px minmax(0, 1fr); }
@@ -324,8 +324,8 @@ export default function ProfilePage() {
           .dashboard-content { padding-top: 24px; padding-bottom: 36px; }
         }
 
-        .brand { display: flex; align-items: center; gap: 10px; padding: 0; border: 0; background: transparent; color: #00243A; cursor: pointer; text-align: left; } .brand-icon { display: grid; place-items: center; width: 41px; height: 41px; border-radius: 9px; background: #FDEAE0; color: #EB630F; } .brand strong { display: block; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 20px; letter-spacing: -0.55px; } .brand small { display: block; margin-top: 5px; color: #EB630F; font-size: 12px; font-weight: 700; }
-        .side-nav { display: grid; gap: 7px; margin-top: 42px; } .side-link { display: flex; align-items: center; gap: 13px; width: 100%; padding: 11px 14px; border: 0; border-radius: 8px; background: transparent; color: #536179; cursor: pointer; font: inherit; font-size: 14px; font-weight: 600; text-align: left; } .side-link.active { background: #FDEAE0; color: #00243A; font-weight: 800; } .side-link.active svg { color: #EB630F; }
+        .brand { display: flex; align-items: center; gap: 13px; padding: 0; border: 0; background: transparent; color: #fff; cursor: pointer; text-align: left; } .brand-icon { display: grid; place-items: center; width: 41px; height: 41px; border-radius: 12px; background: rgba(235,99,15,.22); color: #EB630F; } .brand strong { display: block; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 20px; letter-spacing: -0.6px; } .brand small { display: block; margin-top: 5px; color: #EB630F; font-size: 12px; font-weight: 700; }
+        .side-nav { display: grid; gap: 7px; margin-top: 33px; } .side-link { display: flex; align-items: center; gap: 13px; width: 100%; padding: 11px 13px; border: 0; border-radius: 11px; background: transparent; color: rgba(255,255,255,.68); cursor: pointer; font: inherit; font-size: 14px; font-weight: 600; text-align: left; } .side-link.active { background: rgba(235,99,15,.25); color: #fff; font-weight: 800; } .side-link.active svg { color: #EB630F; }
         .side-divider { height: 1px; margin: 6px 3px; background: #e4ddd4; } .footer-links { display: grid; gap: 2px; margin-top: auto; padding-top: 14px; } .footer-link { display: flex; align-items: center; gap: 8px; padding: 7px 14px; border: 0; background: transparent; color: #8996a8; cursor: pointer; font: inherit; font-size: 11px; font-weight: 700; text-align: left; } .footer-link:hover { color: #536179; }
         .emergency-card { display: flex; align-items: flex-start; gap: 10px; margin-top: 18px; padding: 16px; border: 2px solid #ff5a5f; border-radius: 12px; background: #fff4f4; color: #ff5158; cursor: pointer; font: inherit; text-align: left; } .emergency-icon { flex: 0 0 auto; } .emergency-card strong, .emergency-card small, .emergency-card b { display: block; } .emergency-card strong { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 13px; } .emergency-card small { margin: 10px 0 7px; color: #536179; font-size: 11px; line-height: 1.4; } .emergency-card b { color: #ff5158; font-size: 11px; } .user-chip { display: flex; align-items: center; gap: 8px; width: 100%; margin-top: 12px; padding: 6px; border: 0; border-radius: 7px; background: transparent; cursor: pointer; font: inherit; text-align: left; } .user-chip:hover { background: #f7f4ef; } .chip-avatar { display: grid; place-items: center; width: 27px; height: 27px; flex: 0 0 auto; border-radius: 50%; background: #FDEAE0; color: #C24F0C; font-weight: 800; font-size: 11px; } .user-chip strong { display: block; font-size: 11px; } .user-chip small { display: block; color: #8996a8; font-size: 11px; font-weight: 600; }
 

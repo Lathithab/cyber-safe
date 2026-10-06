@@ -68,6 +68,7 @@ export default function PostReportPage() {
   const menuNav = DASHBOARD_NAV.filter(([, route]) => !MENU_EXCLUDED_ROUTES.includes(route));
   const [form, setForm] = useState({ incidentType: "", description: "", incidentDate: "", location: "", anonymous: true, file: null });
   const [submitError, setSubmitError] = useState("");
+  const [submitSuccess, setSubmitSuccess] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const canSubmit = form.incidentType && form.description.trim().length >= 10;
@@ -93,6 +94,7 @@ export default function PostReportPage() {
     event.preventDefault();
     if (!canSubmit || isSubmitting) return;
     setSubmitError("");
+    setSubmitSuccess("");
     setIsSubmitting(true);
 
     let evidenceImage = null;
@@ -132,21 +134,25 @@ export default function PostReportPage() {
       }
     }
 
+    const { data: { user } = {} } = await supabase.auth.getUser();
     const { error } = await supabase.from("posts").insert({
+      author_id: user?.id || null,
       display_name: form.anonymous ? "Anonymous" : "CyberSafe member",
       description: form.description.trim(),
       location: form.location.trim() || null,
       issues: [form.incidentType],
       image_url: evidenceImage,
-      status: "approved",
+      status: "pending",
     });
 
     if (error) {
+      console.error("Could not submit incident report:", error);
       setSubmitError("We could not submit your report. Please try again or use Get Help Now if you need urgent support.");
       setIsSubmitting(false);
       return;
     }
-    router.push("/feed");
+    setSubmitSuccess("Your report was submitted for review. You can check its status in My Posts on your profile.");
+    setIsSubmitting(false);
   }
 
   return (
@@ -212,9 +218,10 @@ export default function PostReportPage() {
 
             <div className="form-actions">
               <label className="upload-button"><Icon name="upload" size={17} /><span>{form.file ? form.file.name : "Upload Evidence "}</span><input name="file" type="file" accept="application/pdf,image/png,image/jpeg" onChange={updateForm} hidden /></label>
-              <button className="submit-button" type="submit" disabled={!canSubmit || isSubmitting}>{isSubmitting ? "Submitting report..." : "Submit Incident Report"}</button>
+              <button className="submit-button" type="submit" disabled={!canSubmit || isSubmitting || Boolean(submitSuccess)}>{isSubmitting ? "Submitting report..." : submitSuccess ? "Report Submitted" : "Submit Incident Report"}</button>
             </div>
             {submitError && <p className="submit-error" role="alert">{submitError}</p>}
+            {submitSuccess && <p className="submit-success" role="status">{submitSuccess}</p>}
             <p className="privacy-note">Do not include passwords, PINs, one-time passwords, full card numbers, or ID numbers.</p>
           </form>
 
@@ -282,7 +289,7 @@ export default function PostReportPage() {
         .incident-types { margin: 32px 0 27px; padding: 0; border: 0; } .incident-types legend, .field-label { display: block; margin-bottom: 13px; color: #1c263d; font-size: 13px; font-weight: 800; } .type-options { display: flex; flex-wrap: wrap; gap: 10px; } .type-button { padding: 11px 16px; border: 1px solid #dce5ef; border-radius: 8px; background: #f8fafc; color: #536179; cursor: pointer; font: inherit; font-size: 12px; font-weight: 700; } .type-button.selected { border-color: #EB630F; background: #FDEAE0; color: #C24F0C; box-shadow: inset 0 0 0 1px #EB630F; }
         textarea, .input-shell { width: 100%; border: 1px solid #dce5ef; border-radius: 9px; background: #f8fafc; color: #26324a; font: inherit; font-size: 12px; outline: none; } textarea { min-height: 158px; padding: 14px 16px; resize: vertical; line-height: 1.45; } textarea:focus, .input-shell:focus-within { border-color: #EB630F; box-shadow: 0 0 0 3px rgba(235,99,15,.13); } .two-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 27px; } .input-shell { display: flex; align-items: center; gap: 10px; height: 58px; padding: 0 16px; color: #607087; } .input-shell input { min-width: 0; width: 100%; border: 0; outline: 0; background: transparent; color: #26324a; font: inherit; font-size: 12px; }
         .anonymous-option { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 28px; padding: 17px 18px; border-radius: 10px; background: #FDEAE0; cursor: pointer; } .anonymous-option strong, .anonymous-option small { display: block; } .anonymous-option strong { font-size: 12px; } .anonymous-option small { margin-top: 7px; color: #66758b; font-size: 11px; line-height: 1.35; } .anonymous-option input { position: absolute; opacity: 0; pointer-events: none; } .anonymous-option i { position: relative; width: 42px; height: 24px; flex: 0 0 auto; border-radius: 999px; background: #bdc9d7; } .anonymous-option i::after { content: ""; position: absolute; top: 4px; left: 4px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .18s; } .anonymous-option input:checked + i { background: #EB630F; } .anonymous-option input:checked + i::after { transform: translateX(23px); }
-        .form-actions { display: grid; grid-template-columns: 1fr 1.2fr; gap: 18px; margin-top: 38px; } .upload-button { display: flex; align-items: center; justify-content: center; gap: 9px; min-height: 62px; padding: 8px 13px; border: 1px solid #dce5ef; border-radius: 9px; background: #f8fafc; color: #536179; cursor: pointer; font-size: 12px; font-weight: 800; overflow: hidden; } .upload-button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .submit-button:disabled { cursor: not-allowed; opacity: .5; } .submit-error { margin: 13px 0 0; color: #d92d20; font-size: 11px; line-height: 1.4; } .privacy-note { margin: 14px 0 0; color: #8996a8; font-size: 11px; line-height: 1.45; }
+        .form-actions { display: grid; grid-template-columns: 1fr 1.2fr; gap: 18px; margin-top: 38px; } .upload-button { display: flex; align-items: center; justify-content: center; gap: 9px; min-height: 62px; padding: 8px 13px; border: 1px solid #dce5ef; border-radius: 9px; background: #f8fafc; color: #536179; cursor: pointer; font-size: 12px; font-weight: 800; overflow: hidden; } .upload-button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .submit-button:disabled { cursor: not-allowed; opacity: .5; } .submit-error, .submit-success { margin: 13px 0 0; font-size: 11px; line-height: 1.4; } .submit-error { color: #d92d20; } .submit-success { color: #167447; } .privacy-note { margin: 14px 0 0; color: #8996a8; font-size: 11px; line-height: 1.45; }
         .report-summary { padding: 27px; } .status-card { margin-top: 25px; padding: 18px; border: 1px solid #dce5ef; border-radius: 10px; } .case-number { color: #C24F0C; font-size: 11px; font-weight: 800; letter-spacing: .04em; } .status-title { margin: 14px 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 800; } .status-card ol { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; color: #8b97a8; font-size: 11px; } .status-card li { position: relative; padding-left: 28px; } .status-card li::before { content: ""; position: absolute; top: 3px; left: 0; width: 16px; height: 16px; border-radius: 50%; background: #e9eef4; } .status-card li.complete { color: #202c42; font-weight: 700; } .status-card li.complete::before { background: #16bf89; }
         .report-tip { margin-top: 24px; padding: 18px; border-radius: 10px; background: #fff4f4; } .report-tip strong { color: #d92d20; font-size: 12px; } .report-tip p { margin: 6px 0 16px; color: #65738a; font-size: 11px; line-height: 1.4; } .report-tip button { border: 0; background: transparent; color: #d92d20; cursor: pointer; font: inherit; font-size: 11px; font-weight: 800; padding: 0; }
         @media (max-width: 1180px) { .sidebar { padding: 22px 16px 20px; } .dashboard-content { padding: 27px 24px 42px; } .side-link { font-size: 13px; } .page-header { align-items: flex-start; flex-direction: column; } .header-actions { width: 100%; } .platform-search { flex: 1; } }

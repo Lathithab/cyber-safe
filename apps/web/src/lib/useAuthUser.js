@@ -42,7 +42,8 @@ export function filterNavForUser(nav, isGuest) {
 }
 
 // Navigation items for the current user: guests only see GUEST_ROUTES.
+// Empty until the auth check finishes, so guests never see the full menu.
 export function useDashboardNav(nav) {
-  const { isGuest } = useAuthUser();
-  return filterNavForUser(nav, isGuest);
+  const { isGuest, loading } = useAuthUser();
+  return loading ? [] : filterNavForUser(nav, isGuest);
 }

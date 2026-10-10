@@ -4,11 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
-import DashboardNavIcon from "../components/DashboardNavIcon";
-import C3saLogo from "../components/C3saLogo";
-import LogoutButton from "../components/LogoutButton";
-import { DASHBOARD_NAV } from "../components/dashboardNav";
-import { useDashboardNav } from "../../lib/useAuthUser";
+import DashboardNavBar from "../components/DashboardNavBar";
 
 const scamExampleRowStyle = {
   gridColumn: "1 / -1",
@@ -44,11 +40,6 @@ function Icon({ name, size = 22 }) {
   if (name === "search") return <svg {...shared}><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>;
   if (name === "phone") return <svg {...shared}><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z" /></svg>;
   return <svg {...shared}><path d="M12 5v14M5 12h14" /></svg>;
-}
-
-function Sidebar({ router }) {
-  const links = useDashboardNav(DASHBOARD_NAV);
-  return <aside className="sidebar"><button className="brand" type="button" onClick={() => router.push("/")}><C3saLogo /><span><strong>CyberSafe</strong><small>South Africa</small></span></button><nav className="side-nav" aria-label="Dashboard navigation">{links.map(([label, route, icon]) => <button key={label} className={`side-link ${route === "/library" ? "active" : ""}`} type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={19} /><span>{label}</span></button>)}</nav><LogoutButton /></aside>;
 }
 
 function WhatsAppExample({ imageSrc }) {
@@ -382,11 +373,6 @@ function BankSmsExample({ imageSrc }) {
 
 export default function ScamLibraryPage() {
   const router = useRouter();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const PRIMARY_ROUTES = ["/feed", "/learn", "/postReport", "/cyberbot"];
-  const MENU_EXCLUDED_ROUTES = [...PRIMARY_ROUTES, "/login", "/admin", "/notification"];
-  const primaryNav = useDashboardNav(DASHBOARD_NAV).filter(([, route]) => PRIMARY_ROUTES.includes(route));
-  const menuNav = useDashboardNav(DASHBOARD_NAV).filter(([, route]) => !MENU_EXCLUDED_ROUTES.includes(route));
   const [scams, setScams] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -456,34 +442,7 @@ export default function ScamLibraryPage() {
   }), [scams, query, category]);
 
   return <main className="library-dashboard">
-    <header className="mobile-topbar">
-      <button className="mobile-topbar-menu" type="button" onClick={() => setMenuOpen(true)} aria-label="Open menu"><Icon name="menu" size={21} /></button>
-      <button className="mobile-topbar-brand" type="button" onClick={() => router.push("/feed")}><C3saLogo size={34} /><strong>CyberSafe</strong></button>
-      <button className="mobile-topbar-bell" type="button" onClick={() => router.push("/profiles")} aria-label="User Profile"><DashboardNavIcon name="user" size={21} /></button>
-    </header>
-    <Sidebar router={router} />
-    <nav className="bottom-nav" aria-label="Primary navigation">
-      {primaryNav.map(([label, route, icon]) => (
-        <button key={label} type="button" className={`bottom-nav-item ${route === "/library" ? "active" : ""}`} onClick={() => router.push(route)}>
-          <DashboardNavIcon name={icon} size={21} />
-          <span>{label.replace("Community ", "").replace(" Security", "").replace(" Incident", "").replace(" AI", "")}</span>
-        </button>
-      ))}
-    </nav>
-    {menuOpen && (
-      <div className="nav-menu-overlay" onClick={() => setMenuOpen(false)}>
-        <div className="nav-menu-sheet" onClick={(event) => event.stopPropagation()}>
-          <div className="nav-menu-header"><strong>More</strong><button type="button" className="nav-menu-close" onClick={() => setMenuOpen(false)} aria-label="Close menu"><Icon name="close" size={18} /></button></div>
-          <div className="nav-menu-grid">
-            {menuNav.map(([label, route, icon]) => (
-              <button key={label} type="button" className="nav-menu-item" onClick={() => { setMenuOpen(false); router.push(route); }}>
-                <span className="nav-menu-icon"><DashboardNavIcon name={icon} size={20} /></span>{label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-    )}
+    <DashboardNavBar active="/library" iconSize={19} />
     <section className="library-content">
     <header className="library-header"><div><p className="eyebrow">CyberSafe reference centre</p><h1>Scam Library</h1><p>Recognise common South African scams, understand the warning signs, and take the right next step.</p></div><button className="help-button" type="button" onClick={() => router.push("/help")}>Get Help Now</button></header>
     <section className="safety-banner"><span><Icon name="phone" size={22} /></span><div><strong>Are you being scammed right now?</strong><p>Stop responding, do not send money or codes, and call your bank immediately if account details may be at risk.</p></div><button type="button" onClick={() => router.push("/help")}>Open helpline hub</button></section>

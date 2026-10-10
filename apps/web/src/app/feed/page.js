@@ -3,13 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
-import DashboardNavIcon from "../components/DashboardNavIcon";
-import C3saLogo from "../components/C3saLogo";
-import LogoutButton from "../components/LogoutButton";
-import { DASHBOARD_NAV } from "../components/dashboardNav";
+import DashboardNavBar from "../components/DashboardNavBar";
 import PlatformSearch from "../components/PlatformSearch";
 import { SEED_POSTS, loadStoredComments, appendStoredComment } from "./posts";
-import { useAuthUser, useDashboardNav } from "../../lib/useAuthUser";
+import { useAuthUser } from "../../lib/useAuthUser";
 
 function Icon({ name, size = 22 }) {
   const shared = {
@@ -181,24 +178,8 @@ export default function FeedPage() {
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [pendingImage, setPendingImage] = useState(null);
   const [toast, setToast] = useState(null);
-  const [menuOpen, setMenuOpen] = useState(false);
   const toastTimer = useRef(null);
   const fileInputRef = useRef(null);
-
-  const links = useDashboardNav(DASHBOARD_NAV);
-  const PRIMARY_ROUTES = ["/feed", "/learn", "/postReport", "/cyberbot"];
-  const MENU_EXCLUDED_ROUTES = [
-    ...PRIMARY_ROUTES,
-    "/login",
-    "/admin",
-    "/notification",
-  ];
-  const primaryNav = links.filter(([, route]) =>
-    PRIMARY_ROUTES.includes(route),
-  );
-  const menuNav = links.filter(
-    ([, route]) => !MENU_EXCLUDED_ROUTES.includes(route),
-  );
 
   function showToast(message) {
     setToast(message);
@@ -422,120 +403,7 @@ export default function FeedPage() {
 
   return (
     <main className="feed-dashboard">
-      <header className="mobile-topbar">
-        <button
-          className="mobile-topbar-menu"
-          type="button"
-          onClick={() => setMenuOpen(true)}
-          aria-label="Open menu"
-        >
-          <Icon name="menu" size={21} />
-        </button>
-        <button
-          className="mobile-topbar-brand"
-          type="button"
-          onClick={() => router.push("/feed")}
-        >
-          <C3saLogo size={34} />
-          <strong>CyberSafe</strong>
-        </button>
-        <button
-          className="mobile-topbar-bell"
-          type="button"
-          onClick={() => router.push("/notification")}
-          aria-label="Notifications"
-        >
-          <DashboardNavIcon name="bell" size={21} />
-        </button>
-      </header>
-
-      <aside className="sidebar">
-        <button
-          className="brand"
-          type="button"
-          onClick={() => router.push("/")}
-        >
-          <C3saLogo />
-          <span>
-            <strong>CyberSafe</strong>
-            <small>South Africa</small>
-          </span>
-        </button>
-        <nav className="side-nav" aria-label="Dashboard navigation">
-          {links.map(([label, route, icon]) => (
-            <button
-              key={label}
-              className={`side-link ${route === "/feed" ? "active" : ""}`}
-              type="button"
-              onClick={() => router.push(route)}
-            >
-              <DashboardNavIcon name={icon} size={19} />
-              <span>{label}</span>
-            </button>
-          ))}
-        </nav>
-        <LogoutButton />
-      </aside>
-
-      <nav className="bottom-nav" aria-label="Primary navigation">
-        {primaryNav.map(([label, route, icon]) => (
-          <button
-            key={label}
-            type="button"
-            className={`bottom-nav-item ${route === "/feed" ? "active" : ""}`}
-            onClick={() => router.push(route)}
-          >
-            <DashboardNavIcon name={icon} size={21} />
-            <span>
-              {label
-                .replace("Community ", "")
-                .replace(" Security", "")
-                .replace(" Incident", "")
-                .replace(" AI", "")}
-            </span>
-          </button>
-        ))}
-      </nav>
-
-      {menuOpen && (
-        <div className="nav-menu-overlay" onClick={() => setMenuOpen(false)}>
-          <div
-            className="nav-menu-sheet"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="nav-menu-header">
-              <strong>More</strong>
-              <button
-                type="button"
-                className="nav-menu-close"
-                onClick={() => setMenuOpen(false)}
-                aria-label="Close menu"
-              >
-                <Icon name="close" size={18} />
-              </button>
-            </div>
-            <div className="nav-menu-grid">
-              {menuNav.map(([label, route, icon]) => (
-                <button
-                  key={label}
-                  type="button"
-                  className="nav-menu-item"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    router.push(route);
-                  }}
-                >
-                  <span className="nav-menu-icon">
-                    <DashboardNavIcon name={icon} size={20} />
-                  </span>
-                  {label}
-                </button>
-              ))}
-            </div>
-            <LogoutButton />
-          </div>
-        </div>
-      )}
+      <DashboardNavBar active="/feed" iconSize={19} bell menuLogout />
 
       <section className="dashboard-content">
         <header className="page-header">

@@ -6,6 +6,7 @@ import DashboardNavIcon from "../components/DashboardNavIcon";
 import C3saLogo from "../components/C3saLogo";
 import LogoutButton from "../components/LogoutButton";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
+import { useDashboardNav } from "../../lib/useAuthUser";
 import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
 import PlatformSearch from "../components/PlatformSearch";
 import { getModuleBadge } from "../../lib/moduleBadges";
@@ -45,7 +46,7 @@ export default function ProfilePage() {
   const [postsError, setPostsError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  const links = DASHBOARD_NAV;
+  const links = useDashboardNav(DASHBOARD_NAV);
   const [menuOpen, setMenuOpen] = useState(false);
   const PRIMARY_ROUTES = ["/feed", "/learn", "/postReport", "/cyberbot"];
   const MENU_EXCLUDED_ROUTES = [...PRIMARY_ROUTES, "/login", "/admin", "/notification"];

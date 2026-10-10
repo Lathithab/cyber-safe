@@ -8,7 +8,7 @@ import C3saLogo from "../components/C3saLogo";
 import LogoutButton from "../components/LogoutButton";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
 import PlatformSearch from "../components/PlatformSearch";
-import { useAuthUser } from "../../lib/useAuthUser";
+import { useAuthUser, useDashboardNav } from "../../lib/useAuthUser";
 import GuestUpgradeNotice from "../components/GuestUpgradeNotice";
 
 const INCIDENT_TYPES = [
@@ -128,7 +128,7 @@ function Icon({ name, size = 22 }) {
 }
 
 function Sidebar({ router }) {
-  const items = DASHBOARD_NAV;
+  const items = useDashboardNav(DASHBOARD_NAV);
   return (
     <aside className="sidebar">
       <button className="brand" type="button" onClick={() => router.push("/")}>
@@ -181,10 +181,10 @@ export default function PostReportPage() {
     "/admin",
     "/notification",
   ];
-  const primaryNav = DASHBOARD_NAV.filter(([, route]) =>
+  const primaryNav = useDashboardNav(DASHBOARD_NAV).filter(([, route]) =>
     PRIMARY_ROUTES.includes(route),
   );
-  const menuNav = DASHBOARD_NAV.filter(
+  const menuNav = useDashboardNav(DASHBOARD_NAV).filter(
     ([, route]) => !MENU_EXCLUDED_ROUTES.includes(route),
   );
   const [form, setForm] = useState({

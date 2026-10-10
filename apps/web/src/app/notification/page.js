@@ -6,6 +6,7 @@ import DashboardNavIcon from "../components/DashboardNavIcon";
 import C3saLogo from "../components/C3saLogo";
 import LogoutButton from "../components/LogoutButton";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
+import { useDashboardNav } from "../../lib/useAuthUser";
 import PlatformSearch from "../components/PlatformSearch";
 
 function Icon({ name, size = 22 }) {
@@ -40,7 +41,7 @@ export default function NotificationsPage() {
   const [prefsOpen, setPrefsOpen] = useState(false);
   const [prefs, setPrefs] = useState({ alerts: true, reports: true, learning: true });
   const [draftPrefs, setDraftPrefs] = useState(prefs);
-  const links = DASHBOARD_NAV;
+  const links = useDashboardNav(DASHBOARD_NAV);
   const [menuOpen, setMenuOpen] = useState(false);
   const PRIMARY_ROUTES = ["/feed", "/learn", "/postReport", "/cyberbot"];
   const MENU_EXCLUDED_ROUTES = [...PRIMARY_ROUTES, "/login", "/admin", "/notification"];

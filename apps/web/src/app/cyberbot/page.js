@@ -7,6 +7,7 @@ import DashboardNavIcon from "../components/DashboardNavIcon";
 import C3saLogo from "../components/C3saLogo";
 import LogoutButton from "../components/LogoutButton";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
+import { useDashboardNav } from "../../lib/useAuthUser";
 
 const WHATSAPP_URL = "https://wa.me/27618780277?text=Hello%20CyberBot";
 
@@ -24,7 +25,7 @@ function Icon({ name, size = 24 }) {
 
 export default function CyberBotPage() {
   const router = useRouter();
-  const links = DASHBOARD_NAV;
+  const links = useDashboardNav(DASHBOARD_NAV);
   const [menuOpen, setMenuOpen] = useState(false);
   const PRIMARY_ROUTES = ["/feed", "/learn", "/postReport", "/cyberbot"];
   const MENU_EXCLUDED_ROUTES = [...PRIMARY_ROUTES, "/login", "/admin", "/notification"];

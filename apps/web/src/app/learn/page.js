@@ -7,6 +7,7 @@ import DashboardNavIcon from "../components/DashboardNavIcon";
 import C3saLogo from "../components/C3saLogo";
 import LogoutButton from "../components/LogoutButton";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
+import { useDashboardNav } from "../../lib/useAuthUser";
 
 const FILTERS = [
   "All modules",
@@ -100,7 +101,7 @@ export default function LearnPage() {
     loadDatabaseModules();
   }, []);
   const [activeFilter, setActiveFilter] = useState("All modules");
-  const links = DASHBOARD_NAV;
+  const links = useDashboardNav(DASHBOARD_NAV);
   const PRIMARY_ROUTES = ["/feed", "/learn", "/postReport", "/cyberbot"];
   const MENU_EXCLUDED_ROUTES = [
     ...PRIMARY_ROUTES,
@@ -108,10 +109,10 @@ export default function LearnPage() {
     "/admin",
     "/notification",
   ];
-  const primaryNav = DASHBOARD_NAV.filter(([, route]) =>
+  const primaryNav = useDashboardNav(DASHBOARD_NAV).filter(([, route]) =>
     PRIMARY_ROUTES.includes(route),
   );
-  const menuNav = DASHBOARD_NAV.filter(
+  const menuNav = useDashboardNav(DASHBOARD_NAV).filter(
     ([, route]) => !MENU_EXCLUDED_ROUTES.includes(route),
   );
   const visibleModules =

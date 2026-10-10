@@ -8,6 +8,7 @@ import DashboardNavIcon from "../components/DashboardNavIcon";
 import C3saLogo from "../components/C3saLogo";
 import LogoutButton from "../components/LogoutButton";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
+import { useDashboardNav } from "../../lib/useAuthUser";
 
 const scamExampleRowStyle = {
   gridColumn: "1 / -1",
@@ -46,7 +47,7 @@ function Icon({ name, size = 22 }) {
 }
 
 function Sidebar({ router }) {
-  const links = DASHBOARD_NAV;
+  const links = useDashboardNav(DASHBOARD_NAV);
   return <aside className="sidebar"><button className="brand" type="button" onClick={() => router.push("/")}><C3saLogo /><span><strong>CyberSafe</strong><small>South Africa</small></span></button><nav className="side-nav" aria-label="Dashboard navigation">{links.map(([label, route, icon]) => <button key={label} className={`side-link ${route === "/library" ? "active" : ""}`} type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={19} /><span>{label}</span></button>)}</nav><LogoutButton /></aside>;
 }
 
@@ -384,8 +385,8 @@ export default function ScamLibraryPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const PRIMARY_ROUTES = ["/feed", "/learn", "/postReport", "/cyberbot"];
   const MENU_EXCLUDED_ROUTES = [...PRIMARY_ROUTES, "/login", "/admin", "/notification"];
-  const primaryNav = DASHBOARD_NAV.filter(([, route]) => PRIMARY_ROUTES.includes(route));
-  const menuNav = DASHBOARD_NAV.filter(([, route]) => !MENU_EXCLUDED_ROUTES.includes(route));
+  const primaryNav = useDashboardNav(DASHBOARD_NAV).filter(([, route]) => PRIMARY_ROUTES.includes(route));
+  const menuNav = useDashboardNav(DASHBOARD_NAV).filter(([, route]) => !MENU_EXCLUDED_ROUTES.includes(route));
   const [scams, setScams] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState("");

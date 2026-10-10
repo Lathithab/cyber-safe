@@ -9,7 +9,7 @@ import LogoutButton from "../components/LogoutButton";
 import { DASHBOARD_NAV } from "../components/dashboardNav";
 import PlatformSearch from "../components/PlatformSearch";
 import { SEED_POSTS, loadStoredComments, appendStoredComment } from "./posts";
-import { useAuthUser } from "../../lib/useAuthUser";
+import { useAuthUser, useDashboardNav } from "../../lib/useAuthUser";
 
 function Icon({ name, size = 22 }) {
   const shared = {
@@ -185,7 +185,7 @@ export default function FeedPage() {
   const toastTimer = useRef(null);
   const fileInputRef = useRef(null);
 
-  const links = DASHBOARD_NAV;
+  const links = useDashboardNav(DASHBOARD_NAV);
   const PRIMARY_ROUTES = ["/feed", "/learn", "/postReport", "/cyberbot"];
   const MENU_EXCLUDED_ROUTES = [
     ...PRIMARY_ROUTES,

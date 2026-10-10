@@ -40,3 +40,9 @@ export function filterNavForUser(nav, isGuest) {
     ? nav.filter(([, route]) => GUEST_ROUTES.includes(route))
     : nav;
 }
+
+// Navigation items for the current user: guests only see GUEST_ROUTES.
+export function useDashboardNav(nav) {
+  const { isGuest } = useAuthUser();
+  return filterNavForUser(nav, isGuest);
+}

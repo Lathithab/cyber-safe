@@ -18,7 +18,13 @@
       "PowerShell(git rm --cached --quiet apps/api/.env)",
       "PowerShell(git rm -r --cached --quiet apps/api/__pycache__ apps/api/routers/__pycache__)",
       "PowerShell(git check-ignore -v apps/api/.env apps/api/__pycache__/main.cpython-314.pyc apps/api/foo.pyc whatsapp-bot/.env apps/web/.env.local; \"--- example NOT ignored? \\(expect no output + exit 1\\)\"; git check-ignore apps/api/.env.example whatsapp-bot/.env.example apps/web/.env.example; \"exit=$LASTEXITCODE\")",
-      "PowerShell(git add .gitignore)"
+      "PowerShell(git add .gitignore)",
+      "PowerShell(npm run build; \"BUILD EXIT: $LASTEXITCODE\")",
+      "PowerShell(Set-Location C:\\\\Users\\\\beyil\\\\cyber-safe\\\\apps\\\\web; npx eslint src 2>&1 | Select-Object -Last 2; \"ESLINT EXIT: $LASTEXITCODE\"; npm run build 2>&1 | Select-String -Pattern \"Compiled|Failed|Error|error|Generating static pages \\\\\\(21|/\\(learn|library|help|cyberbot|profiles|settings|notification|postReport|feed\\)\\\\s\"; \"BUILD EXIT: $LASTEXITCODE\")",
+      "PowerShell(Set-Location C:\\\\Users\\\\beyil\\\\cyber-safe\\\\apps\\\\web; Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue; npx eslint src 2>&1 | Select-Object -Last 2; \"ESLINT EXIT: $LASTEXITCODE\"; npm run build 2>&1 | Select-String -Pattern \"Compiled|Failed|rror|Attempted|Generating static pages \\\\\\(21\"; \"BUILD EXIT: $LASTEXITCODE\")",
+      "PowerShell(npm run build 2>&1)",
+      "PowerShell(Set-Location C:\\\\Users\\\\beyil\\\\cyber-safe\\\\apps\\\\web; Get-Content src\\\\app\\\\components\\\\DashboardNavBar.js -TotalCount 9; Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue; npx eslint src 2>&1 | Select-Object -Last 2; \"ESLINT EXIT: $LASTEXITCODE\"; npm run build 2>&1 | Select-String -Pattern \"Compiled|Failed|rror|Attempted|Generating static pages \\\\\\(21\"; \"BUILD EXIT: $LASTEXITCODE\")",
+      "Bash(npx eslint *)"
     ]
   }
 }

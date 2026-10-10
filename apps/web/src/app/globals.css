@@ -108,3 +108,24 @@ body {
   text-align: center;
   font-weight: bold;
 }
+
+/* Hide scrollbars site-wide while keeping scroll functionality */
+html {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+html::-webkit-scrollbar {
+  display: none;
+}
+
+/* Cross-device fixes */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+/* iOS Safari zooms the page when a focused input is under 16px */
+@media (max-width: 850px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}

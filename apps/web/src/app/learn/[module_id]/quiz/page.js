@@ -3,12 +3,16 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { isSupabaseConfigured, supabase } from "../../../../../lib/supabase";
+import { getModuleBadge } from "../../../../lib/moduleBadges";
+
+const PASSING_PERCENTAGE = 60;
 
 export default function QuizPage() {
   const params = useParams();
   const router = useRouter();
 
   const [quiz, setQuiz] = useState(null);
+  const [moduleTitle, setModuleTitle] = useState("");
   const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
@@ -17,6 +21,8 @@ export default function QuizPage() {
   const [isComplete, setIsComplete] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
+  const [completionMessage, setCompletionMessage] = useState("");
+  const [isSavingCompletion, setIsSavingCompletion] = useState(false);
 
   useEffect(() => {
     async function loadQuiz() {
@@ -67,6 +73,13 @@ export default function QuizPage() {
 
       setQuiz(quizData);
       setQuestions(questionData || []);
+
+      const { data: moduleData } = await supabase
+        .from("modules")
+        .select("title")
+        .eq("id", params.module_id)
+        .maybeSingle();
+      setModuleTitle(moduleData?.title || "Learning Module");
       setIsLoading(false);
     }
 
@@ -74,6 +87,61 @@ export default function QuizPage() {
       loadQuiz();
     }
   }, [params.module_id]);
+
+  useEffect(() => {
+    if (!isComplete || !questions.length) return;
+
+    const percentage = Math.round((score / questions.length) * 100);
+    if (percentage < PASSING_PERCENTAGE) {
+      setCompletionMessage(
+        `Score at least ${PASSING_PERCENTAGE}% to complete this module and earn its badge. Review the module and try again.`
+      );
+      return;
+    }
+
+    let cancelled = false;
+    async function saveCompletion() {
+      if (!isSupabaseConfigured || !supabase) {
+        setCompletionMessage("Sign in to save your module completion and badge.");
+        return;
+      }
+
+      setIsSavingCompletion(true);
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        if (!cancelled) {
+          setCompletionMessage("Sign in to save your module completion and badge.");
+          setIsSavingCompletion(false);
+        }
+        return;
+      }
+
+      const { error } = await supabase.from("user_progress").upsert(
+        {
+          user_id: user.id,
+          module_id: params.module_id,
+          status: "completed",
+          quiz_score: percentage,
+          completed_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id,module_id" }
+      );
+
+      if (!cancelled) {
+        setCompletionMessage(
+          error
+            ? "Your quiz is passed, but we could not save the badge. Please try again later."
+            : `Badge earned: ${getModuleBadge({ title: moduleTitle }).title}`
+        );
+        setIsSavingCompletion(false);
+      }
+    }
+
+    saveCompletion();
+    return () => {
+      cancelled = true;
+    };
+  }, [isComplete, moduleTitle, params.module_id, questions.length, score]);
 
   function handleAnswerSelect(index) {
     if (submitted) return;
@@ -160,6 +228,10 @@ export default function QuizPage() {
               : "Keep practising. Review the module and try the quiz again."}
           </p>
 
+          <p role="status" aria-live="polite" style={styles.badgeMessage}>
+            {isSavingCompletion ? "Saving your module badge…" : completionMessage}
+          </p>
+
           <div style={styles.resultButtons}>
   <button
     type="button"
@@ -171,10 +243,10 @@ export default function QuizPage() {
 
   <button
     type="button"
-    onClick={() => router.push("/")}
+    onClick={() => router.push("/learn")}
     style={styles.homeButton}
   >
-    Back to Home
+    Back to Learn
   </button>
 </div>
         </div>
@@ -230,7 +302,7 @@ export default function QuizPage() {
               }
             } else if (index === selectedAnswer) {
               background = "#e3f7fc";
-              border = "2px solid #31c7e6";
+              border = "2px solid #eb630f";
             }
 
             return (
@@ -310,7 +382,7 @@ const styles = {
   page: {
     minHeight: "100vh",
     padding: "40px 20px",
-    background: "#f5f8fb",
+    background: "#faf7f2",
     display: "flex",
     justifyContent: "center",
   },
@@ -357,7 +429,7 @@ const styles = {
 
   progressFill: {
     height: "100%",
-    background: "#31c7e6",
+    background: "#eb630f",
     borderRadius: "999px",
     transition: "width 0.3s ease",
   },
@@ -417,7 +489,7 @@ const styles = {
     padding: "14px 22px",
     border: "none",
     borderRadius: "13px",
-    background: "#31c7e6",
+    background: "#eb630f",
     color: "#102039",
     cursor: "pointer",
     fontWeight: "800",
@@ -428,7 +500,7 @@ const styles = {
     textAlign: "center",
     padding: "30px",
     margin: "30px 0",
-    background: "#f5f8fb",
+    background: "#faf7f2",
     borderRadius: "16px",
   },
 
@@ -452,6 +524,14 @@ const styles = {
     marginBottom: "30px",
   },
 
+  badgeMessage: {
+    minHeight: "24px",
+    margin: "-12px 0 24px",
+    color: "#c24f0c",
+    fontWeight: "700",
+    textAlign: "center",
+  },
+
   error: {
     color: "#c0392b",
     fontWeight: "600",
@@ -465,7 +545,7 @@ const styles = {
 
 homeButton: {
   padding: "14px 22px",
-  border: "2px solid #31c7e6",
+  border: "2px solid #eb630f",
   borderRadius: "13px",
   background: "#ffffff",
   color: "#102039",

@@ -59,7 +59,7 @@ if (!DB.posts) {
     {
       id: "1", name: "Maya Chen", initials: "MC", time: "2h",
       text: "Scam alert. I received a message claiming my bank account would be blocked unless I clicked a link. I did not click it. Always verify unexpected requests through the official app or website.",
-      image: seedImage("#eaf6ff", "#c9e3f9", "#30C9E8", "SECURITY ALERT", "Your account needs urgent verification.", "#ffe8ed", "#b4233d", "Suspicious link"),
+      image: seedImage("#eaf6ff", "#c9e3f9", "#eb630f", "SECURITY ALERT", "Your account needs urgent verification.", "#ffe8ed", "#b4233d", "Suspicious link"),
       comments: [
         { name: "Thabo", text: "Good catch. Thanks for warning everyone." },
         { name: "Lebo", text: "I received the same message." }

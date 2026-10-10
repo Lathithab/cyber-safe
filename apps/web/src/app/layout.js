@@ -14,13 +14,18 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "CyberSafe",
   description: "Cyber safety guidance for everyday life",
- 
-  
-};
-export const viewport = {
-  themeColor: "#30c9e8",
+  manifest: "/manifest.json",
 };
 
+// viewport-fit=cover is what makes env(safe-area-inset-*) return real values
+// on iPhones (notch / home indicator). Without it the fixed bottom nav sits
+// against the home indicator and gets clipped.
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#EB630F",
+};
 
 export default function RootLayout({ children }) {
   return (

@@ -82,7 +82,7 @@ export default function ModulePage() {
       style={{
         minHeight: "100vh",
         padding: "50px",
-        background: "#f6f9fd",
+        background: "#f7f4ef",
         color: "#121a32",
         fontFamily: "Arial, sans-serif",
       }}
@@ -94,7 +94,7 @@ export default function ModulePage() {
           border: "none",
           background: "transparent",
           cursor: "pointer",
-          color: "#20b6d8",
+          color: "#c24f0c",
           fontWeight: "700",
           marginBottom: "30px",
         }}
@@ -109,12 +109,12 @@ export default function ModulePage() {
           background: "#fff",
           padding: "45px",
           borderRadius: "24px",
-          border: "1px solid #dce5ef",
+          border: "1px solid #e4ddd4",
         }}
       >
         <p
           style={{
-            color: "#20b6d8",
+            color: "#c24f0c",
             fontWeight: "800",
             textTransform: "uppercase",
             fontSize: "13px",
@@ -161,7 +161,7 @@ export default function ModulePage() {
     padding: "15px 24px",
     border: "none",
     borderRadius: "13px",
-    background: "#31c7e6",
+    background: "#eb630f",
     color: "#102039",
     cursor: "pointer",
     fontWeight: "800",

@@ -139,6 +139,7 @@ async function getAIReply(conversations, userId, userMessage) {
         Authorization: `Bearer ${GROQ_API_KEY}`,
         "Content-Type": "application/json",
       },
+      timeout: 15000,
     },
   );
 

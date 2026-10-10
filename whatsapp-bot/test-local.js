@@ -1,9 +1,3 @@
-// Test the bot's AI logic directly, without WhatsApp or ngrok.
-// Run with: node test-local.js
-//
-// This lets you validate multilingual responses and safety behavior
-// while Meta's phone verification is on cooldown.
-
 const { getAIReply, containsCrisisKeyword } = require("./bot-logic");
 
 const conversations = {};

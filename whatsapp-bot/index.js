@@ -31,6 +31,11 @@ app.use(
 const conversations = {}; // chat history for each learner
 const hasGreeted = {}; // learners we've already welcomed
 const languagePrefs = {}; // each learner's chosen language, e.g. "xh"
+const lastSeen = {}; // when each learner last sent a message
+const sessionEnded = {}; // learners who tapped "End chat"
+
+// If a learner is quiet for this long, their next message starts a new chat.
+const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
 
 // WhatsApp sometimes sends the same message twice. Remember recent message IDs
 // so we only reply once.
@@ -82,6 +87,12 @@ const TEXT = {
       'No problem. I\'m still here if you want to chat. Type "menu" any time.',
     error:
       "Sorry, I'm having trouble replying right now. Please try again in a moment.",
+    btnMenu: "Menu",
+    btnEnd: "End chat",
+    welcomeBack:
+      "Welcome back! 👋 What would you like help with? Tap a button, or just type your question.",
+    goodbye:
+      "Thanks for chatting. 💛 Our chat has ended and I've cleared it. If you need anything, just send a message to start again.\n\nIf you're ever in danger, call Childline on 116 (free, 24/7).",
   },
   af: {
     chooseButton: "Kies taal",
@@ -108,6 +119,12 @@ const TEXT = {
       'Geen probleem nie. Ek is steeds hier as jy wil gesels. Tik enige tyd "spyskaart".',
     error:
       "Jammer, ek sukkel nou om te antwoord. Probeer asseblief weer oor 'n rukkie.",
+    btnMenu: "Spyskaart",
+    btnEnd: "Beëindig gesprek",
+    welcomeBack:
+      "Welkom terug! 👋 Waarmee wil jy hulp hê? Tik op 'n knoppie, of tik net jou vraag.",
+    goodbye:
+      "Dankie dat jy met my gesels het. 💛 Ons gesprek is verby en ek het dit uitgevee. Stuur net 'n boodskap as jy weer hulp nodig het.\n\nAs jy ooit in gevaar is, bel Childline by 116 (gratis, 24/7).",
   },
   nso: {
     chooseButton: "Kgetha polelo",
@@ -135,6 +152,12 @@ const TEXT = {
       'Ga go na bothata. Ke sa le fa ge o nyaka go bolela. Ngwala "menyu" nako efe goba efe.',
     error:
       "Tshwarelo, ke na le bothata bja go araba gabjale. Hle leka gape ka morago ga nakwana.",
+    btnMenu: "Menyu",
+    btnEnd: "Fetša poledišano",
+    welcomeBack:
+      "O amogelwa gape! 👋 O nyaka thušo ka eng? Kgotla konopo, goba o ngwale potšišo ya gago.",
+    goodbye:
+      "Ke a leboga ge o boletše le nna. 💛 Poledišano ya rena e fedile gomme ke e phumotše. Ge o nyaka thušo gape, romela molaetša fela.\n\nGe o ka ba kotsing, letšetša Childline go 116 (mahala, 24/7).",
   },
   xh: {
     chooseButton: "Khetha ulwimi",
@@ -161,6 +184,12 @@ const TEXT = {
       'Akukho ngxaki. Ndisekhona ukuba ufuna ukuncokola. Bhala "imenyu" nangaliphi na ixesha.',
     error:
       "Uxolo, ndinengxaki yokuphendula ngoku. Nceda uzame kwakhona emva kwexeshana.",
+    btnMenu: "Imenyu",
+    btnEnd: "Gqiba incoko",
+    welcomeBack:
+      "Wamkelekile kwakhona! 👋 Ufuna uncedo ngantoni? Cofa iqhosha, okanye ubhale umbuzo wakho.",
+    goodbye:
+      "Enkosi ngokuncokola nam. 💛 Incoko yethu iphelile kwaye ndiyicimile. Ukuba ufuna uncedo kwakhona, thumela nje umyalezo.\n\nUkuba ukhe usengozini, tsalela iChildline ku-116 (simahla, 24/7).",
   },
 };
 
@@ -204,6 +233,28 @@ const COMMANDS = {
     "bolela le motho",
     "thetha nomntu",
   ],
+  END: [
+    "bye",
+    "goodbye",
+    "end",
+    "end chat",
+    "done",
+    "i'm done",
+    "im done",
+    "stop",
+    "totsiens",
+    "klaar",
+    "beëindig gesprek",
+    "šala gabotse",
+    "sala gabotse",
+    "ke feditše",
+    "ke fedile",
+    "fetša poledišano",
+    "sala kakuhle",
+    "ndigqibile",
+    "gqiba incoko",
+    "bhayi",
+  ],
 };
 
 function getCommand(text) {
@@ -223,6 +274,12 @@ function setLanguage(from, code) {
   if (!conversations[from])
     conversations[from] = [{ role: "system", content: prompt }];
   else conversations[from][0] = { role: "system", content: prompt };
+}
+
+// Forget the chat history but keep the learner's language.
+function clearChat(from) {
+  delete conversations[from];
+  if (languagePrefs[from]) setLanguage(from, languagePrefs[from]);
 }
 
 // ---------- Checking messages really come from WhatsApp ----------
@@ -294,6 +351,23 @@ function sendMenu(to, bodyText = t(to, "menu")) {
   ]);
 }
 
+// Send a reply with "Menu" and "End chat" buttons underneath, so the learner
+// can always go back to the menu or finish. WhatsApp only allows 1024
+// characters above buttons, so very long replies go as plain text.
+function sendWithOptions(to, text) {
+  if (text.length > 1000) return sendText(to, text);
+  return sendButtons(to, text, [
+    { id: "MENU", title: t(to, "btnMenu") },
+    { id: "END", title: t(to, "btnEnd") },
+  ]);
+}
+
+// Start a new chat: the menu if we know their language, otherwise the language picker.
+function sendFreshStart(to) {
+  if (languagePrefs[to]) return sendMenu(to, t(to, "welcomeBack"));
+  return sendLanguageList(to);
+}
+
 // The language picker.
 function sendLanguageList(to) {
   return callWhatsApp({
@@ -347,8 +421,7 @@ async function handleAction(from, action) {
       return sendMenu(from);
 
     case "RESET":
-      delete conversations[from];
-      if (languagePrefs[from]) setLanguage(from, languagePrefs[from]);
+      clearChat(from);
       return sendMenu(from, `${t(from, "restart")}\n\n${t(from, "menu")}`);
 
     case "LANGUAGE":
@@ -364,13 +437,13 @@ async function handleAction(from, action) {
         t(from, "bullyingQuestion"),
         languagePrefs[from],
       );
-      return sendText(from, reply);
+      return sendWithOptions(from, reply);
     }
 
     case "GET_HELP": {
       // Always the real emergency numbers, straight away. The AI is not involved.
       const lang = languagePrefs[from] || "en";
-      return sendText(from, SAFETY_RESOURCES_BY_LANG[lang]);
+      return sendWithOptions(from, SAFETY_RESOURCES_BY_LANG[lang]);
     }
 
     case "HANDOFF":
@@ -386,6 +459,12 @@ async function handleAction(from, action) {
 
     case "HANDOFF_NO":
       return sendText(from, t(from, "handoffNo"));
+
+    case "END":
+      // Finish the chat. Their next message starts a new one.
+      clearChat(from);
+      sessionEnded[from] = true;
+      return sendText(from, t(from, "goodbye"));
 
     default:
       return sendMenu(from);
@@ -435,6 +514,34 @@ app.post("/webhook", async (req, res) => {
       return;
     }
 
+    // Is this the start of a new chat? (They tapped "End chat", or were quiet for 30 minutes.)
+    const now = Date.now();
+    const isNewSession =
+      hasGreeted[from] &&
+      (sessionEnded[from] || now - (lastSeen[from] || 0) > SESSION_TIMEOUT_MS);
+    lastSeen[from] = now;
+
+    if (isNewSession) {
+      sessionEnded[from] = false;
+      clearChat(from);
+
+      // They tapped a button or typed a command: just do it.
+      // Otherwise, show the menu again (and answer first if they asked something).
+      if (!choice && !getCommand(text)) {
+        if (text.split(/\s+/).length > 2) {
+          const reply = await getAIReply(
+            conversations,
+            from,
+            text,
+            languagePrefs[from],
+          );
+          await sendText(from, reply);
+        }
+        await sendFreshStart(from);
+        return;
+      }
+    }
+
     // A new learner: ask which language they'd like.
     if (!hasGreeted[from]) {
       hasGreeted[from] = true;
@@ -474,7 +581,7 @@ app.post("/webhook", async (req, res) => {
       text,
       languagePrefs[from],
     );
-    await sendText(from, reply);
+    await sendWithOptions(from, reply);
   } catch (err) {
     console.error("Error handling message:", err.response?.data || err.message);
     // Never leave a learner with silence.

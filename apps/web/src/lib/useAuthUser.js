@@ -11,20 +11,25 @@ export const GUEST_ROUTES = [
   "/profiles",
 ];
 
+// Last known auth state, shared across pages so navigating doesn't wait on
+// another auth check before the nav can render.
+let lastKnownState = null;
+
 export function useAuthUser() {
-  const [state, setState] = useState({
-    user: null,
-    isGuest: false,
-    loading: true,
-  });
+  const [state, setState] = useState(
+    () => lastKnownState ?? { user: null, isGuest: false, loading: true },
+  );
 
   useEffect(() => {
     if (!isSupabaseConfigured || !supabase) {
-      setState({ user: null, isGuest: false, loading: false });
+      lastKnownState = { user: null, isGuest: false, loading: false };
+      setState(lastKnownState);
       return;
     }
-    const update = (user) =>
-      setState({ user, isGuest: Boolean(user?.is_anonymous), loading: false });
+    const update = (user) => {
+      lastKnownState = { user, isGuest: Boolean(user?.is_anonymous), loading: false };
+      setState(lastKnownState);
+    };
     supabase.auth.getUser().then(({ data }) => update(data?.user ?? null));
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) =>
       update(session?.user ?? null),
@@ -41,9 +46,9 @@ export function filterNavForUser(nav, isGuest) {
     : nav;
 }
 
-// Navigation items for the current user: guests only see GUEST_ROUTES.
-// Empty until the auth check finishes, so guests never see the full menu.
-export function useDashboardNav(nav) {
+// Whether to show the guest navigation. Also true until the first auth check
+// finishes, so the nav is never empty and guests never see the full menu.
+export function useGuestNav() {
   const { isGuest, loading } = useAuthUser();
-  return loading ? [] : filterNavForUser(nav, isGuest);
+  return loading || isGuest;
 }

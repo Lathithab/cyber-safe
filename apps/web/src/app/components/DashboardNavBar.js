@@ -6,12 +6,17 @@ import DashboardNavIcon from "./DashboardNavIcon";
 import C3saLogo from "./C3saLogo";
 import LogoutButton from "./LogoutButton";
 import { DASHBOARD_NAV } from "./dashboardNav";
-import { useDashboardNav } from "../../lib/useAuthUser";
+import { filterNavForUser, useGuestNav } from "../../lib/useAuthUser";
 
 const PRIMARY_ROUTES = ["/feed", "/learn", "/postReport", "/cyberbot"];
-const MENU_EXCLUDED_ROUTES = [...PRIMARY_ROUTES, "/login", "/admin", "/notification"];
+// Guests get Help in the bottom bar instead of the sidebar and More menu.
+const GUEST_PRIMARY_ROUTES = [...PRIMARY_ROUTES, "/help"];
+const MENU_EXCLUDED_ROUTES = ["/login", "/admin", "/notification"];
 
-const iconProps = { fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", viewBox: "0 0 24 24", "aria-hidden": true };
+// Inline because the dashboard CSS lives in each page; styled like a bottom-nav item.
+const sideHelpStyle = { display: "flex", flexDirection: "column", alignItems: "center", gap: 3, alignSelf: "center", margin: "auto 0 12px", padding: "6px 14px", border: 0, background: "transparent", cursor: "pointer", font: "inherit" };
+
+const iconProps ={ fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", viewBox: "0 0 24 24", "aria-hidden": true };
 
 function MenuIcon() {
   return <svg {...iconProps} width={21} height={21}><path d="M4 6h16M4 12h16M4 18h16" /></svg>;
@@ -37,9 +42,12 @@ export default function DashboardNavBar({
 }) {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
-  const links = useDashboardNav(DASHBOARD_NAV);
-  const primaryNav = links.filter(([, route]) => PRIMARY_ROUTES.includes(route));
-  const menuNav = links.filter(([, route]) => !MENU_EXCLUDED_ROUTES.includes(route));
+  const guestNav = useGuestNav();
+  const primaryRoutes = guestNav ? GUEST_PRIMARY_ROUTES : PRIMARY_ROUTES;
+  const links = filterNavForUser(DASHBOARD_NAV, guestNav);
+  const sideNav = guestNav ? links.filter(([, route]) => route !== "/help") : links;
+  const primaryNav = links.filter(([, route]) => primaryRoutes.includes(route));
+  const menuNav = links.filter(([, route]) => !primaryRoutes.includes(route) && !MENU_EXCLUDED_ROUTES.includes(route));
 
   return (
     <>
@@ -68,13 +76,24 @@ export default function DashboardNavBar({
           <span><strong>CyberSafe</strong><small>South Africa</small></span>
         </button>
         <nav className="side-nav" aria-label="Dashboard navigation">
-          {links.map(([label, route, icon]) => (
+          {sideNav.map(([label, route, icon]) => (
             <button key={label} className={`side-link ${route === active ? "active" : ""}`} type="button" onClick={() => router.push(route)}>
               <DashboardNavIcon name={icon} size={iconSize} />
               <span>{label}</span>
             </button>
           ))}
         </nav>
+        {guestNav && (
+          <button
+            type="button"
+            onClick={() => router.push("/help")}
+            aria-label="Get Help"
+            style={{ ...sideHelpStyle, color: active === "/help" ? "#EB630F" : "rgba(255,255,255,.6)" }}
+          >
+            <DashboardNavIcon name="help" size={22} />
+            <span style={{ fontSize: 11, fontWeight: 700 }}>Help</span>
+          </button>
+        )}
         <LogoutButton />
         {sidebarExtra}
       </aside>

@@ -129,6 +129,9 @@ export default function LearnPage() {
             </button>
             <small>30 mins · Practical quiz included</small>
           </div>
+
+          
+
           <i>
             <Icon name="shield" size={100} />
           </i>
@@ -148,6 +151,7 @@ export default function LearnPage() {
               {filter}
             </button>
           ))}
+
         </div>
         <div className="module-grid">
           {isLoading && (

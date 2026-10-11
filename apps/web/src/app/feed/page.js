@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
 import DashboardNavBar from "../components/DashboardNavBar";
 import PlatformSearch from "../components/PlatformSearch";
-import { SEED_POSTS, loadStoredComments, appendStoredComment } from "./posts";
+import {
+  SEED_POSTS,
+  loadStoredComments,
+  appendStoredComment,
+} from "./posts";
 import { useAuthUser } from "../../lib/useAuthUser";
 
 function Icon({ name, size = 22 }) {
@@ -20,7 +24,8 @@ function Icon({ name, size = 22 }) {
     strokeLinejoin: "round",
     "aria-hidden": true,
   };
-  if (name === "shield")
+
+  if (name === "shield") {
     return (
       <svg {...shared} viewBox="0 0 24 26" fill="currentColor" stroke="none">
         <path d="M7,1 L15.5,1 L18.5,2.5 L21,7.5 L17.8,9.5 L16.8,13.5 L15.8,20 L12.5,25 L9.5,23.5 L8,19.5 L6,15 L7,11.5 L5,9.5 L2.8,10.3 L1,6 L2.3,2.2 Z" />
@@ -35,26 +40,34 @@ function Icon({ name, size = 22 }) {
         />
       </svg>
     );
-  if (name === "phone")
+  }
+
+  if (name === "phone") {
     return (
       <svg {...shared}>
         <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z" />
       </svg>
     );
-  if (name === "search")
+  }
+
+  if (name === "search") {
     return (
       <svg {...shared}>
         <circle cx="11" cy="11" r="7" />
         <path d="m20 20-4-4" />
       </svg>
     );
-  if (name === "menu")
+  }
+
+  if (name === "menu") {
     return (
       <svg {...shared}>
         <path d="M4 6h16M4 12h16M4 18h16" />
       </svg>
     );
-  if (name === "image")
+  }
+
+  if (name === "image") {
     return (
       <svg {...shared}>
         <rect x="3" y="4" width="18" height="16" rx="2" />
@@ -62,26 +75,34 @@ function Icon({ name, size = 22 }) {
         <path d="m4 18 5-5 4 4 3-3 4 4" />
       </svg>
     );
-  if (name === "tag")
+  }
+
+  if (name === "tag") {
     return (
       <svg {...shared}>
         <path d="m20.6 12-8-8H4v8.6l8 8a2 2 0 0 0 2.8 0l5.8-5.8a2 2 0 0 0 0-2.8Z" />
         <circle cx="8.5" cy="8.5" r="1.2" fill="currentColor" />
       </svg>
     );
-  if (name === "gem")
+  }
+
+  if (name === "gem") {
     return (
       <svg {...shared}>
         <polygon points="12 2 22 8 12 22 2 8" />
       </svg>
     );
-  if (name === "comment")
+  }
+
+  if (name === "comment") {
     return (
       <svg {...shared}>
         <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
       </svg>
     );
-  if (name === "share")
+  }
+
+  if (name === "share") {
     return (
       <svg {...shared}>
         <circle cx="18" cy="5" r="3" />
@@ -90,25 +111,33 @@ function Icon({ name, size = 22 }) {
         <path d="M8.6 10.6 15.4 6.9M8.6 13.4l6.8 3.7" />
       </svg>
     );
-  if (name === "bookmark")
+  }
+
+  if (name === "bookmark") {
     return (
       <svg {...shared}>
         <path d="M19 21 12 16l-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
       </svg>
     );
-  if (name === "pin")
+  }
+
+  if (name === "pin") {
     return (
       <svg {...shared}>
         <path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0z" />
         <circle cx="12" cy="10" r="2.5" />
       </svg>
     );
-  if (name === "close")
+  }
+
+  if (name === "close") {
     return (
       <svg {...shared}>
         <path d="M18 6 6 18M6 6l12 12" />
       </svg>
     );
+  }
+
   return (
     <svg {...shared}>
       <path d="M12 5v14M5 12h14" />
@@ -123,12 +152,15 @@ function initials(name) {
 function loadStoredReports() {
   try {
     const reports = JSON.parse(
-      localStorage.getItem("cybersafeReports") || "[]",
+      localStorage.getItem("cybersafeReports") || "[]"
     );
+
     const latest = JSON.parse(
-      sessionStorage.getItem("cybersafeLatestReport") || "null",
+      sessionStorage.getItem("cybersafeLatestReport") || "null"
     );
+
     sessionStorage.removeItem("cybersafeLatestReport");
+
     return latest ? [latest, ...reports] : reports;
   } catch {
     return [];
@@ -164,9 +196,7 @@ const CATEGORIES = [
 export default function FeedPage() {
   const router = useRouter();
   const { isGuest } = useAuthUser();
-  useEffect(() => {
-    if (isGuest) router.replace("/learn");
-  }, [isGuest, router]);
+
   const [posts, setPosts] = useState([]);
   const [currentUserName, setCurrentUserName] = useState("Guest");
   const [loading, setLoading] = useState(true);
@@ -178,8 +208,17 @@ export default function FeedPage() {
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [pendingImage, setPendingImage] = useState(null);
   const [toast, setToast] = useState(null);
+
   const toastTimer = useRef(null);
   const fileInputRef = useRef(null);
+  const likeInFlightRef = useRef(new Set());
+
+  // Guest users should use the learning area rather than the community feed.
+  useEffect(() => {
+    if (isGuest) {
+      router.replace("/learn");
+    }
+  }, [isGuest, router]);
 
   function showToast(message) {
     setToast(message);
@@ -187,115 +226,305 @@ export default function FeedPage() {
     toastTimer.current = setTimeout(() => setToast(null), 2200);
   }
 
+  // Load posts, saved gem counts, and the current user's gem selections.
   useEffect(() => {
+    let cancelled = false;
+
     async function loadPosts() {
       const withComments = (list) =>
         list.map((post) => {
           const stored = loadStoredComments(post.id);
+
           return {
             ...post,
+            likes: Number(post.likes ?? 0),
             commentsList: [...(post.topComments || []), ...stored],
             comments: (post.comments || 0) + stored.length,
-            liked: false,
-            saved: false,
+            liked: Boolean(post.liked),
+            saved: Boolean(post.saved),
           };
         });
 
-      const reports = loadStoredReports();
+      try {
+        const reports = loadStoredReports();
 
-      if (!isSupabaseConfigured) {
-        setPosts(withComments([...reports, ...SEED_POSTS]));
-        setLoading(false);
-        return;
+        if (!isSupabaseConfigured || !supabase) {
+          if (!cancelled) {
+            setPosts(withComments([...reports, ...SEED_POSTS]));
+          }
+          return;
+        }
+
+        const { data, error } = await supabase
+          .from("posts")
+          .select("*")
+          .eq("status", "approved")
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        const databasePosts = (data || []).map((post) => ({
+          id: post.id,
+          name: post.display_name,
+          time: new Date(post.created_at).toLocaleString(),
+          text: post.description,
+          location: post.location,
+          image: post.image_url,
+          likes: 0,
+          comments: 0,
+          liked: false,
+          saved: false,
+          isDatabasePost: true,
+        }));
+
+        const databasePostIds = databasePosts.map((post) => post.id);
+
+        // Retrieve the actual gem count for each database post.
+        const postsWithCounts = await Promise.all(
+          databasePosts.map(async (post) => {
+            const { count, error: countError } = await supabase
+              .from("likes")
+              .select("post_id", { count: "exact", head: true })
+              .eq("post_id", post.id);
+
+            if (countError) {
+              console.error(
+                `Error loading gems for post ${post.id}:`,
+                countError
+              );
+
+              return post;
+            }
+
+            return {
+              ...post,
+              likes: count ?? 0,
+            };
+          })
+        );
+
+        const {
+          data: authData,
+          error: authError,
+        } = await supabase.auth.getUser();
+
+        if (authError) {
+          console.error("Error checking current user:", authError);
+        }
+
+        let likedPostIds = new Set();
+
+        if (authData?.user && databasePostIds.length > 0) {
+          const {
+            data: userLikes,
+            error: userLikesError,
+          } = await supabase
+            .from("likes")
+            .select("post_id")
+            .eq("user_id", authData.user.id)
+            .in("post_id", databasePostIds);
+
+          if (userLikesError) {
+            console.error("Error loading your gems:", userLikesError);
+          } else {
+            likedPostIds = new Set(
+              (userLikes || []).map((like) => like.post_id)
+            );
+          }
+        }
+
+        const hydratedPosts = postsWithCounts.map((post) => ({
+          ...post,
+          liked: likedPostIds.has(post.id),
+        }));
+
+        if (!cancelled) {
+          setPosts(
+            withComments([...reports, ...hydratedPosts, ...SEED_POSTS])
+          );
+        }
+      } catch (error) {
+        console.error("Error loading community feed:", error);
+
+        if (!cancelled) {
+          setPosts(
+            withComments([...loadStoredReports(), ...SEED_POSTS])
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
-
-      const { data, error } = await supabase
-        .from("posts")
-        .select("*")
-        .eq("status", "approved")
-        .order("created_at", { ascending: false });
-      if (error) {
-        console.error("Error loading posts:", error);
-        setPosts(withComments([...reports, ...SEED_POSTS]));
-        setLoading(false);
-        return;
-      }
-
-      const databasePosts = (data || []).map((post) => ({
-        id: post.id,
-        name: post.display_name,
-        time: new Date(post.created_at).toLocaleString(),
-        text: post.description,
-        location: post.location,
-        image: post.image_url,
-        likes: 0,
-        comments: 0,
-      }));
-
-      setPosts(withComments([...reports, ...databasePosts, ...SEED_POSTS]));
-      setLoading(false);
     }
+
     loadPosts();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
     async function loadCurrentUser() {
       if (!isSupabaseConfigured || !supabase) return;
+
       const {
         data: { user },
+        error,
       } = await supabase.auth.getUser();
-      if (!user) return;
+
+      if (error || !user) return;
+
       const { data: profile } = await supabase
         .from("profiles")
         .select("username, full_name")
         .eq("id", user.id)
         .maybeSingle();
+
       setCurrentUserName(
-        profile?.full_name || profile?.username || user.email || "Guest",
+        profile?.full_name || profile?.username || user.email || "Guest"
       );
     }
+
     loadCurrentUser();
   }, []);
 
   const unreadTrending = useMemo(() => TRENDING, []);
 
-  function likePost(index) {
-    setPosts((prev) => {
-      const updated = [...prev];
-      updated[index] = {
-        ...updated[index],
-        liked: !updated[index].liked,
-        likes: updated[index].likes + (updated[index].liked ? -1 : 1),
-      };
-      return updated;
-    });
+  // Save or remove a gem in Supabase for database-backed posts.
+  async function likePost(index) {
+    const post = posts[index];
+
+    if (!post) return;
+
+    // Seed posts and locally stored reports remain local.
+    if (!post.isDatabasePost) {
+      setPosts((current) =>
+        current.map((item) =>
+          item.id === post.id
+            ? {
+                ...item,
+                liked: !item.liked,
+                likes: Math.max(
+                  0,
+                  Number(item.likes || 0) + (item.liked ? -1 : 1)
+                ),
+              }
+            : item
+        )
+      );
+
+      return;
+    }
+
+    if (!isSupabaseConfigured || !supabase) {
+      showToast("Gem saving is unavailable right now.");
+      return;
+    }
+
+    if (likeInFlightRef.current.has(post.id)) return;
+
+    likeInFlightRef.current.add(post.id);
+
+    try {
+      const {
+        data: authData,
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (authError) throw authError;
+
+      const user = authData?.user;
+
+      if (!user) {
+        showToast("Please sign in to give a gem.");
+        return;
+      }
+
+      if (post.liked) {
+        const { error } = await supabase
+          .from("likes")
+          .delete()
+          .eq("post_id", post.id)
+          .eq("user_id", user.id);
+
+        if (error) throw error;
+
+        setPosts((current) =>
+          current.map((item) =>
+            item.id === post.id
+              ? {
+                  ...item,
+                  liked: false,
+                  likes: Math.max(0, Number(item.likes || 0) - 1),
+                }
+              : item
+          )
+        );
+      } else {
+        const { error } = await supabase.from("likes").insert({
+          post_id: post.id,
+          user_id: user.id,
+        });
+
+        if (error) throw error;
+
+        setPosts((current) =>
+          current.map((item) =>
+            item.id === post.id
+              ? {
+                  ...item,
+                  liked: true,
+                  likes: Number(item.likes || 0) + 1,
+                }
+              : item
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error updating gem:", error);
+      showToast("Couldn't save your gem. Please try again.");
+    } finally {
+      likeInFlightRef.current.delete(post.id);
+    }
   }
 
   function savePost(index) {
     setPosts((prev) => {
       const updated = [...prev];
       const nowSaved = !updated[index].saved;
-      updated[index] = { ...updated[index], saved: nowSaved };
+
+      updated[index] = {
+        ...updated[index],
+        saved: nowSaved,
+      };
+
       showToast(nowSaved ? "Post saved" : "Removed from saved posts");
+
       return updated;
     });
   }
 
   function deleteReport(id) {
     if (!window.confirm("Remove this report from your feed?")) return;
+
     setPosts((current) => current.filter((post) => post.id !== id));
     setOpenMenuId(null);
+
     try {
       const reports = JSON.parse(
-        localStorage.getItem("cybersafeReports") || "[]",
+        localStorage.getItem("cybersafeReports") || "[]"
       );
+
       localStorage.setItem(
         "cybersafeReports",
-        JSON.stringify(reports.filter((report) => report.id !== id)),
+        JSON.stringify(reports.filter((report) => report.id !== id))
       );
     } catch {
       // Feed state is already updated; storage may be unavailable.
     }
+
     showToast("Report deleted");
   }
 
@@ -311,7 +540,10 @@ export default function FeedPage() {
   }
 
   function copyPostLink(id) {
-    const url = `${typeof window !== "undefined" ? window.location.origin : ""}/post?id=${encodeURIComponent(id)}`;
+    const url = `${
+      typeof window !== "undefined" ? window.location.origin : ""
+    }/post?id=${encodeURIComponent(id)}`;
+
     if (navigator.clipboard?.writeText) {
       navigator.clipboard
         .writeText(url)
@@ -320,6 +552,7 @@ export default function FeedPage() {
     } else {
       showToast("Couldn't copy the link");
     }
+
     setOpenShareId(null);
   }
 
@@ -335,41 +568,63 @@ export default function FeedPage() {
   function submitComment(index) {
     const post = posts[index];
     const text = (commentDrafts[post.id] || "").trim();
+
     if (!text) return;
-    const comment = { name: currentUserName, text, time: "Just now" };
+
+    const comment = {
+      name: currentUserName,
+      text,
+      time: "Just now",
+    };
+
     appendStoredComment(post.id, comment);
+
     setPosts((current) => {
       const updated = [...current];
+
       updated[index] = {
         ...updated[index],
         commentsList: [...updated[index].commentsList, comment],
         comments: updated[index].comments + 1,
       };
+
       return updated;
     });
-    setCommentDrafts((current) => ({ ...current, [post.id]: "" }));
+
+    setCommentDrafts((current) => ({
+      ...current,
+      [post.id]: "",
+    }));
   }
 
   function handleImageAttach(event) {
     const file = event.target.files?.[0];
     if (!file) return;
+
     const reader = new FileReader();
+
     reader.onload = () => setPendingImage(reader.result);
     reader.readAsDataURL(file);
   }
 
   function removeImageAttachment() {
     setPendingImage(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   }
 
   function submitPost(event) {
     event.preventDefault();
+
     const trimmed = draft.trim();
+
     if (!trimmed && !pendingImage) {
       showToast("Write something or attach an image first");
       return;
     }
+
     const newPost = {
       id: `report-${Date.now()}`,
       name: "You",
@@ -383,18 +638,22 @@ export default function FeedPage() {
       liked: false,
       saved: false,
     };
+
     setPosts((current) => [newPost, ...current]);
+
     try {
       const reports = JSON.parse(
-        localStorage.getItem("cybersafeReports") || "[]",
+        localStorage.getItem("cybersafeReports") || "[]"
       );
+
       localStorage.setItem(
         "cybersafeReports",
-        JSON.stringify([newPost, ...reports]),
+        JSON.stringify([newPost, ...reports])
       );
     } catch {
-      // Post is already visible in this session even if storage fails.
+      // The post remains visible in this session if storage fails.
     }
+
     setDraft("");
     setCategory(CATEGORIES[0]);
     removeImageAttachment();
@@ -412,13 +671,16 @@ export default function FeedPage() {
               <h1>Community Safety Feed</h1>
               <span>South Africa Active</span>
             </div>
+
             <p>
               Stay updated with the latest scams, alerts, and cybersecurity
               advice across South Africa.
             </p>
           </div>
+
           <div className="header-actions">
             <PlatformSearch />
+
             <button
               className="help-button"
               type="button"
@@ -436,6 +698,7 @@ export default function FeedPage() {
                 <div className="composer-avatar">
                   {initials(currentUserName)}
                 </div>
+
                 <input
                   value={draft}
                   onChange={(event) => setDraft(event.target.value)}
@@ -447,6 +710,7 @@ export default function FeedPage() {
               {pendingImage && (
                 <div className="composer-image-preview">
                   <img src={pendingImage} alt="Attached evidence" />
+
                   <button
                     type="button"
                     onClick={removeImageAttachment}
@@ -462,6 +726,7 @@ export default function FeedPage() {
                   <label className="tool">
                     <Icon name="image" size={14} />
                     Image/Evidence
+
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -470,8 +735,10 @@ export default function FeedPage() {
                       onChange={handleImageAttach}
                     />
                   </label>
+
                   <label className="tool category-picker">
                     <Icon name="tag" size={14} />
+
                     <select
                       value={category}
                       onChange={(event) => setCategory(event.target.value)}
@@ -485,6 +752,7 @@ export default function FeedPage() {
                     </select>
                   </label>
                 </div>
+
                 <button type="submit" className="post-button">
                   Post Safety Alert
                 </button>
@@ -501,27 +769,35 @@ export default function FeedPage() {
                   <div className="post-header">
                     <div className="post-user">
                       {post.profile ? (
-                        <img src={post.profile} alt="" className="avatar-img" />
+                        <img
+                          src={post.profile}
+                          alt=""
+                          className="avatar-img"
+                        />
                       ) : (
                         <div className="avatar-img avatar-fallback">
                           {initials(post.name)}
                         </div>
                       )}
+
                       <div>
                         <div className="name-row">
                           <strong>{post.name}</strong>
+
                           {post.issues?.[0] && (
                             <span className="badge">
                               {String(post.issues[0]).toUpperCase()}
                             </span>
                           )}
                         </div>
+
                         <small>
                           {post.role ? `${post.role} · ` : ""}
                           {post.time}
                         </small>
                       </div>
                     </div>
+
                     <div className="menu-wrap">
                       <button
                         className="menu-button"
@@ -529,12 +805,13 @@ export default function FeedPage() {
                         aria-label={`Options for ${post.name}'s post`}
                         onClick={() =>
                           setOpenMenuId((current) =>
-                            current === post.id ? null : post.id,
+                            current === post.id ? null : post.id
                           )
                         }
                       >
                         •••
                       </button>
+
                       {openMenuId === post.id && (
                         <div className="menu-popup">
                           <button
@@ -543,12 +820,14 @@ export default function FeedPage() {
                           >
                             Report post
                           </button>
+
                           <button
                             type="button"
                             onClick={() => hidePost(post.id)}
                           >
                             Hide post
                           </button>
+
                           {post.id?.startsWith("report-") && (
                             <button
                               type="button"
@@ -564,17 +843,20 @@ export default function FeedPage() {
                   </div>
 
                   <p className="post-text">{post.text}</p>
+
                   {post.location && (
                     <p className="post-meta">
                       <Icon name="pin" size={12} />
                       {post.location}
                     </p>
                   )}
+
                   {post.incidentDate && (
                     <p className="post-meta">
                       Incident date: {post.incidentDate}
                     </p>
                   )}
+
                   {post.image && (
                     <img src={post.image} alt="" className="post-image" />
                   )}
@@ -585,10 +867,12 @@ export default function FeedPage() {
                         type="button"
                         className={`action-button ${post.liked ? "liked" : ""}`}
                         onClick={() => likePost(index)}
+                        aria-pressed={Boolean(post.liked)}
                       >
                         <Icon name="gem" size={14} />
                         {post.likes} Helpful
                       </button>
+
                       <button
                         type="button"
                         className="action-button"
@@ -597,19 +881,21 @@ export default function FeedPage() {
                         <Icon name="comment" size={14} />
                         {post.comments} Comments
                       </button>
+
                       <div className="share-wrap">
                         <button
                           type="button"
                           className="action-button"
                           onClick={() =>
                             setOpenShareId((current) =>
-                              current === post.id ? null : post.id,
+                              current === post.id ? null : post.id
                             )
                           }
                         >
                           <Icon name="share" size={14} />
                           Share
                         </button>
+
                         {openShareId === post.id && (
                           <div className="menu-popup share-popup">
                             <button
@@ -618,12 +904,14 @@ export default function FeedPage() {
                             >
                               Copy link
                             </button>
+
                             <button
                               type="button"
                               onClick={() => sharePost("WhatsApp")}
                             >
                               Share to WhatsApp
                             </button>
+
                             <button
                               type="button"
                               onClick={() => sharePost("Community Feed")}
@@ -634,6 +922,7 @@ export default function FeedPage() {
                         )}
                       </div>
                     </div>
+
                     <button
                       type="button"
                       className={`save-button ${post.saved ? "saved" : ""}`}
@@ -653,6 +942,7 @@ export default function FeedPage() {
                             <div className="comment-avatar">
                               {initials(comment.name)}
                             </div>
+
                             <div className="comment-bubble">
                               <span className="c-name">{comment.name}</span>
                               <span className="c-time">{comment.time}</span>
@@ -660,16 +950,19 @@ export default function FeedPage() {
                             </div>
                           </div>
                         ))}
+
                         {!post.commentsList.length && (
                           <p className="no-comments">
                             Be the first to comment.
                           </p>
                         )}
                       </div>
+
                       <div className="comment-input-row">
                         <div className="comment-avatar">
                           {initials(currentUserName)}
                         </div>
+
                         <input
                           placeholder="Write a comment..."
                           value={commentDrafts[post.id] || ""}
@@ -680,9 +973,13 @@ export default function FeedPage() {
                             }))
                           }
                           onKeyDown={(event) => {
-                            if (event.key === "Enter") submitComment(index);
+                            if (event.key === "Enter") {
+                              event.preventDefault();
+                              submitComment(index);
+                            }
                           }}
                         />
+
                         <button
                           type="button"
                           onClick={() => submitComment(index)}
@@ -701,12 +998,15 @@ export default function FeedPage() {
               <span className="incident-icon">
                 <Icon name="phone" size={18} />
               </span>
+
               <h2>Cyber Incident?</h2>
               <small>Immediate assistance is ready</small>
+
               <p>
                 If you&apos;ve been phished, hacked, or are facing
                 cyberbullying, use our specialized South African hotlines.
               </p>
+
               <button type="button" onClick={() => router.push("/help")}>
                 Access Cyber Helpline
               </button>
@@ -714,6 +1014,7 @@ export default function FeedPage() {
 
             <section className="trending-card">
               <h2>Trending in South Africa</h2>
+
               <div className="trending-list">
                 {unreadTrending.map((item) => (
                   <div className="trending-item" key={item.title}>
@@ -734,11 +1035,7 @@ export default function FeedPage() {
         * { box-sizing: border-box; }
         .visually-hidden { position: absolute; width: 16px; height: 16px; padding: 0; margin: 2px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 
-        /* ============================================================
-           BASE = PHONE. Everything below, with no media query, is the
-           default mobile layout. Tablet/desktop are added on top via
-           min-width queries further down.
-        ============================================================ */
+        /* Base mobile layout */
         .feed-dashboard { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr); background: #f6f9fd; color: #00243A; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
 
         .sidebar { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 14px 6px; border-right: 1px solid #0d3557; background: #00243A; overflow-y: auto; }
@@ -852,21 +1149,12 @@ export default function FeedPage() {
 
         .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #00243A; color: #fff; font-size: 12px; font-weight: 700; padding: 11px 18px; border-radius: 999px; box-shadow: 0 10px 30px rgba(0,0,0,.25); z-index: 60; max-width: calc(100vw - 32px); text-align: center; }
 
-        /* ============================================================
-           TABLET AND UP (min-width: 851px) — sidebar widens, labels
-           reappear, footer links and header actions go horizontal.
-        ============================================================ */
-        .sidebar { display: none; }
-
+        /* Mobile navigation styles retained for shared dashboard layouts. */
         .mobile-topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 41; display: grid; grid-template-columns: 40px 1fr 40px; align-items: center; height: calc(52px + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px); background: #00243A; border-bottom: 2px solid #EB630F; }
-        .mobile-topbar-menu { display: grid; place-items: center; width: 40px; height: 40px; margin: 0 auto; border: 0; background: transparent; color: #fff; cursor: pointer; }
+        .mobile-topbar-menu, .mobile-topbar-bell { display: grid; place-items: center; width: 40px; height: 40px; margin: 0 auto; border: 0; background: transparent; color: #fff; cursor: pointer; }
         .mobile-topbar-brand { display: flex; align-items: center; justify-content: center; gap: 7px; border: 0; background: transparent; color: #fff; cursor: pointer; font: inherit; padding: 0; }
         .mobile-topbar-icon { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 6px; background: rgba(235,99,15,.22); color: #EB630F; }
         .mobile-topbar-brand strong { font-size: 15px; letter-spacing: -0.3px; }
-        .mobile-topbar-bell { display: grid; place-items: center; width: 40px; height: 40px; margin: 0 auto; border: 0; background: transparent; color: #fff; cursor: pointer; }
-
-        .dashboard-content { padding-top: calc(18px + 52px + env(safe-area-inset-top, 0px)); }
-
         .bottom-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: flex; background: #00243A; border-top: 2px solid #EB630F; padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 -4px 16px rgba(0,0,0,.25); }
         .bottom-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 2px; border: 0; background: transparent; color: rgba(255,255,255,.6); cursor: pointer; font: inherit; font-size: 10px; font-weight: 700; }
         .bottom-nav-item.active { color: #EB630F; }
@@ -902,7 +1190,6 @@ export default function FeedPage() {
           .user-chip { justify-content: flex-start; }
           .user-chip span:not(.chip-avatar) { display: block; }
           .user-chip strong { font-size: 11px; }
-
           .dashboard-content { padding: 24px 20px 36px; }
           .page-header { flex-direction: row; align-items: flex-start; justify-content: space-between; }
           h1 { white-space: nowrap; font-size: clamp(19px, 3.4vw, 23px); }
@@ -912,10 +1199,6 @@ export default function FeedPage() {
           .post-button { width: auto; }
         }
 
-        /* ============================================================
-           DESKTOP (min-width: 1181px) — full sidebar width, two-column
-           feed layout with the trending/emergency side column visible.
-        ============================================================ */
         @media (min-width: 1181px) {
           .feed-dashboard { grid-template-columns: 230px minmax(0, 1fr); }
           .sidebar { padding: 24px 22px 22px; }
@@ -926,7 +1209,7 @@ export default function FeedPage() {
           .feed-side::-webkit-scrollbar { display: none; }
           .platform-search { width: 245px; }
         }
-        /* Small-screen robustness: let rows wrap instead of stretching the page */
+
         .composer, .post-card, .feed-side { min-width: 0; max-width: 100%; }
         .post-text, .post-header { overflow-wrap: anywhere; }
         .post-user { min-width: 0; }
@@ -935,8 +1218,7 @@ export default function FeedPage() {
         .left-actions { flex-wrap: wrap; gap: 4px 12px; }
         .composer-bottom { flex-wrap: wrap; }
         .composer-tools { flex-wrap: wrap; gap: 6px 12px; min-width: 0; }
-
-`}</style>
+      `}</style>
     </main>
   );
 }

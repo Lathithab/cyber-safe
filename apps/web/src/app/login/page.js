@@ -69,6 +69,7 @@ function GoogleIcon() {
 
 export default function LoginPage() {
   const router = useRouter();
+  const [oauthProvider, setOauthProvider] = useState(null);
   const [mode, setMode] = useState("login");
   const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
@@ -121,37 +122,72 @@ export default function LoginPage() {
     }
     setIsSubmitting(false);
   }
-  async function handleGoogleLogin() {
+  async function handleOAuthSignIn(provider) {
     setErrorMessage("");
+    setSuccessMessage("");
+
     if (!isSupabaseConfigured || !supabase) {
       setErrorMessage("Authentication is not configured.");
       return;
     }
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${window.location.origin}/feed` },
-    });
-    if (error)
-      setErrorMessage("We couldn't start Google sign-in. Please try again.");
+
+    setOauthProvider(provider);
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/feed`,
+          ...(provider === "azure" ? { scopes: "email" } : {}),
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // Supabase redirects the browser to the selected provider.
+    } catch (error) {
+      console.error("Social sign-in error:", error);
+
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to start social sign-in. Please try again."
+      );
+
+      setOauthProvider(null);
+    }
   }
 
   async function handleGuestLogin() {
     setErrorMessage("");
+    setSuccessMessage("");
     setIsSubmitting(true);
+
     if (!isSupabaseConfigured || !supabase) {
       setErrorMessage("Authentication is not configured.");
       setIsSubmitting(false);
       return;
     }
-    const { error } = await supabase.auth.signInAnonymously();
-    if (error) {
+
+    try {
+      const { error } = await supabase.auth.signInAnonymously();
+
+      if (error) {
+        throw error;
+      }
+
+      router.push("/learn");
+    } catch (error) {
+      console.error("Guest sign-in error:", error);
+
       setErrorMessage(
-        "Guest access isn't available right now. Please try again.",
+        "Guest access isn't available right now. Please try again."
       );
+
       setIsSubmitting(false);
-      return;
     }
-    router.push("/learn");
   }
   return (
     <main className="login-page">
@@ -301,32 +337,35 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="divider">
-            <span>or connect with</span>
-          </div>
-          <div className="oauth-row">
-            <button
-              type="button"
-              className="oauth-button"
-              onClick={handleGoogleLogin}
-              disabled={isSubmitting}
-            >
-              <GoogleIcon />
-              Continue with Google
-            </button>
-          </div>
-          <button
-            type="button"
-            className="guest-button"
-            onClick={handleGuestLogin}
-            disabled={isSubmitting}
-          >
-            No email? Continue as a guest
-          </button>
-          <p className="demo-note">
-            Guests can learn and take quizzes. You can add an email or Google
-            account later to keep your progress.
-          </p>
+<div className="divider">
+  <span>or connect with</span>
+</div>
+
+<div className="oauth-row">
+  <button
+    type="button"
+    className="oauth-button"
+    onClick={() => handleOAuthSignIn("google")}
+    disabled={isSubmitting || oauthProvider !== null}
+  >
+    <GoogleIcon />
+    {oauthProvider === "google" ? "Connecting…" : "Continue with Google"}
+  </button>
+</div>
+
+<button
+  type="button"
+  className="guest-button"
+  onClick={handleGuestLogin}
+  disabled={isSubmitting || oauthProvider !== null}
+>
+  No email? Continue as a guest
+</button>
+
+<p className="demo-note">
+  Guests can learn and take quizzes. You can add an email or Google
+  account later to keep your progress.
+</p> 
         </div>
       </section>
 

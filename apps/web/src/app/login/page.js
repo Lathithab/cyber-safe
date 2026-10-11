@@ -45,6 +45,7 @@ function MicrosoftIcon() {
 
 export default function LoginPage() {
   const router = useRouter();
+  const [oauthProvider, setOauthProvider] = useState(null);
   const [mode, setMode] = useState("login");
   const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
@@ -91,7 +92,43 @@ export default function LoginPage() {
     }
     setIsSubmitting(false);
   }
+async function handleOAuthSignIn(provider) {
+  setErrorMessage("");
+  setSuccessMessage("");
 
+  if (!isSupabaseConfigured || !supabase) {
+    setErrorMessage("Authentication is not configured.");
+    return;
+  }
+
+  setOauthProvider(provider);
+
+  try {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/feed`,
+        ...(provider === "azure" ? { scopes: "email" } : {}),
+      },
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    // Supabase redirects the browser to the selected provider.
+  } catch (error) {
+    console.error("Social sign-in error:", error);
+
+    setErrorMessage(
+      error instanceof Error
+        ? error.message
+        : "Unable to start social sign-in. Please try again."
+    );
+
+    setOauthProvider(null);
+  }
+}
   return (
     <main className="login-page">
       <section className="login-hero">
@@ -140,10 +177,30 @@ export default function LoginPage() {
 
           <div className="divider"><span>or connect with</span></div>
           <div className="oauth-row">
-            <button type="button" className="oauth-button" disabled title="Coming soon"><GoogleIcon />Google</button>
-            <button type="button" className="oauth-button" disabled title="Coming soon"><MicrosoftIcon />Microsoft</button>
-          </div>
-          <p className="demo-note">Email and password authentication is active. Google and Microsoft sign-in are not connected yet.</p>
+  <button
+    type="button"
+    className="oauth-button"
+    onClick={() => handleOAuthSignIn("google")}
+    disabled={isSubmitting || oauthProvider !== null}
+  >
+    <GoogleIcon />
+    {oauthProvider === "google" ? "Connecting…" : "Google"}
+  </button>
+
+  <button
+    type="button"
+    className="oauth-button"
+    onClick={() => handleOAuthSignIn("azure")}
+    disabled={isSubmitting || oauthProvider !== null}
+  >
+    <MicrosoftIcon />
+    {oauthProvider === "azure" ? "Connecting…" : "Microsoft"}
+  </button>
+</div>
+
+<p className="demo-note">
+  Sign in with Google, Microsoft, or your email and password.
+</p>
         </div>
       </section>
 

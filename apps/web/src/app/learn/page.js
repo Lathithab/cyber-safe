@@ -95,6 +95,7 @@ export default function LearnPage() {
               </button>
             ))}
           </div>
+          
         </div>
       </div>
     )}

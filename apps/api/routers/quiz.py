@@ -16,13 +16,31 @@ router = APIRouter(prefix="/quiz", tags=["quiz"])
 PASS_THRESHOLD_PERCENT = 70.0
 
 
+def _get_quiz_id(supabase, module_id: str) -> int:
+    """Quiz content is linked module -> Quizz -> quiz_questions (via quizz_id),
+    not directly by module_id on quiz_questions."""
+    quiz = (
+        supabase.table("Quizz")
+        .select("id")
+        .eq("module_id", module_id)
+        .order("id")
+        .limit(1)
+        .execute()
+    )
+    if not quiz.data:
+        raise HTTPException(status_code=404, detail="No quiz found for this module")
+    return quiz.data[0]["id"]
+
+
 @router.get("/{module_id}/questions")
 def get_quiz_questions(module_id: str, user: CurrentUser = Depends(get_current_user)):
     supabase = get_supabase()
+    quiz_id = _get_quiz_id(supabase, module_id)
+
     result = (
         supabase.table("quiz_questions")
         .select("id, question, options")
-        .eq("module_id", module_id)
+        .eq("quizz_id", quiz_id)
         .order("order_index")
         .execute()
     )
@@ -34,11 +52,12 @@ def get_quiz_questions(module_id: str, user: CurrentUser = Depends(get_current_u
 @router.post("/{module_id}/submit", response_model=QuizResult)
 def submit_quiz(module_id: str, submission: QuizSubmission, user: CurrentUser = Depends(get_current_user)):
     supabase = get_supabase()
+    quiz_id = _get_quiz_id(supabase, module_id)
 
     questions_result = (
         supabase.table("quiz_questions")
         .select("id, correct_index")
-        .eq("module_id", module_id)
+        .eq("quizz_id", quiz_id)
         .execute()
     )
     questions = questions_result.data or []

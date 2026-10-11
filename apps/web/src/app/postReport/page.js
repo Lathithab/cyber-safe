@@ -3,11 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
-import DashboardNavIcon from "../components/DashboardNavIcon";
-import C3saLogo from "../components/C3saLogo";
-import LogoutButton from "../components/LogoutButton";
-import { DASHBOARD_NAV } from "../components/dashboardNav";
+import DashboardNavBar from "../components/DashboardNavBar";
 import PlatformSearch from "../components/PlatformSearch";
+import { useAuthUser } from "../../lib/useAuthUser";
+import GuestUpgradeNotice from "../components/GuestUpgradeNotice";
 
 const INCIDENT_TYPES = [
   "Phishing Link",
@@ -19,54 +18,123 @@ const INCIDENT_TYPES = [
 ];
 
 function Icon({ name, size = 22 }) {
-  const shared = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true };
-  if (name === "menu") return <svg {...shared}><path d="M4 6h16M4 12h16M4 18h16" /></svg>;
-  if (name === "close") return <svg {...shared}><path d="M18 6 6 18M6 6l12 12" /></svg>;
-  if (name === "shield") return <svg {...shared} viewBox="0 0 24 26" fill="currentColor" stroke="none"><path d="M7,1 L15.5,1 L18.5,2.5 L21,7.5 L17.8,9.5 L16.8,13.5 L15.8,20 L12.5,25 L9.5,23.5 L8,19.5 L6,15 L7,11.5 L5,9.5 L2.8,10.3 L1,6 L2.3,2.2 Z" /><ellipse cx="19.5" cy="17" rx="0.9" ry="1.9" transform="rotate(20 19.5 17)" fill="currentColor" stroke="none" /></svg>;
-  if (name === "home") return <svg {...shared}><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" /></svg>;
-  if (name === "book") return <svg {...shared}><path d="M4 19a2 2 0 0 1 2-2h14" /><path d="M6 3h14v18H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" /></svg>;
-  if (name === "alert") return <svg {...shared}><path d="m10.3 3.9-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3.1l-8-14a2 2 0 0 0-3.4 0z" /><path d="M12 9v4" /><path d="M12 17h.01" /></svg>;
-  if (name === "chat") return <svg {...shared}><path d="M21 11.5a8.4 8.4 0 0 1-9 8.5 9 9 0 0 1-4-.9L3 21l1.6-4.3A8.4 8.4 0 0 1 3 11.5 8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z" /></svg>;
-  if (name === "phone") return <svg {...shared}><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z" /></svg>;
-  if (name === "search") return <svg {...shared}><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>;
-  if (name === "calendar") return <svg {...shared}><rect width="18" height="18" x="3" y="4" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>;
-  if (name === "pin") return <svg {...shared}><path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0z" /><circle cx="12" cy="10" r="2.5" /></svg>;
-  if (name === "upload") return <svg {...shared}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m17 8-5-5-5 5M12 3v13" /></svg>;
-  return <svg {...shared}><path d="M12 5v14M5 12h14" /></svg>;
-}
-
-function Sidebar({ router }) {
-  const items = DASHBOARD_NAV;
+  const shared = {
+    width: size,
+    height: size,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    "aria-hidden": true,
+  };
+  if (name === "menu")
+    return (
+      <svg {...shared}>
+        <path d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    );
+  if (name === "close")
+    return (
+      <svg {...shared}>
+        <path d="M18 6 6 18M6 6l12 12" />
+      </svg>
+    );
+  if (name === "shield")
+    return (
+      <svg {...shared} viewBox="0 0 24 26" fill="currentColor" stroke="none">
+        <path d="M7,1 L15.5,1 L18.5,2.5 L21,7.5 L17.8,9.5 L16.8,13.5 L15.8,20 L12.5,25 L9.5,23.5 L8,19.5 L6,15 L7,11.5 L5,9.5 L2.8,10.3 L1,6 L2.3,2.2 Z" />
+        <ellipse
+          cx="19.5"
+          cy="17"
+          rx="0.9"
+          ry="1.9"
+          transform="rotate(20 19.5 17)"
+          fill="currentColor"
+          stroke="none"
+        />
+      </svg>
+    );
+  if (name === "home")
+    return (
+      <svg {...shared}>
+        <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
+      </svg>
+    );
+  if (name === "book")
+    return (
+      <svg {...shared}>
+        <path d="M4 19a2 2 0 0 1 2-2h14" />
+        <path d="M6 3h14v18H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" />
+      </svg>
+    );
+  if (name === "alert")
+    return (
+      <svg {...shared}>
+        <path d="m10.3 3.9-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3.1l-8-14a2 2 0 0 0-3.4 0z" />
+        <path d="M12 9v4" />
+        <path d="M12 17h.01" />
+      </svg>
+    );
+  if (name === "chat")
+    return (
+      <svg {...shared}>
+        <path d="M21 11.5a8.4 8.4 0 0 1-9 8.5 9 9 0 0 1-4-.9L3 21l1.6-4.3A8.4 8.4 0 0 1 3 11.5 8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z" />
+      </svg>
+    );
+  if (name === "phone")
+    return (
+      <svg {...shared}>
+        <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z" />
+      </svg>
+    );
+  if (name === "search")
+    return (
+      <svg {...shared}>
+        <circle cx="11" cy="11" r="7" />
+        <path d="m20 20-4-4" />
+      </svg>
+    );
+  if (name === "calendar")
+    return (
+      <svg {...shared}>
+        <rect width="18" height="18" x="3" y="4" rx="2" />
+        <path d="M16 2v4M8 2v4M3 10h18" />
+      </svg>
+    );
+  if (name === "pin")
+    return (
+      <svg {...shared}>
+        <path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0z" />
+        <circle cx="12" cy="10" r="2.5" />
+      </svg>
+    );
+  if (name === "upload")
+    return (
+      <svg {...shared}>
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <path d="m17 8-5-5-5 5M12 3v13" />
+      </svg>
+    );
   return (
-    <aside className="sidebar">
-      <button className="brand" type="button" onClick={() => router.push("/")}>
-        <C3saLogo />
-        <span><strong>CyberSafe</strong><small>South Africa</small></span>
-      </button>
-      <nav className="side-nav" aria-label="Dashboard navigation">
-        {items.map(([label, route, icon]) => (
-          <button key={label} className={`side-link ${route === "/postReport" ? "active" : ""}`} type="button" onClick={() => router.push(route)}>
-            <DashboardNavIcon name={icon} size={20} /><span>{label}</span>
-          </button>
-        ))}
-      </nav>
-      <LogoutButton />
-      <button className="emergency-card" type="button" onClick={() => router.push("/help")}>
-        <span className="emergency-icon"><Icon name="phone" size={18} /></span>
-        <span><strong>EMERGENCY</strong><small>Victim of a scam or cyber hack?</small><b>Get Help Now</b></span>
-      </button>
-    </aside>
+    <svg {...shared}>
+      <path d="M12 5v14M5 12h14" />
+    </svg>
   );
 }
 
 export default function PostReportPage() {
   const router = useRouter();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const PRIMARY_ROUTES = ["/feed", "/learn", "/postReport", "/cyberbot"];
-  const MENU_EXCLUDED_ROUTES = [...PRIMARY_ROUTES, "/login", "/admin", "/notification"];
-  const primaryNav = DASHBOARD_NAV.filter(([, route]) => PRIMARY_ROUTES.includes(route));
-  const menuNav = DASHBOARD_NAV.filter(([, route]) => !MENU_EXCLUDED_ROUTES.includes(route));
-  const [form, setForm] = useState({ incidentType: "", description: "", incidentDate: "", location: "", anonymous: true, file: null });
+  const { isGuest } = useAuthUser();
+  const [form, setForm] = useState({
+    incidentType: "",
+    description: "",
+    incidentDate: "",
+    location: "",
+    anonymous: true,
+    file: null,
+  });
   const [submitError, setSubmitError] = useState("");
   const [submitSuccess, setSubmitSuccess] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -76,7 +144,11 @@ export default function PostReportPage() {
 
   function updateForm(event) {
     const { name, value, type, checked, files } = event.target;
-    setForm((current) => ({ ...current, [name]: type === "checkbox" ? checked : files ? files[0] ?? null : value }));
+    setForm((current) => ({
+      ...current,
+      [name]:
+        type === "checkbox" ? checked : files ? (files[0] ?? null) : value,
+    }));
   }
 
   function readEvidenceImage(file) {
@@ -85,14 +157,15 @@ export default function PostReportPage() {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result);
-      reader.onerror = () => reject(new Error("The selected image could not be read."));
+      reader.onerror = () =>
+        reject(new Error("The selected image could not be read."));
       reader.readAsDataURL(file);
     });
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
-    if (!canSubmit || isSubmitting) return;
+    if (isGuest || !canSubmit || isSubmitting) return;
     setSubmitError("");
     setSubmitSuccess("");
     setIsSubmitting(true);
@@ -123,12 +196,19 @@ export default function PostReportPage() {
       };
 
       try {
-        const reports = JSON.parse(localStorage.getItem("cybersafeReports") || "[]");
-        localStorage.setItem("cybersafeReports", JSON.stringify([localReport, ...reports]));
+        const reports = JSON.parse(
+          localStorage.getItem("cybersafeReports") || "[]",
+        );
+        localStorage.setItem(
+          "cybersafeReports",
+          JSON.stringify([localReport, ...reports]),
+        );
         router.push("/feed");
         return;
       } catch {
-        setSubmitError("This device could not save the report locally. Please try again.");
+        setSubmitError(
+          "This device could not save the report locally. Please try again.",
+        );
         setIsSubmitting(false);
         return;
       }
@@ -147,82 +227,196 @@ export default function PostReportPage() {
 
     if (error) {
       console.error("Could not submit incident report:", error);
-      setSubmitError("We could not submit your report. Please try again or use Get Help Now if you need urgent support.");
+      setSubmitError(
+        "We could not submit your report. Please try again or use Get Help Now if you need urgent support.",
+      );
       setIsSubmitting(false);
       return;
     }
-    setSubmitSuccess("Your report was submitted for review. You can check its status in My Posts on your profile.");
+    setSubmitSuccess(
+      "Your report was submitted for review. You can check its status in My Posts on your profile.",
+    );
     setIsSubmitting(false);
   }
 
   return (
     <main className="report-dashboard">
-      <header className="mobile-topbar">
-        <button className="mobile-topbar-menu" type="button" onClick={() => setMenuOpen(true)} aria-label="Open menu"><Icon name="menu" size={21} /></button>
-        <button className="mobile-topbar-brand" type="button" onClick={() => router.push("/feed")}><C3saLogo size={34} /><strong>CyberSafe</strong></button>
-        <button className="mobile-topbar-bell" type="button" onClick={() => router.push("/notification")} aria-label="Notifications"><DashboardNavIcon name="bell" size={21} /></button>
-      </header>
-      <Sidebar router={router} />
-      <nav className="bottom-nav" aria-label="Primary navigation">
-        {primaryNav.map(([label, route, icon]) => (
-          <button key={label} type="button" className={`bottom-nav-item ${route === "/postReport" ? "active" : ""}`} onClick={() => router.push(route)}>
-            <DashboardNavIcon name={icon} size={21} />
-            <span>{label.replace("Community ", "").replace(" Security", "").replace(" Incident", "").replace(" AI", "")}</span>
+      <DashboardNavBar
+        active="/postReport"
+        iconSize={20}
+        bell
+        menuLogout
+        sidebarExtra={
+          <button
+            className="emergency-card"
+            type="button"
+            onClick={() => router.push("/help")}
+          >
+            <span className="emergency-icon">
+              <Icon name="phone" size={18} />
+            </span>
+            <span>
+              <strong>EMERGENCY</strong>
+              <small>Victim of a scam or cyber hack?</small>
+              <b>Get Help Now</b>
+            </span>
           </button>
-        ))}
-      </nav>
-      {menuOpen && (
-        <div className="nav-menu-overlay" onClick={() => setMenuOpen(false)}>
-          <div className="nav-menu-sheet" onClick={(event) => event.stopPropagation()}>
-            <div className="nav-menu-header"><strong>More</strong><button type="button" className="nav-menu-close" onClick={() => setMenuOpen(false)} aria-label="Close menu"><Icon name="close" size={18} /></button></div>
-            <div className="nav-menu-grid">
-              {menuNav.map(([label, route, icon]) => (
-                <button key={label} type="button" className="nav-menu-item" onClick={() => { setMenuOpen(false); router.push(route); }}>
-                  <span className="nav-menu-icon"><DashboardNavIcon name={icon} size={20} /></span>{label}
-                </button>
-              ))}
-            </div>
-            <LogoutButton />
-          </div>
-        </div>
-      )}
+        }
+      />
       <section className="dashboard-content">
         <header className="page-header">
           <div className="page-intro">
-            <div className="title-row"><h1>Report Cyber Crime</h1><span>Community Safety Hub</span></div>
-            <p>Securely submit incident details to alert the community and access direct legal/SAPS support channels.</p>
+            <div className="title-row">
+              <h1>Report Cyber Crime</h1>
+              <span>Community Safety Hub</span>
+            </div>
+            <p>
+              Securely submit incident details to alert the community and access
+              direct legal/SAPS support channels.
+            </p>
           </div>
           <div className="header-actions">
             <PlatformSearch />
-            <button className="help-button" type="button" onClick={() => router.push("/help")}>Get Help Now</button>
+            <button
+              className="help-button"
+              type="button"
+              onClick={() => router.push("/help")}
+            >
+              Get Help Now
+            </button>
           </div>
         </header>
 
         <div className="content-grid">
           <form className="report-card" onSubmit={handleSubmit}>
-            <div className="card-heading"><h2>Incident Form</h2><p>Provide as much information as possible. Your safety and privacy are our priority.</p></div>
+            <div className="card-heading">
+              <h2>Incident Form</h2>
+              <p>
+                Provide as much information as possible. Your safety and privacy
+                are our priority.
+              </p>
+            </div>
 
-            <fieldset className="incident-types"><legend>What type of incident occurred?</legend><div className="type-options">
-              {INCIDENT_TYPES.map((type) => <button key={type} type="button" className={form.incidentType === type ? "type-button selected" : "type-button"} onClick={() => setForm((current) => ({ ...current, incidentType: type }))}>{type}</button>)}
-            </div></fieldset>
+            <fieldset className="incident-types">
+              <legend>What type of incident occurred?</legend>
+              <div className="type-options">
+                {INCIDENT_TYPES.map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    className={
+                      form.incidentType === type
+                        ? "type-button selected"
+                        : "type-button"
+                    }
+                    onClick={() =>
+                      setForm((current) => ({ ...current, incidentType: type }))
+                    }
+                  >
+                    {type}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
 
-            <label className="field-label" htmlFor="description">Detailed Description</label>
-            <textarea id="description" name="description" value={form.description} onChange={updateForm} placeholder="Tell us what happened, how you were contacted, and what information or money may be at risk..." rows={5} />
+            <label className="field-label" htmlFor="description">
+              Detailed Description
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              value={form.description}
+              onChange={updateForm}
+              placeholder="Tell us what happened, how you were contacted, and what information or money may be at risk..."
+              rows={5}
+            />
 
             <div className="two-fields">
-              <label className="field-label" htmlFor="incidentDate">Date of Incident<span className="input-shell"><Icon name="calendar" size={17} /><input id="incidentDate" name="incidentDate" type="date" max={today} value={form.incidentDate} onChange={updateForm} /></span></label>
-              <label className="field-label" htmlFor="location">Location (Province/City)<span className="input-shell"><Icon name="pin" size={17} /><input id="location" name="location" placeholder="e.g. Johannesburg, Gauteng" value={form.location} onChange={updateForm} /></span></label>
+              <label className="field-label" htmlFor="incidentDate">
+                Date of Incident
+                <span className="input-shell">
+                  <Icon name="calendar" size={17} />
+                  <input
+                    id="incidentDate"
+                    name="incidentDate"
+                    type="date"
+                    max={today}
+                    value={form.incidentDate}
+                    onChange={updateForm}
+                  />
+                </span>
+              </label>
+              <label className="field-label" htmlFor="location">
+                Location (Province/City)
+                <span className="input-shell">
+                  <Icon name="pin" size={17} />
+                  <input
+                    id="location"
+                    name="location"
+                    placeholder="e.g. Johannesburg, Gauteng"
+                    value={form.location}
+                    onChange={updateForm}
+                  />
+                </span>
+              </label>
             </div>
 
-            <label className="anonymous-option"><span><strong>Post Anonymously to Safety Feed</strong><small>This alerts other South Africans in your area without revealing your personal identity.</small></span><input name="anonymous" type="checkbox" checked={form.anonymous} onChange={updateForm} aria-label="Post anonymously" /><i /></label>
+            <label className="anonymous-option">
+              <span>
+                <strong>Post Anonymously to Safety Feed</strong>
+                <small>
+                  This alerts other South Africans in your area without
+                  revealing your personal identity.
+                </small>
+              </span>
+              <input
+                name="anonymous"
+                type="checkbox"
+                checked={form.anonymous}
+                onChange={updateForm}
+                aria-label="Post anonymously"
+              />
+              <i />
+            </label>
 
             <div className="form-actions">
-              <label className="upload-button"><Icon name="upload" size={17} /><span>{form.file ? form.file.name : "Upload Evidence "}</span><input name="file" type="file" accept="application/pdf,image/png,image/jpeg" onChange={updateForm} hidden /></label>
-              <button className="submit-button" type="submit" disabled={!canSubmit || isSubmitting || Boolean(submitSuccess)}>{isSubmitting ? "Submitting report..." : submitSuccess ? "Report Submitted" : "Submit Incident Report"}</button>
+              <label className="upload-button">
+                <Icon name="upload" size={17} />
+                <span>{form.file ? form.file.name : "Upload Evidence "}</span>
+                <input
+                  name="file"
+                  type="file"
+                  accept="application/pdf,image/png,image/jpeg"
+                  onChange={updateForm}
+                  hidden
+                />
+              </label>
+              <button
+                className="submit-button"
+                type="submit"
+                disabled={!canSubmit || isSubmitting || Boolean(submitSuccess)}
+              >
+                {isSubmitting
+                  ? "Submitting report..."
+                  : submitSuccess
+                    ? "Report Submitted"
+                    : "Submit Incident Report"}
+              </button>
             </div>
-            {submitError && <p className="submit-error" role="alert">{submitError}</p>}
-            {submitSuccess && <p className="submit-success" role="status">{submitSuccess}</p>}
-            <p className="privacy-note">Do not include passwords, PINs, one-time passwords, full card numbers, or ID numbers.</p>
+            {submitError && (
+              <p className="submit-error" role="alert">
+                {submitError}
+              </p>
+            )}
+            {submitSuccess && (
+              <p className="submit-success" role="status">
+                {submitSuccess}
+              </p>
+            )}
+            <p className="privacy-note">
+              Do not include passwords, PINs, one-time passwords, full card
+              numbers, or ID numbers.
+            </p>
           </form>
 
           <aside className="report-summary">
@@ -237,7 +431,16 @@ export default function PostReportPage() {
                 <li>Community alert published anonymously</li>
               </ol>
             </div>
-            <div className="report-tip"><strong>Need urgent help?</strong><p>If money is moving or account access is at risk, call your bank immediately.</p><button type="button" onClick={() => router.push("/help")}>Open support hub</button></div>
+            <div className="report-tip">
+              <strong>Need urgent help?</strong>
+              <p>
+                If money is moving or account access is at risk, call your bank
+                immediately.
+              </p>
+              <button type="button" onClick={() => router.push("/help")}>
+                Open support hub
+              </button>
+            </div>
           </aside>
         </div>
       </section>

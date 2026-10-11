@@ -5,7 +5,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-ReportStatus = Literal["pending", "approved", "rejected"]
+ReportStatus = Literal["pending", "approved", "removed"]
 
 
 class ReportCreate(BaseModel):
@@ -29,7 +29,7 @@ class ReportOut(BaseModel):
 
 
 class ModerationDecision(BaseModel):
-    status: Literal["approved", "rejected"]
+    status: Literal["approved", "removed", "pending"]
     reason: str | None = None
 
 

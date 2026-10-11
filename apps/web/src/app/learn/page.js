@@ -3,29 +3,61 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
-import DashboardNavIcon from "../components/DashboardNavIcon";
-import C3saLogo from "../components/C3saLogo";
-import LogoutButton from "../components/LogoutButton";
-import { DASHBOARD_NAV } from "../components/dashboardNav";
+import DashboardNavBar from "../components/DashboardNavBar";
 
-const FILTERS = ["All modules", "Banking", "Social engineering", "School resources"];
+const FILTERS = [
+  "All modules",
+  "Banking",
+  "Social engineering",
+  "School resources",
+];
 function Icon({ name, size = 22 }) {
-  const shared = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true };
+  const shared = {
+    width: size,
+    height: size,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    "aria-hidden": true,
+  };
   if (name === "shield") {
     return (
       <svg {...shared} viewBox="0 0 24 26" fill="currentColor" stroke="none">
         <path d="M7,1 L15.5,1 L18.5,2.5 L21,7.5 L17.8,9.5 L16.8,13.5 L15.8,20 L12.5,25 L9.5,23.5 L8,19.5 L6,15 L7,11.5 L5,9.5 L2.8,10.3 L1,6 L2.3,2.2 Z" />
-        <ellipse cx="19.5" cy="17" rx="0.9" ry="1.9" transform="rotate(20 19.5 17)" />
+        <ellipse
+          cx="19.5"
+          cy="17"
+          rx="0.9"
+          ry="1.9"
+          transform="rotate(20 19.5 17)"
+        />
       </svg>
     );
   }
-  if (name === "menu") return <svg {...shared}><path d="M4 6h16M4 12h16M4 18h16" /></svg>;
-  if (name === "close") return <svg {...shared}><path d="M18 6 6 18M6 6l12 12" /></svg>;
+  if (name === "menu")
+    return (
+      <svg {...shared}>
+        <path d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    );
+  if (name === "close")
+    return (
+      <svg {...shared}>
+        <path d="M18 6 6 18M6 6l12 12" />
+      </svg>
+    );
 
   return null;
 }
 function ShieldIcon() {
-  return <span className="shield-icon" aria-hidden="true">✓</span>;
+  return (
+    <span className="shield-icon" aria-hidden="true">
+      ✓
+    </span>
+  );
 }
 
 export default function LearnPage() {
@@ -33,11 +65,12 @@ export default function LearnPage() {
   const [databaseModules, setDatabaseModules] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
-  const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => {
     async function loadDatabaseModules() {
       if (!isSupabaseConfigured) {
-        setLoadError("Learning modules are not available until Supabase is configured.");
+        setLoadError(
+          "Learning modules are not available until Supabase is configured.",
+        );
         setIsLoading(false);
         return;
       }
@@ -50,7 +83,9 @@ export default function LearnPage() {
 
       if (error) {
         console.error("Could not load modules:", error);
-        setLoadError("We could not load the learning modules. Please try again shortly.");
+        setLoadError(
+          "We could not load the learning modules. Please try again shortly.",
+        );
       } else {
         setDatabaseModules(data || []);
       }
@@ -61,69 +96,98 @@ export default function LearnPage() {
     loadDatabaseModules();
   }, []);
   const [activeFilter, setActiveFilter] = useState("All modules");
-  const links = DASHBOARD_NAV;
-  const PRIMARY_ROUTES = ["/feed", "/learn", "/postReport", "/cyberbot"];
-  const MENU_EXCLUDED_ROUTES = [...PRIMARY_ROUTES, "/login", "/admin", "/notification"];
-  const primaryNav = DASHBOARD_NAV.filter(([, route]) => PRIMARY_ROUTES.includes(route));
-  const menuNav = DASHBOARD_NAV.filter(([, route]) => !MENU_EXCLUDED_ROUTES.includes(route));
-  const visibleModules = activeFilter === "All modules"
-    ? databaseModules
-    : databaseModules.filter((module) => module.category === activeFilter);
-  return <main className="learn-dashboard">
-    <header className="mobile-topbar">
-      <button className="mobile-topbar-menu" type="button" onClick={() => setMenuOpen(true)} aria-label="Open menu"><Icon name="menu" size={21} /></button>
-      <button className="mobile-topbar-brand" type="button" onClick={() => router.push("/feed")}><C3saLogo size={34} /><strong>CyberSafe</strong></button>
-      <button className="mobile-topbar-bell" type="button" onClick={() => router.push("/profiles")} aria-label="User Profile"><DashboardNavIcon name="user" size={21} /></button>
-    </header>
-    <aside className="sidebar"><button className="brand" onClick={() => router.push("/feed")} type="button"><C3saLogo /><span><strong>CyberSafe</strong><small>South Africa</small></span></button><nav className="side-nav">{links.map(([label, route, icon]) => <button key={label} type="button" className={`side-link ${route === "/learn" ? "active" : ""}`} onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={24} />{label}</button>)}</nav><LogoutButton /></aside>
-    <nav className="bottom-nav" aria-label="Primary navigation">
-      {primaryNav.map(([label, route, icon]) => (
-        <button key={label} type="button" className={`bottom-nav-item ${route === "/learn" ? "active" : ""}`} onClick={() => router.push(route)}>
-          <DashboardNavIcon name={icon} size={21} />
-          <span>{label.replace("Community ", "").replace(" Security", "").replace(" Incident", "").replace(" AI", "")}</span>
-        </button>
-      ))}
-    </nav>
-    {menuOpen && (
-      <div className="nav-menu-overlay" onClick={() => setMenuOpen(false)}>
-        <div className="nav-menu-sheet" onClick={(event) => event.stopPropagation()}>
-          <div className="nav-menu-header"><strong>More</strong><button type="button" className="nav-menu-close" onClick={() => setMenuOpen(false)} aria-label="Close menu"><Icon name="close" size={18} /></button></div>
-          <div className="nav-menu-grid">
-            {menuNav.map(([label, route, icon]) => (
-              <button key={label} type="button" className="nav-menu-item" onClick={() => { setMenuOpen(false); router.push(route); }}>
-                <span className="nav-menu-icon"><DashboardNavIcon name={icon} size={20} /></span>{label}
-              </button>
-            ))}
+  const visibleModules =
+    activeFilter === "All modules"
+      ? databaseModules
+      : databaseModules.filter((module) => module.category === activeFilter);
+  return (
+    <main className="learn-dashboard">
+      <DashboardNavBar active="/learn" iconSize={24} brandHref="/feed" />
+      <section className="learn-content">
+        <header>
+          <p>CyberSafe academy</p>
+          <h1>Interactive Safety Academy</h1>
+          <span>
+            Practical courses built to tackle local South African digital
+            threats.
+          </span>
+        </header>
+        <section className="hero">
+          <div>
+            <b>FEATURED CURRICULUM</b>
+            <h2>Securing your SA Banking Apps against OTP Scams</h2>
+            <p>
+              Learn how social engineers steal one-time passwords and banking
+              login details - and the rules of immediate secure-bank escalation.
+            </p>
+            <button
+              type="button"
+              disabled={!databaseModules.length}
+              onClick={() => router.push(`/learn/${databaseModules[0]?.id}`)}
+            >
+              Start free module
+            </button>
+            <small>30 mins · Practical quiz included</small>
           </div>
+
           
+
+          <i>
+            <Icon name="shield" size={100} />
+          </i>
+        </section>
+        <section className="module-row">
+          <h2>Start learning</h2>
+          <span>Short, practical and local</span>
+        </section>
+        <div className="filters" aria-label="Learning module filters">
+          {FILTERS.map((filter) => (
+            <button
+              key={filter}
+              type="button"
+              className={activeFilter === filter ? "selected" : ""}
+              onClick={() => setActiveFilter(filter)}
+            >
+              {filter}
+            </button>
+          ))}
+
         </div>
-      </div>
-    )}
-    <section className="learn-content"><header><p>CyberSafe academy</p><h1>Interactive Safety Academy</h1><span>Practical courses built to tackle local South African digital threats.</span></header><section className="hero"><div><b>FEATURED CURRICULUM</b><h2>Securing your SA Banking Apps against OTP Scams</h2><p>Learn how social engineers steal one-time passwords and banking login details - and the rules of immediate secure-bank escalation.</p><button type="button" disabled={!databaseModules.length} onClick={() => router.push(`/learn/${databaseModules[0].id}`)}>Start free module</button><small>30 mins · Practical quiz included</small></div><i><Icon name="shield" size={100} /></i></section><section className="module-row"><h2>Start learning</h2><span>Short, practical and local</span></section><div className="filters" aria-label="Learning module filters">{FILTERS.map((filter) => <button key={filter} type="button" className={activeFilter === filter ? "selected" : ""} onClick={() => setActiveFilter(filter)}>{filter}</button>)}</div><div className="module-grid">
-  {isLoading && <p className="module-status">Loading learning modules…</p>}
-  {!isLoading && loadError && <p className="module-status error">{loadError}</p>}
-  {!isLoading && !loadError && !visibleModules.length && <p className="module-status">No modules are available in this category yet.</p>}
-  {visibleModules.map((module) => (
-    <article key={module.id}>
-      <small>{module.difficulty}</small>
+        <div className="module-grid">
+          {isLoading && (
+            <p className="module-status">Loading learning modules…</p>
+          )}
+          {!isLoading && loadError && (
+            <p className="module-status error">{loadError}</p>
+          )}
+          {!isLoading && !loadError && !visibleModules.length && (
+            <p className="module-status">
+              No modules are available in this category yet.
+            </p>
+          )}
+          {visibleModules.map((module) => (
+            <article key={module.id}>
+              <small>{module.difficulty}</small>
 
-      <h2>{module.title}</h2>
+              <h2>{module.title}</h2>
 
-      <p>{module.description}</p>
+              <p>{module.description}</p>
 
-      <footer>
-        <span>{module.estimated_minutes} min</span>
+              <footer>
+                <span>{module.estimated_minutes} min</span>
 
-        <button
-          type="button"
-          onClick={() => router.push(`/learn/${module.id}`)}
-        >
-          Open module →
-        </button>
-      </footer>
-    </article>
-  ))}
-</div></section><style>{`
+                <button
+                  type="button"
+                  onClick={() => router.push(`/learn/${module.id}`)}
+                >
+                  Open module →
+                </button>
+              </footer>
+            </article>
+          ))}
+        </div>
+      </section>
+      <style>{`
     * { box-sizing:border-box; } .learn-dashboard { min-height:100vh; display:grid; grid-template-columns: minmax(0,1fr); background:#f7f4ef; color:#00243A; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; } .sidebar { position:sticky; top:0; height:100vh; display:flex; flex-direction:column; padding:24px 22px; border-right:1px solid #e4ddd4; background: #00243A; } .sidebar { display: none; }    .mobile-topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 41; display: grid; grid-template-columns: 40px 1fr 40px; align-items: center; height: calc(52px + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px); background: #00243A; border-bottom: 2px solid #EB630F; }
     .mobile-topbar-menu, .mobile-topbar-bell { display: grid; place-items: center; width: 40px; height: 40px; margin: 0 auto; border: 0; background: transparent; color: #fff; cursor: pointer; }
     .mobile-topbar-brand { display: flex; align-items: center; justify-content: center; gap: 7px; border: 0; background: transparent; color: #fff; cursor: pointer; font: inherit; padding: 0; }
@@ -153,5 +217,7 @@ export default function LearnPage() {
       .mobile-topbar, .bottom-nav, .nav-menu-overlay { display: none; }
       .learn-content { padding-top: 24px; }
     }
-    `}</style></main>;
+    `}</style>
+    </main>
+  );
 }

@@ -1,12 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { emergency, banks, networks, geoLinks } from "./contacts";
-import DashboardNavIcon from "../components/DashboardNavIcon";
-import C3saLogo from "../components/C3saLogo";
-import LogoutButton from "../components/LogoutButton";
-import { DASHBOARD_NAV } from "../components/dashboardNav";
+import DashboardNavBar from "../components/DashboardNavBar";
 
 function Icon({ name, size = 22 }) {
   const shared = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true };
@@ -24,15 +20,6 @@ function Icon({ name, size = 22 }) {
   return <svg {...shared}><path d="M12 5v14M5 12h14" /></svg>;
 }
 
-function Sidebar({ router }) {
-  const links = DASHBOARD_NAV;
-  return <aside className="sidebar">
-     <button className="brand" type="button" onClick={() => router.push("/")}><C3saLogo /><span><strong>CyberSafe</strong><small>South Africa</small></span></button>
-     <nav className="side-nav" aria-label="Dashboard navigation">{links.map(([label, route, icon]) => <button key={label} className={`side-link ${route === "/help" ? "active" : ""}`} type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={25} /><span>{label}</span></button>)}</nav>
-     <LogoutButton />
-  </aside>;
-}
-
 function formatNumber(tel) {
   if (tel.length <= 5) return tel;
   return tel.replace(/(\d{4})(\d{3})(\d{3,})/, "$1 $2 $3");
@@ -43,12 +30,6 @@ function ContactRow({ contact, urgent = false }) {
 }
 
 export default function HelpPage() {
-  const router = useRouter();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const PRIMARY_ROUTES = ["/feed", "/learn", "/postReport", "/cyberbot"];
-  const MENU_EXCLUDED_ROUTES = [...PRIMARY_ROUTES, "/login", "/admin", "/notification"];
-  const primaryNav = DASHBOARD_NAV.filter(([, route]) => PRIMARY_ROUTES.includes(route));
-  const menuNav = DASHBOARD_NAV.filter(([, route]) => !MENU_EXCLUDED_ROUTES.includes(route));
   const [bankSearch, setBankSearch] = useState("");
   const filteredBanks = useMemo(() => banks.filter((bank) => `${bank.name} ${bank.detail}`.toLowerCase().includes(bankSearch.toLowerCase())), [bankSearch]);
 
@@ -62,34 +43,7 @@ export default function HelpPage() {
   }, []);
 
   return <main className="hub-dashboard">
-    <header className="mobile-topbar">
-      <button className="mobile-topbar-menu" type="button" onClick={() => setMenuOpen(true)} aria-label="Open menu"><Icon name="menu" size={21} /></button>
-      <button className="mobile-topbar-brand" type="button" onClick={() => router.push("/feed")}><C3saLogo size={34} /><strong>CyberSafe</strong></button>
-      <button className="mobile-topbar-bell" type="button" onClick={() => router.push("/profiles")} aria-label="User Profile"><DashboardNavIcon name="user" size={21} /></button>
-    </header>
-    <Sidebar router={router} />
-    <nav className="bottom-nav" aria-label="Primary navigation">
-      {primaryNav.map(([label, route, icon]) => (
-        <button key={label} type="button" className={`bottom-nav-item ${route === "/help" ? "active" : ""}`} onClick={() => router.push(route)}>
-          <DashboardNavIcon name={icon} size={21} />
-          <span>{label.replace("Community ", "").replace(" Security", "").replace(" Incident", "").replace(" AI", "")}</span>
-        </button>
-      ))}
-    </nav>
-    {menuOpen && (
-      <div className="nav-menu-overlay" onClick={() => setMenuOpen(false)}>
-        <div className="nav-menu-sheet" onClick={(event) => event.stopPropagation()}>
-          <div className="nav-menu-header"><strong>More</strong><button type="button" className="nav-menu-close" onClick={() => setMenuOpen(false)} aria-label="Close menu"><Icon name="close" size={18} /></button></div>
-          <div className="nav-menu-grid">
-            {menuNav.map(([label, route, icon]) => (
-              <button key={label} type="button" className="nav-menu-item" onClick={() => { setMenuOpen(false); router.push(route); }}>
-                <span className="nav-menu-icon"><DashboardNavIcon name={icon} size={20} /></span>{label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-    )}
+    <DashboardNavBar active="/help" iconSize={25} />
     <section className="hub-content">
       <header className="hub-header">
         <div><p className="eyebrow">CyberSafe support</p><h1> Helpline Hub</h1><p>Official South African support contacts for scam, fraud and cybercrime incidents.</p></div>

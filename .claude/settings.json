@@ -10,7 +10,21 @@
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
       "Bash(GROQ_API_KEY=dummy node -e \"require\\('./bot-logic'\\)\")",
-      "Bash(GROQ_API_KEY=dummy node -e ' *)"
+      "Bash(GROQ_API_KEY=dummy node -e ' *)",
+      "PowerShell(git ls-files | Where-Object { $_ -notmatch 'node_modules' } | Select-Object -First 400; \"---\"; git branch -a; \"---\"; git remote -v)",
+      "PowerShell(\"main vs develop \\(left=main only, right=develop only\\):\"; git rev-list --left-right --count main...develop; \"main vs origin/main:\"; git rev-list --left-right --count main...origin/main; \"---.env.example history\"; git log --all --oneline -- apps/api/.env.example apps/web/.env.example whatsapp-bot/.env.example; \"---branches containing those\"; git branch -a --contains \\(git log --all --format=%H -1 -- apps/api/.env.example\\); \"---develop tree top\"; git ls-tree -r --name-only develop | Where-Object { $_ -notmatch '^apps/web/public' } | Measure-Object | Select -Expand Count; git log --oneline -8 develop)",
+      "PowerShell(\"supabase cli: \" + $\\(try { \\(supabase --version\\) } catch { 'not installed' }\\); \"vercel cli: \" + $\\(try { \\(vercel --version\\) } catch { 'not installed' }\\); \"docker: \" + $\\(try { \\(docker --version\\) } catch { 'not installed' }\\); \"python: \" + $\\(try { python --version } catch { 'none' }\\); \"node: \" + $\\(try { node --version } catch { 'none' }\\); \"git-filter-repo: \" + $\\(try { git filter-repo --version } catch { 'not installed' }\\))",
+      "PowerShell(git switch -c chore/phase-0-secrets)",
+      "PowerShell(git rm --cached --quiet apps/api/.env)",
+      "PowerShell(git rm -r --cached --quiet apps/api/__pycache__ apps/api/routers/__pycache__)",
+      "PowerShell(git check-ignore -v apps/api/.env apps/api/__pycache__/main.cpython-314.pyc apps/api/foo.pyc whatsapp-bot/.env apps/web/.env.local; \"--- example NOT ignored? \\(expect no output + exit 1\\)\"; git check-ignore apps/api/.env.example whatsapp-bot/.env.example apps/web/.env.example; \"exit=$LASTEXITCODE\")",
+      "PowerShell(git add .gitignore)",
+      "PowerShell(npm run build; \"BUILD EXIT: $LASTEXITCODE\")",
+      "PowerShell(Set-Location C:\\\\Users\\\\beyil\\\\cyber-safe\\\\apps\\\\web; npx eslint src 2>&1 | Select-Object -Last 2; \"ESLINT EXIT: $LASTEXITCODE\"; npm run build 2>&1 | Select-String -Pattern \"Compiled|Failed|Error|error|Generating static pages \\\\\\(21|/\\(learn|library|help|cyberbot|profiles|settings|notification|postReport|feed\\)\\\\s\"; \"BUILD EXIT: $LASTEXITCODE\")",
+      "PowerShell(Set-Location C:\\\\Users\\\\beyil\\\\cyber-safe\\\\apps\\\\web; Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue; npx eslint src 2>&1 | Select-Object -Last 2; \"ESLINT EXIT: $LASTEXITCODE\"; npm run build 2>&1 | Select-String -Pattern \"Compiled|Failed|rror|Attempted|Generating static pages \\\\\\(21\"; \"BUILD EXIT: $LASTEXITCODE\")",
+      "PowerShell(npm run build 2>&1)",
+      "PowerShell(Set-Location C:\\\\Users\\\\beyil\\\\cyber-safe\\\\apps\\\\web; Get-Content src\\\\app\\\\components\\\\DashboardNavBar.js -TotalCount 9; Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue; npx eslint src 2>&1 | Select-Object -Last 2; \"ESLINT EXIT: $LASTEXITCODE\"; npm run build 2>&1 | Select-String -Pattern \"Compiled|Failed|rror|Attempted|Generating static pages \\\\\\(21\"; \"BUILD EXIT: $LASTEXITCODE\")",
+      "Bash(npx eslint *)"
     ]
   }
 }

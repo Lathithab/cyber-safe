@@ -3,16 +3,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
-import DashboardNavIcon from "../components/DashboardNavIcon";
-import C3saLogo from "../components/C3saLogo";
-import LogoutButton from "../components/LogoutButton";
-import { DASHBOARD_NAV } from "../components/dashboardNav";
+import DashboardNavBar from "../components/DashboardNavBar";
 import PlatformSearch from "../components/PlatformSearch";
 import {
   SEED_POSTS,
   loadStoredComments,
   appendStoredComment,
 } from "./posts";
+import { useAuthUser } from "../../lib/useAuthUser";
 
 function Icon({ name, size = 22 }) {
   const shared = {
@@ -27,7 +25,7 @@ function Icon({ name, size = 22 }) {
     "aria-hidden": true,
   };
 
-  if (name === "shield")
+  if (name === "shield") {
     return (
       <svg {...shared} viewBox="0 0 24 26" fill="currentColor" stroke="none">
         <path d="M7,1 L15.5,1 L18.5,2.5 L21,7.5 L17.8,9.5 L16.8,13.5 L15.8,20 L12.5,25 L9.5,23.5 L8,19.5 L6,15 L7,11.5 L5,9.5 L2.8,10.3 L1,6 L2.3,2.2 Z" />
@@ -42,30 +40,34 @@ function Icon({ name, size = 22 }) {
         />
       </svg>
     );
+  }
 
-  if (name === "phone")
+  if (name === "phone") {
     return (
       <svg {...shared}>
         <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z" />
       </svg>
     );
+  }
 
-  if (name === "search")
+  if (name === "search") {
     return (
       <svg {...shared}>
         <circle cx="11" cy="11" r="7" />
         <path d="m20 20-4-4" />
       </svg>
     );
+  }
 
-  if (name === "menu")
+  if (name === "menu") {
     return (
       <svg {...shared}>
         <path d="M4 6h16M4 12h16M4 18h16" />
       </svg>
     );
+  }
 
-  if (name === "image")
+  if (name === "image") {
     return (
       <svg {...shared}>
         <rect x="3" y="4" width="18" height="16" rx="2" />
@@ -73,30 +75,34 @@ function Icon({ name, size = 22 }) {
         <path d="m4 18 5-5 4 4 3-3 4 4" />
       </svg>
     );
+  }
 
-  if (name === "tag")
+  if (name === "tag") {
     return (
       <svg {...shared}>
         <path d="m20.6 12-8-8H4v8.6l8 8a2 2 0 0 0 2.8 0l5.8-5.8a2 2 0 0 0 0-2.8Z" />
         <circle cx="8.5" cy="8.5" r="1.2" fill="currentColor" />
       </svg>
     );
+  }
 
-  if (name === "gem")
+  if (name === "gem") {
     return (
       <svg {...shared}>
         <polygon points="12 2 22 8 12 22 2 8" />
       </svg>
     );
+  }
 
-  if (name === "comment")
+  if (name === "comment") {
     return (
       <svg {...shared}>
         <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
       </svg>
     );
+  }
 
-  if (name === "share")
+  if (name === "share") {
     return (
       <svg {...shared}>
         <circle cx="18" cy="5" r="3" />
@@ -105,28 +111,32 @@ function Icon({ name, size = 22 }) {
         <path d="M8.6 10.6 15.4 6.9M8.6 13.4l6.8 3.7" />
       </svg>
     );
+  }
 
-  if (name === "bookmark")
+  if (name === "bookmark") {
     return (
       <svg {...shared}>
         <path d="M19 21 12 16l-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
       </svg>
     );
+  }
 
-  if (name === "pin")
+  if (name === "pin") {
     return (
       <svg {...shared}>
         <path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0z" />
         <circle cx="12" cy="10" r="2.5" />
       </svg>
     );
+  }
 
-  if (name === "close")
+  if (name === "close") {
     return (
       <svg {...shared}>
         <path d="M18 6 6 18M6 6l12 12" />
       </svg>
     );
+  }
 
   return (
     <svg {...shared}>
@@ -144,6 +154,7 @@ function loadStoredReports() {
     const reports = JSON.parse(
       localStorage.getItem("cybersafeReports") || "[]"
     );
+
     const latest = JSON.parse(
       sessionStorage.getItem("cybersafeLatestReport") || "null"
     );
@@ -184,6 +195,7 @@ const CATEGORIES = [
 
 export default function FeedPage() {
   const router = useRouter();
+  const { isGuest } = useAuthUser();
 
   const [posts, setPosts] = useState([]);
   const [currentUserName, setCurrentUserName] = useState("Guest");
@@ -196,28 +208,17 @@ export default function FeedPage() {
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [pendingImage, setPendingImage] = useState(null);
   const [toast, setToast] = useState(null);
-  const [menuOpen, setMenuOpen] = useState(false);
 
   const toastTimer = useRef(null);
   const fileInputRef = useRef(null);
   const likeInFlightRef = useRef(new Set());
 
-  const links = DASHBOARD_NAV;
-  const PRIMARY_ROUTES = ["/feed", "/learn", "/postReport", "/cyberbot"];
-  const MENU_EXCLUDED_ROUTES = [
-    ...PRIMARY_ROUTES,
-    "/login",
-    "/admin",
-    "/notification",
-  ];
-
-  const primaryNav = links.filter(([, route]) =>
-    PRIMARY_ROUTES.includes(route)
-  );
-
-  const menuNav = links.filter(
-    ([, route]) => !MENU_EXCLUDED_ROUTES.includes(route)
-  );
+  // Guest users should use the learning area rather than the community feed.
+  useEffect(() => {
+    if (isGuest) {
+      router.replace("/learn");
+    }
+  }, [isGuest, router]);
 
   function showToast(message) {
     setToast(message);
@@ -225,7 +226,7 @@ export default function FeedPage() {
     toastTimer.current = setTimeout(() => setToast(null), 2200);
   }
 
-  // Load posts and their saved gem state from Supabase.
+  // Load posts, saved gem counts, and the current user's gem selections.
   useEffect(() => {
     let cancelled = false;
 
@@ -254,10 +255,7 @@ export default function FeedPage() {
           return;
         }
 
-        const {
-          data,
-          error,
-        } = await supabase
+        const { data, error } = await supabase
           .from("posts")
           .select("*")
           .eq("status", "approved")
@@ -284,10 +282,7 @@ export default function FeedPage() {
         // Retrieve the actual gem count for each database post.
         const postsWithCounts = await Promise.all(
           databasePosts.map(async (post) => {
-            const {
-              count,
-              error: countError,
-            } = await supabase
+            const { count, error: countError } = await supabase
               .from("likes")
               .select("post_id", { count: "exact", head: true })
               .eq("post_id", post.id);
@@ -297,6 +292,7 @@ export default function FeedPage() {
                 `Error loading gems for post ${post.id}:`,
                 countError
               );
+
               return post;
             }
 
@@ -396,7 +392,7 @@ export default function FeedPage() {
 
   const unreadTrending = useMemo(() => TRENDING, []);
 
-  // Save or remove a gem.
+  // Save or remove a gem in Supabase for database-backed posts.
   async function likePost(index) {
     const post = posts[index];
 
@@ -418,6 +414,7 @@ export default function FeedPage() {
             : item
         )
       );
+
       return;
     }
 
@@ -662,67 +659,35 @@ export default function FeedPage() {
     removeImageAttachment();
     showToast("Posted to the community feed");
   }
-  return(
+
+  return (
     <main className="feed-dashboard">
-      <header className="mobile-topbar">
-        <button className="mobile-topbar-menu" type="button" onClick={() => setMenuOpen(true)} aria-label="Open menu">
-          <Icon name="menu" size={21} />
-        </button>
-        <button className="mobile-topbar-brand" type="button" onClick={() => router.push("/feed")}>
-          <C3saLogo size={34} />
-          <strong>CyberSafe</strong>
-        </button>
-        <button className="mobile-topbar-bell" type="button" onClick={() => router.push("/notification")} aria-label="Notifications">
-          <DashboardNavIcon name="bell" size={21} />
-        </button>
-      </header>
-
-      <aside className="sidebar">
-        <button className="brand" type="button" onClick={() => router.push("/")}><C3saLogo /><span><strong>CyberSafe</strong><small>South Africa</small></span></button>
-        <nav className="side-nav" aria-label="Dashboard navigation">
-          {links.map(([label, route, icon]) => <button key={label} className={`side-link ${route === "/feed" ? "active" : ""}`} type="button" onClick={() => router.push(route)}><DashboardNavIcon name={icon} size={19} /><span>{label}</span></button>)}
-        </nav>
-        <LogoutButton />
-      </aside>
-
-      <nav className="bottom-nav" aria-label="Primary navigation">
-        {primaryNav.map(([label, route, icon]) => (
-          <button key={label} type="button" className={`bottom-nav-item ${route === "/feed" ? "active" : ""}`} onClick={() => router.push(route)}>
-            <DashboardNavIcon name={icon} size={21} />
-            <span>{label.replace("Community ", "").replace(" Security", "").replace(" Incident", "").replace(" AI", "")}</span>
-          </button>
-        ))}
-      </nav>
-
-      {menuOpen && (
-        <div className="nav-menu-overlay" onClick={() => setMenuOpen(false)}>
-          <div className="nav-menu-sheet" onClick={(event) => event.stopPropagation()}>
-            <div className="nav-menu-header">
-              <strong>More</strong>
-              <button type="button" className="nav-menu-close" onClick={() => setMenuOpen(false)} aria-label="Close menu"><Icon name="close" size={18} /></button>
-            </div>
-            <div className="nav-menu-grid">
-              {menuNav.map(([label, route, icon]) => (
-                <button key={label} type="button" className="nav-menu-item" onClick={() => { setMenuOpen(false); router.push(route); }}>
-                  <span className="nav-menu-icon"><DashboardNavIcon name={icon} size={20} /></span>
-                  {label}
-                </button>
-              ))}
-            </div>
-            <LogoutButton />
-          </div>
-        </div>
-      )}
+      <DashboardNavBar active="/feed" iconSize={19} bell menuLogout />
 
       <section className="dashboard-content">
         <header className="page-header">
           <div className="page-intro">
-            <div className="title-row"><h1>Community Safety Feed</h1><span>South Africa Active</span></div>
-            <p>Stay updated with the latest scams, alerts, and cybersecurity advice across South Africa.</p>
+            <div className="title-row">
+              <h1>Community Safety Feed</h1>
+              <span>South Africa Active</span>
+            </div>
+
+            <p>
+              Stay updated with the latest scams, alerts, and cybersecurity
+              advice across South Africa.
+            </p>
           </div>
+
           <div className="header-actions">
             <PlatformSearch />
-            <button className="help-button" type="button" onClick={() => router.push("/help")}>Get Help Now</button>
+
+            <button
+              className="help-button"
+              type="button"
+              onClick={() => router.push("/help")}
+            >
+              Get Help Now
+            </button>
           </div>
         </header>
 
@@ -730,117 +695,326 @@ export default function FeedPage() {
           <div className="feed-column">
             <form className="composer" onSubmit={submitPost}>
               <div className="composer-top">
-                <div className="composer-avatar">{initials(currentUserName)}</div>
-                <input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Share a warning, question, or cyber safety tip with your community..." aria-label="Share a post" />
+                <div className="composer-avatar">
+                  {initials(currentUserName)}
+                </div>
+
+                <input
+                  value={draft}
+                  onChange={(event) => setDraft(event.target.value)}
+                  placeholder="Share a warning, question, or cyber safety tip with your community..."
+                  aria-label="Share a post"
+                />
               </div>
 
               {pendingImage && (
                 <div className="composer-image-preview">
                   <img src={pendingImage} alt="Attached evidence" />
-                  <button type="button" onClick={removeImageAttachment} aria-label="Remove image"><Icon name="close" size={12} /></button>
+
+                  <button
+                    type="button"
+                    onClick={removeImageAttachment}
+                    aria-label="Remove image"
+                  >
+                    <Icon name="close" size={12} />
+                  </button>
                 </div>
               )}
 
               <div className="composer-bottom">
                 <div className="composer-tools">
                   <label className="tool">
-                    <Icon name="image" size={14} />Image/Evidence
-                    <input ref={fileInputRef} type="file" accept="image/*" className="visually-hidden" onChange={handleImageAttach} />
+                    <Icon name="image" size={14} />
+                    Image/Evidence
+
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="visually-hidden"
+                      onChange={handleImageAttach}
+                    />
                   </label>
-                  <label className="tool category-picker"><Icon name="tag" size={14} /><select value={category} onChange={(event) => setCategory(event.target.value)} aria-label="Post category">{CATEGORIES.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
+
+                  <label className="tool category-picker">
+                    <Icon name="tag" size={14} />
+
+                    <select
+                      value={category}
+                      onChange={(event) => setCategory(event.target.value)}
+                      aria-label="Post category"
+                    >
+                      {CATEGORIES.map((item) => (
+                        <option key={item} value={item}>
+                          {item}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
                 </div>
-                <button type="submit" className="post-button">Post Safety Alert</button>
+
+                <button type="submit" className="post-button">
+                  Post Safety Alert
+                </button>
               </div>
             </form>
 
-            {loading && <p className="loading-state">Loading community feed...</p>}
+            {loading && (
+              <p className="loading-state">Loading community feed...</p>
+            )}
 
-            {!loading && posts.map((post, index) => (
-              <article className="post-card" key={post.id || index}>
-                <div className="post-header">
-                  <div className="post-user">
-                    {post.profile ? <img src={post.profile} alt="" className="avatar-img" /> : <div className="avatar-img avatar-fallback">{initials(post.name)}</div>}
-                    <div>
-                      <div className="name-row"><strong>{post.name}</strong>{post.issues?.[0] && <span className="badge">{String(post.issues[0]).toUpperCase()}</span>}</div>
-                      <small>{post.role ? `${post.role} · ` : ""}{post.time}</small>
-                    </div>
-                  </div>
-                  <div className="menu-wrap">
-                    <button className="menu-button" type="button" aria-label={`Options for ${post.name}'s post`} onClick={() => setOpenMenuId((current) => (current === post.id ? null : post.id))}>•••</button>
-                    {openMenuId === post.id && (
-                      <div className="menu-popup">
-                        <button type="button" onClick={() => reportPost(post.id)}>Report post</button>
-                        <button type="button" onClick={() => hidePost(post.id)}>Hide post</button>
-                        {post.id?.startsWith("report-") && <button type="button" className="delete-button" onClick={() => deleteReport(post.id)}>Delete report</button>}
+            {!loading &&
+              posts.map((post, index) => (
+                <article className="post-card" key={post.id || index}>
+                  <div className="post-header">
+                    <div className="post-user">
+                      {post.profile ? (
+                        <img
+                          src={post.profile}
+                          alt=""
+                          className="avatar-img"
+                        />
+                      ) : (
+                        <div className="avatar-img avatar-fallback">
+                          {initials(post.name)}
+                        </div>
+                      )}
+
+                      <div>
+                        <div className="name-row">
+                          <strong>{post.name}</strong>
+
+                          {post.issues?.[0] && (
+                            <span className="badge">
+                              {String(post.issues[0]).toUpperCase()}
+                            </span>
+                          )}
+                        </div>
+
+                        <small>
+                          {post.role ? `${post.role} · ` : ""}
+                          {post.time}
+                        </small>
                       </div>
-                    )}
-                  </div>
-                </div>
+                    </div>
 
-                <p className="post-text">{post.text}</p>
-                {post.location && <p className="post-meta"><Icon name="pin" size={12} />{post.location}</p>}
-                {post.incidentDate && <p className="post-meta">Incident date: {post.incidentDate}</p>}
-                {post.image && <img src={post.image} alt="" className="post-image" />}
+                    <div className="menu-wrap">
+                      <button
+                        className="menu-button"
+                        type="button"
+                        aria-label={`Options for ${post.name}'s post`}
+                        onClick={() =>
+                          setOpenMenuId((current) =>
+                            current === post.id ? null : post.id
+                          )
+                        }
+                      >
+                        •••
+                      </button>
 
-                <div className="post-actions">
-                  <div className="left-actions">
-                    <button type="button" className={`action-button ${post.liked ? "liked" : ""}`} onClick={() => likePost(index)}><Icon name="gem" size={14} />{post.likes} Helpful</button>
-                    <button type="button" className="action-button" onClick={() => toggleComments(post.id)}><Icon name="comment" size={14} />{post.comments} Comments</button>
-                    <div className="share-wrap">
-                      <button type="button" className="action-button" onClick={() => setOpenShareId((current) => (current === post.id ? null : post.id))}><Icon name="share" size={14} />Share</button>
-                      {openShareId === post.id && (
-                        <div className="menu-popup share-popup">
-                          <button type="button" onClick={() => copyPostLink(post.id)}>Copy link</button>
-                          <button type="button" onClick={() => sharePost("WhatsApp")}>Share to WhatsApp</button>
-                          <button type="button" onClick={() => sharePost("Community Feed")}>Repost to feed</button>
+                      {openMenuId === post.id && (
+                        <div className="menu-popup">
+                          <button
+                            type="button"
+                            onClick={() => reportPost(post.id)}
+                          >
+                            Report post
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => hidePost(post.id)}
+                          >
+                            Hide post
+                          </button>
+
+                          {post.id?.startsWith("report-") && (
+                            <button
+                              type="button"
+                              className="delete-button"
+                              onClick={() => deleteReport(post.id)}
+                            >
+                              Delete report
+                            </button>
+                          )}
                         </div>
                       )}
                     </div>
                   </div>
-                  <button type="button" className={`save-button ${post.saved ? "saved" : ""}`} onClick={() => savePost(index)} aria-label="Save post"><Icon name="bookmark" size={14} />{post.saved ? "Saved" : "Save"}</button>
-                </div>
 
-                {openCommentsId === post.id && (
-                  <div className="comments-panel">
-                    <div className="comments-list">
-                      {post.commentsList.map((comment, cIndex) => (
-                        <div className="comment-item" key={cIndex}>
-                          <div className="comment-avatar">{initials(comment.name)}</div>
-                          <div className="comment-bubble">
-                            <span className="c-name">{comment.name}</span><span className="c-time">{comment.time}</span>
-                            <p>{comment.text}</p>
+                  <p className="post-text">{post.text}</p>
+
+                  {post.location && (
+                    <p className="post-meta">
+                      <Icon name="pin" size={12} />
+                      {post.location}
+                    </p>
+                  )}
+
+                  {post.incidentDate && (
+                    <p className="post-meta">
+                      Incident date: {post.incidentDate}
+                    </p>
+                  )}
+
+                  {post.image && (
+                    <img src={post.image} alt="" className="post-image" />
+                  )}
+
+                  <div className="post-actions">
+                    <div className="left-actions">
+                      <button
+                        type="button"
+                        className={`action-button ${post.liked ? "liked" : ""}`}
+                        onClick={() => likePost(index)}
+                        aria-pressed={Boolean(post.liked)}
+                      >
+                        <Icon name="gem" size={14} />
+                        {post.likes} Helpful
+                      </button>
+
+                      <button
+                        type="button"
+                        className="action-button"
+                        onClick={() => toggleComments(post.id)}
+                      >
+                        <Icon name="comment" size={14} />
+                        {post.comments} Comments
+                      </button>
+
+                      <div className="share-wrap">
+                        <button
+                          type="button"
+                          className="action-button"
+                          onClick={() =>
+                            setOpenShareId((current) =>
+                              current === post.id ? null : post.id
+                            )
+                          }
+                        >
+                          <Icon name="share" size={14} />
+                          Share
+                        </button>
+
+                        {openShareId === post.id && (
+                          <div className="menu-popup share-popup">
+                            <button
+                              type="button"
+                              onClick={() => copyPostLink(post.id)}
+                            >
+                              Copy link
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => sharePost("WhatsApp")}
+                            >
+                              Share to WhatsApp
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => sharePost("Community Feed")}
+                            >
+                              Repost to feed
+                            </button>
                           </div>
-                        </div>
-                      ))}
-                      {!post.commentsList.length && <p className="no-comments">Be the first to comment.</p>}
+                        )}
+                      </div>
                     </div>
-                    <div className="comment-input-row">
-                      <div className="comment-avatar">{initials(currentUserName)}</div>
-                      <input
-                        placeholder="Write a comment..."
-                        value={commentDrafts[post.id] || ""}
-                        onChange={(event) => setCommentDrafts((current) => ({ ...current, [post.id]: event.target.value }))}
-                        onKeyDown={(event) => { if (event.key === "Enter") submitComment(index); }}
-                      />
-                      <button type="button" onClick={() => submitComment(index)}>Post</button>
-                    </div>
+
+                    <button
+                      type="button"
+                      className={`save-button ${post.saved ? "saved" : ""}`}
+                      onClick={() => savePost(index)}
+                      aria-label="Save post"
+                    >
+                      <Icon name="bookmark" size={14} />
+                      {post.saved ? "Saved" : "Save"}
+                    </button>
                   </div>
-                )}
-              </article>
-            ))}
+
+                  {openCommentsId === post.id && (
+                    <div className="comments-panel">
+                      <div className="comments-list">
+                        {post.commentsList.map((comment, cIndex) => (
+                          <div className="comment-item" key={cIndex}>
+                            <div className="comment-avatar">
+                              {initials(comment.name)}
+                            </div>
+
+                            <div className="comment-bubble">
+                              <span className="c-name">{comment.name}</span>
+                              <span className="c-time">{comment.time}</span>
+                              <p>{comment.text}</p>
+                            </div>
+                          </div>
+                        ))}
+
+                        {!post.commentsList.length && (
+                          <p className="no-comments">
+                            Be the first to comment.
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="comment-input-row">
+                        <div className="comment-avatar">
+                          {initials(currentUserName)}
+                        </div>
+
+                        <input
+                          placeholder="Write a comment..."
+                          value={commentDrafts[post.id] || ""}
+                          onChange={(event) =>
+                            setCommentDrafts((current) => ({
+                              ...current,
+                              [post.id]: event.target.value,
+                            }))
+                          }
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter") {
+                              event.preventDefault();
+                              submitComment(index);
+                            }
+                          }}
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() => submitComment(index)}
+                        >
+                          Post
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </article>
+              ))}
           </div>
 
           <aside className="feed-side">
             <section className="incident-card">
-              <span className="incident-icon"><Icon name="phone" size={18} /></span>
+              <span className="incident-icon">
+                <Icon name="phone" size={18} />
+              </span>
+
               <h2>Cyber Incident?</h2>
               <small>Immediate assistance is ready</small>
-              <p>If you&apos;ve been phished, hacked, or are facing cyberbullying, use our specialized South African hotlines.</p>
-              <button type="button" onClick={() => router.push("/help")}>Access Cyber Helpline</button>
+
+              <p>
+                If you&apos;ve been phished, hacked, or are facing
+                cyberbullying, use our specialized South African hotlines.
+              </p>
+
+              <button type="button" onClick={() => router.push("/help")}>
+                Access Cyber Helpline
+              </button>
             </section>
 
             <section className="trending-card">
               <h2>Trending in South Africa</h2>
+
               <div className="trending-list">
                 {unreadTrending.map((item) => (
                   <div className="trending-item" key={item.title}>
@@ -861,11 +1035,7 @@ export default function FeedPage() {
         * { box-sizing: border-box; }
         .visually-hidden { position: absolute; width: 16px; height: 16px; padding: 0; margin: 2px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 
-        /* ============================================================
-           BASE = PHONE. Everything below, with no media query, is the
-           default mobile layout. Tablet/desktop are added on top via
-           min-width queries further down.
-        ============================================================ */
+        /* Base mobile layout */
         .feed-dashboard { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr); background: #f6f9fd; color: #00243A; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
 
         .sidebar { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 14px 6px; border-right: 1px solid #0d3557; background: #00243A; overflow-y: auto; }
@@ -979,21 +1149,12 @@ export default function FeedPage() {
 
         .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #00243A; color: #fff; font-size: 12px; font-weight: 700; padding: 11px 18px; border-radius: 999px; box-shadow: 0 10px 30px rgba(0,0,0,.25); z-index: 60; max-width: calc(100vw - 32px); text-align: center; }
 
-        /* ============================================================
-           TABLET AND UP (min-width: 851px) — sidebar widens, labels
-           reappear, footer links and header actions go horizontal.
-        ============================================================ */
-        .sidebar { display: none; }
-
+        /* Mobile navigation styles retained for shared dashboard layouts. */
         .mobile-topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 41; display: grid; grid-template-columns: 40px 1fr 40px; align-items: center; height: calc(52px + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px); background: #00243A; border-bottom: 2px solid #EB630F; }
-        .mobile-topbar-menu { display: grid; place-items: center; width: 40px; height: 40px; margin: 0 auto; border: 0; background: transparent; color: #fff; cursor: pointer; }
+        .mobile-topbar-menu, .mobile-topbar-bell { display: grid; place-items: center; width: 40px; height: 40px; margin: 0 auto; border: 0; background: transparent; color: #fff; cursor: pointer; }
         .mobile-topbar-brand { display: flex; align-items: center; justify-content: center; gap: 7px; border: 0; background: transparent; color: #fff; cursor: pointer; font: inherit; padding: 0; }
         .mobile-topbar-icon { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 6px; background: rgba(235,99,15,.22); color: #EB630F; }
         .mobile-topbar-brand strong { font-size: 15px; letter-spacing: -0.3px; }
-        .mobile-topbar-bell { display: grid; place-items: center; width: 40px; height: 40px; margin: 0 auto; border: 0; background: transparent; color: #fff; cursor: pointer; }
-
-        .dashboard-content { padding-top: calc(18px + 52px + env(safe-area-inset-top, 0px)); }
-
         .bottom-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: flex; background: #00243A; border-top: 2px solid #EB630F; padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 -4px 16px rgba(0,0,0,.25); }
         .bottom-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 2px; border: 0; background: transparent; color: rgba(255,255,255,.6); cursor: pointer; font: inherit; font-size: 10px; font-weight: 700; }
         .bottom-nav-item.active { color: #EB630F; }
@@ -1029,7 +1190,6 @@ export default function FeedPage() {
           .user-chip { justify-content: flex-start; }
           .user-chip span:not(.chip-avatar) { display: block; }
           .user-chip strong { font-size: 11px; }
-
           .dashboard-content { padding: 24px 20px 36px; }
           .page-header { flex-direction: row; align-items: flex-start; justify-content: space-between; }
           h1 { white-space: nowrap; font-size: clamp(19px, 3.4vw, 23px); }
@@ -1039,10 +1199,6 @@ export default function FeedPage() {
           .post-button { width: auto; }
         }
 
-        /* ============================================================
-           DESKTOP (min-width: 1181px) — full sidebar width, two-column
-           feed layout with the trending/emergency side column visible.
-        ============================================================ */
         @media (min-width: 1181px) {
           .feed-dashboard { grid-template-columns: 230px minmax(0, 1fr); }
           .sidebar { padding: 24px 22px 22px; }
@@ -1053,7 +1209,7 @@ export default function FeedPage() {
           .feed-side::-webkit-scrollbar { display: none; }
           .platform-search { width: 245px; }
         }
-        /* Small-screen robustness: let rows wrap instead of stretching the page */
+
         .composer, .post-card, .feed-side { min-width: 0; max-width: 100%; }
         .post-text, .post-header { overflow-wrap: anywhere; }
         .post-user { min-width: 0; }
@@ -1062,8 +1218,7 @@ export default function FeedPage() {
         .left-actions { flex-wrap: wrap; gap: 4px 12px; }
         .composer-bottom { flex-wrap: wrap; }
         .composer-tools { flex-wrap: wrap; gap: 6px 12px; min-width: 0; }
-
-`}</style>
+      `}</style>
     </main>
   );
 }

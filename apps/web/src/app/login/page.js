@@ -6,15 +6,38 @@ import { useRouter } from "next/navigation";
 
 function ShieldIcon({ size = 22, color = "currentColor" }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 26" fill={color} stroke="none" aria-hidden="true">
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 26"
+      fill={color}
+      stroke="none"
+      aria-hidden="true"
+    >
       <path d="M7,1 L15.5,1 L18.5,2.5 L21,7.5 L17.8,9.5 L16.8,13.5 L15.8,20 L12.5,25 L9.5,23.5 L8,19.5 L6,15 L7,11.5 L5,9.5 L2.8,10.3 L1,6 L2.3,2.2 Z" />
-      <ellipse cx="19.5" cy="17" rx="0.9" ry="1.9" transform="rotate(20 19.5 17)" />
+      <ellipse
+        cx="19.5"
+        cy="17"
+        rx="0.9"
+        ry="1.9"
+        transform="rotate(20 19.5 17)"
+      />
     </svg>
   );
 }
 function EyeIcon({ size = 19 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z" />
       <circle cx="12" cy="12" r="3" />
     </svg>
@@ -24,21 +47,22 @@ function EyeIcon({ size = 19 }) {
 function GoogleIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
-      <path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.46a5.53 5.53 0 0 1-2.4 3.63v3h3.88c2.27-2.09 3.58-5.17 3.58-8.82Z" />
-      <path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.94-2.91l-3.88-3c-1.08.72-2.45 1.15-4.06 1.15-3.12 0-5.77-2.11-6.72-4.95H1.27v3.1A12 12 0 0 0 12 24Z" />
-      <path fill="#FBBC05" d="M5.28 14.29A7.2 7.2 0 0 1 4.9 12c0-.8.14-1.57.38-2.29v-3.1H1.27A12 12 0 0 0 0 12c0 1.93.46 3.76 1.27 5.39l4.01-3.1Z" />
-      <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.69 1.27 6.61l4.01 3.1C6.23 6.86 8.88 4.75 12 4.75Z" />
-    </svg>
-  );
-}
-
-function MicrosoftIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
-      <rect x="2" y="2" width="9" height="9" fill="#F35325" />
-      <rect x="13" y="2" width="9" height="9" fill="#81BC06" />
-      <rect x="2" y="13" width="9" height="9" fill="#05A6F0" />
-      <rect x="13" y="13" width="9" height="9" fill="#FFBA08" />
+      <path
+        fill="#4285F4"
+        d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.46a5.53 5.53 0 0 1-2.4 3.63v3h3.88c2.27-2.09 3.58-5.17 3.58-8.82Z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 24c3.24 0 5.96-1.07 7.94-2.91l-3.88-3c-1.08.72-2.45 1.15-4.06 1.15-3.12 0-5.77-2.11-6.72-4.95H1.27v3.1A12 12 0 0 0 12 24Z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.28 14.29A7.2 7.2 0 0 1 4.9 12c0-.8.14-1.57.38-2.29v-3.1H1.27A12 12 0 0 0 0 12c0 1.93.46 3.76 1.27 5.39l4.01-3.1Z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.69 1.27 6.61l4.01 3.1C6.23 6.86 8.88 4.75 12 4.75Z"
+      />
     </svg>
   );
 }
@@ -80,9 +104,15 @@ export default function LoginPage() {
         return;
       }
       if (data.session) router.push("/feed");
-      else setSuccessMessage("Account created. Please check your email to confirm your account.");
+      else
+        setSuccessMessage(
+          "Account created. Please check your email to confirm your account.",
+        );
     } else {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
       if (error) {
         setErrorMessage(error.message);
         setIsSubmitting(false);
@@ -92,53 +122,98 @@ export default function LoginPage() {
     }
     setIsSubmitting(false);
   }
-async function handleOAuthSignIn(provider) {
-  setErrorMessage("");
-  setSuccessMessage("");
+  async function handleOAuthSignIn(provider) {
+    setErrorMessage("");
+    setSuccessMessage("");
 
-  if (!isSupabaseConfigured || !supabase) {
-    setErrorMessage("Authentication is not configured.");
-    return;
-  }
-
-  setOauthProvider(provider);
-
-  try {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: `${window.location.origin}/feed`,
-        ...(provider === "azure" ? { scopes: "email" } : {}),
-      },
-    });
-
-    if (error) {
-      throw error;
+    if (!isSupabaseConfigured || !supabase) {
+      setErrorMessage("Authentication is not configured.");
+      return;
     }
 
-    // Supabase redirects the browser to the selected provider.
-  } catch (error) {
-    console.error("Social sign-in error:", error);
+    setOauthProvider(provider);
 
-    setErrorMessage(
-      error instanceof Error
-        ? error.message
-        : "Unable to start social sign-in. Please try again."
-    );
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/feed`,
+          ...(provider === "azure" ? { scopes: "email" } : {}),
+        },
+      });
 
-    setOauthProvider(null);
+      if (error) {
+        throw error;
+      }
+
+      // Supabase redirects the browser to the selected provider.
+    } catch (error) {
+      console.error("Social sign-in error:", error);
+
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to start social sign-in. Please try again."
+      );
+
+      setOauthProvider(null);
+    }
   }
-}
+
+  async function handleGuestLogin() {
+    setErrorMessage("");
+    setSuccessMessage("");
+    setIsSubmitting(true);
+
+    if (!isSupabaseConfigured || !supabase) {
+      setErrorMessage("Authentication is not configured.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.signInAnonymously();
+
+      if (error) {
+        throw error;
+      }
+
+      router.push("/learn");
+    } catch (error) {
+      console.error("Guest sign-in error:", error);
+
+      setErrorMessage(
+        "Guest access isn't available right now. Please try again."
+      );
+
+      setIsSubmitting(false);
+    }
+  }
   return (
     <main className="login-page">
       <section className="login-hero">
         <div className="hero-scrim" />
         <div className="hero-content">
-          <div className="hero-brand"><span className="hero-brand-icon"><Image src="/c3sa-logo.jpeg" alt="C3SA logo" width={48} height={48} /></span><strong>CyberSafe SA</strong></div>
+          <div className="hero-brand">
+            <span className="hero-brand-icon">
+              <Image
+                src="/c3sa-logo.jpeg"
+                alt="C3SA logo"
+                width={48}
+                height={48}
+              />
+            </span>
+            <strong>CyberSafe SA</strong>
+          </div>
 
           <div className="hero-copy">
             <h1>Empowering South African Communities to Stay Safe Online.</h1>
-            <p>Join CyberSafe SA, a cybersecurity awareness platform built specifically for students, schools, and local communities. Learn how to spot scams, report online incidents, and get instant emergency assistance.</p>
+            <p>
+              Join CyberSafe SA, a cybersecurity awareness platform built
+              specifically for students, schools, and local communities. Learn
+              how to spot scams, report online incidents, and get instant
+              emergency assistance.
+            </p>
           </div>
         </div>
       </section>
@@ -146,37 +221,127 @@ async function handleOAuthSignIn(provider) {
       <section className="login-panel">
         <div className="login-card">
           <h2>Welcome Back</h2>
-          <p className="subtitle">Enter your details below to secure your workspace.</p>
+          <p className="subtitle">
+            Enter your details below to secure your workspace.
+          </p>
 
           <div className="mode-toggle">
-            <button type="button" className={mode === "login" ? "selected" : ""} onClick={() => setMode("login")}>Log In</button>
-            <button type="button" className={mode === "register" ? "selected" : ""} onClick={() => setMode("register")}>Register</button>
+            <button
+              type="button"
+              className={mode === "login" ? "selected" : ""}
+              onClick={() => setMode("login")}
+            >
+              Log In
+            </button>
+            <button
+              type="button"
+              className={mode === "register" ? "selected" : ""}
+              onClick={() => setMode("register")}
+            >
+              Register
+            </button>
           </div>
 
-          {errorMessage && <p role="alert" style={{ color: "#d64545", marginBottom: "16px" }}>{errorMessage}</p>}
-          {successMessage && <p role="status" style={{ color: "#159f76", marginBottom: "16px" }}>{successMessage}</p>}
+          {errorMessage && (
+            <p role="alert" style={{ color: "#d64545", marginBottom: "16px" }}>
+              {errorMessage}
+            </p>
+          )}
+          {successMessage && (
+            <p role="status" style={{ color: "#159f76", marginBottom: "16px" }}>
+              {successMessage}
+            </p>
+          )}
 
           <form onSubmit={handleSubmit}>
-            {mode === "register" && <>
-              <label className="field-label" htmlFor="fullName">Full Name</label>
-              <input id="fullName" type="text" value={fullName} onChange={(event) => setFullName(event.target.value)} required autoComplete="name" />
-              <label className="field-label" htmlFor="username">Username</label>
-              <input id="username" type="text" value={username} onChange={(event) => setUsername(event.target.value)} required autoComplete="username" />
-            </>}
-            <label className="field-label" htmlFor="email">Email Address</label>
-            <input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+            {mode === "register" && (
+              <>
+                <label className="field-label" htmlFor="fullName">
+                  Full Name
+                </label>
+                <input
+                  id="fullName"
+                  type="text"
+                  value={fullName}
+                  onChange={(event) => setFullName(event.target.value)}
+                  required
+                  autoComplete="name"
+                />
+                <label className="field-label" htmlFor="username">
+                  Username
+                </label>
+                <input
+                  id="username"
+                  type="text"
+                  value={username}
+                  onChange={(event) => setUsername(event.target.value)}
+                  required
+                  autoComplete="username"
+                />
+              </>
+            )}
+            <label className="field-label" htmlFor="email">
+              Email Address
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              required
+            />
 
-            <div className="password-row"><label className="field-label" htmlFor="password">Password</label><button type="button" className="forgot" disabled title="Coming soon">Forgot?</button></div>
+            <div className="password-row">
+              <label className="field-label" htmlFor="password">
+                Password
+              </label>
+              <button
+                type="button"
+                className="forgot"
+                disabled
+                title="Coming soon"
+              >
+                Forgot?
+              </button>
+            </div>
             <div className="password-shell">
-              <input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••••••" value={password} onChange={(event) => setPassword(event.target.value)} required minLength={6} />
-              <button type="button" className="toggle-visibility" onClick={() => setShowPassword((v) => !v)} aria-label="Toggle password visibility"><EyeIcon /></button>
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••••••"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+                minLength={6}
+              />
+              <button
+                type="button"
+                className="toggle-visibility"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label="Toggle password visibility"
+              >
+                <EyeIcon />
+              </button>
             </div>
 
-            <button type="submit" className="submit-button" disabled={isSubmitting}>{isSubmitting ? "Please wait…" : mode === "login" ? "Sign In" : "Create Account"}</button>
+            <button
+              type="submit"
+              className="submit-button"
+              disabled={isSubmitting}
+            >
+              {isSubmitting
+                ? "Please wait…"
+                : mode === "login"
+                  ? "Sign In"
+                  : "Create Account"}
+            </button>
           </form>
 
-          <div className="divider"><span>or connect with</span></div>
-          <div className="oauth-row">
+<div className="divider">
+  <span>or connect with</span>
+</div>
+
+<div className="oauth-row">
   <button
     type="button"
     className="oauth-button"
@@ -184,23 +349,23 @@ async function handleOAuthSignIn(provider) {
     disabled={isSubmitting || oauthProvider !== null}
   >
     <GoogleIcon />
-    {oauthProvider === "google" ? "Connecting…" : "Google"}
-  </button>
-
-  <button
-    type="button"
-    className="oauth-button"
-    onClick={() => handleOAuthSignIn("azure")}
-    disabled={isSubmitting || oauthProvider !== null}
-  >
-    <MicrosoftIcon />
-    {oauthProvider === "azure" ? "Connecting…" : "Microsoft"}
+    {oauthProvider === "google" ? "Connecting…" : "Continue with Google"}
   </button>
 </div>
 
+<button
+  type="button"
+  className="guest-button"
+  onClick={handleGuestLogin}
+  disabled={isSubmitting || oauthProvider !== null}
+>
+  No email? Continue as a guest
+</button>
+
 <p className="demo-note">
-  Sign in with Google, Microsoft, or your email and password.
-</p>
+  Guests can learn and take quizzes. You can add an email or Google
+  account later to keep your progress.
+</p> 
         </div>
       </section>
 
@@ -230,7 +395,8 @@ async function handleOAuthSignIn(provider) {
         .divider { position: relative; margin: 20px 0 16px; text-align: center; } .divider::before { content: ""; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #e4ddd4; } .divider span { position: relative; padding: 0 14px; background: #fff; color: #8996a8; font-size: 10.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
         .oauth-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } .oauth-button { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 11px; min-height: 44px; border: 1px solid #e4ddd4; border-radius: 8px; background: #fff; color: #26324a; cursor: pointer; font: inherit; font-size: 12px; font-weight: 700; } .oauth-button:disabled { opacity: .5; cursor: not-allowed; }
         .demo-note { margin: 14px 0 0; color: #a4afbe; font-size: 10.5px; text-align: center; line-height: 1.4; }
-
+        .guest-button { width: 100%; margin-top: 12px; padding: 12px; border-radius: 12px; border: 1px dashed currentColor; background: transparent; font-weight: 600; cursor: pointer; }
+        .guest-button:disabled { opacity: .6; cursor: default; }
         @media (min-width: 851px) {
           .login-page { flex-direction: row; }
           .login-hero { width: 44%; min-height: 100vh; padding: 37px 35px; }

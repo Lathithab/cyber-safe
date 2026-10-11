@@ -6,6 +6,8 @@ are NOT shown in the public feed yet. An admin/teacher must review and
 approve a report before it appears, or reject it if it's spam/misleading.
 """
 
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from database import get_supabase
@@ -71,7 +73,14 @@ def moderate_report(
     supabase = get_supabase()
     result = (
         supabase.table("posts")
-        .update({"status": decision.status})
+        .update(
+            {
+                "status": decision.status,
+                "moderation_note": decision.reason,
+                "moderated_at": datetime.now(timezone.utc).isoformat(),
+                "moderated_by": user.id,
+            }
+        )
         .eq("id", report_id)
         .execute()
     )

@@ -1038,7 +1038,7 @@ export default function FeedPage() {
         /* Base mobile layout */
         .feed-dashboard { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr); background: #f6f9fd; color: #00243A; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
 
-        .sidebar { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 14px 6px; border-right: 1px solid #0d3557; background: #00243A; overflow-y: auto; }
+        .sidebar { position: sticky; top: 0; height: 100vh; display: none; flex-direction: column; align-items: center; padding: 14px 6px; border-right: 1px solid #0d3557; background: #00243A; overflow-y: auto; }
         .brand { display: flex; align-items: center; gap: 10px; padding: 0; border: 0; background: transparent; color: #fff; cursor: pointer; text-align: left; }
         .brand-icon { display: grid; place-items: center; width: 41px; height: 41px; flex: 0 0 auto; border-radius: 12px; background: rgba(235,99,15,.22); color: #EB630F; }
         .brand span:not(.brand-icon) { display: none; }

@@ -480,7 +480,13 @@ export default function ScamLibraryPage() {
         </article>
       );
     })}</section>
-    {isLoading && <p className="empty" role="status">Loading scam guides…</p>}
+    {isLoading && (
+      <div className="sk-wrap" role="status" aria-label="Loading scam guides">
+        <span className="sk sk-card" style={{ height: 84 }} />
+        <span className="sk sk-card" style={{ height: 84 }} />
+        <span className="sk sk-card" style={{ height: 84 }} />
+      </div>
+    )}
     {!isLoading && loadError && <p className="empty" role="alert">{loadError}</p>}
     {!isLoading && !loadError && !results.length && <p className="empty">No scam guide matches that search. Try a broader term or use the Helpline Hub for urgent support.</p>}
   </section><style>{`

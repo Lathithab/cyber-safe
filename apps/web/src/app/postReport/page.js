@@ -17,6 +17,9 @@ const INCIDENT_TYPES = [
   "Identity Theft",
 ];
 
+const MAX_EVIDENCE_BYTES = 5 * 1024 * 1024;
+const MAX_EVIDENCE_SIDE = 1280;
+
 function Icon({ name, size = 22 }) {
   const shared = {
     width: size,
@@ -138,12 +141,27 @@ export default function PostReportPage() {
   const [submitError, setSubmitError] = useState("");
   const [submitSuccess, setSubmitSuccess] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fileError, setFileError] = useState("");
 
   const canSubmit = form.incidentType && form.description.trim().length >= 10;
   const today = new Date().toISOString().slice(0, 10);
 
   function updateForm(event) {
     const { name, value, type, checked, files } = event.target;
+    if (name === "file") {
+      const chosen = files?.[0] ?? null;
+      if (chosen && !["image/png", "image/jpeg"].includes(chosen.type)) {
+        setFileError("Please choose a PNG or JPG image.");
+        event.target.value = "";
+        return;
+      }
+      if (chosen && chosen.size > MAX_EVIDENCE_BYTES) {
+        setFileError("That image is larger than 5 MB. Please choose a smaller one.");
+        event.target.value = "";
+        return;
+      }
+      setFileError("");
+    }
     setForm((current) => ({
       ...current,
       [name]:
@@ -151,15 +169,38 @@ export default function PostReportPage() {
     }));
   }
 
+  // Redraws the photo onto a canvas and exports a resized JPEG. This drops
+  // hidden metadata such as GPS location and keeps the stored image small.
   function readEvidenceImage(file) {
     if (!file?.type.startsWith("image/")) return Promise.resolve(null);
 
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = () =>
+      const fail = () =>
         reject(new Error("The selected image could not be read."));
-      reader.readAsDataURL(file);
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const scale = Math.min(1, MAX_EVIDENCE_SIDE / Math.max(img.width, img.height));
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.max(1, Math.round(img.width * scale));
+          canvas.height = Math.max(1, Math.round(img.height * scale));
+          const ctx = canvas.getContext("2d");
+          ctx.fillStyle = "#fff";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL("image/jpeg", 0.8));
+        } catch {
+          fail();
+        } finally {
+          URL.revokeObjectURL(url);
+        }
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        fail();
+      };
+      img.src = url;
     });
   }
 
@@ -287,7 +328,9 @@ export default function PostReportPage() {
           </div>
         </header>
 
-        <div className="content-grid">
+        {isGuest && <GuestUpgradeNotice action="report an incident" />}
+
+        <div className="content-grid" style={isGuest ? { display: "none" } : undefined}>
           <form className="report-card" onSubmit={handleSubmit}>
             <div className="card-heading">
               <h2>Incident Form</h2>
@@ -386,11 +429,16 @@ export default function PostReportPage() {
                 <input
                   name="file"
                   type="file"
-                  accept="application/pdf,image/png,image/jpeg"
+                  accept="image/png,image/jpeg"
                   onChange={updateForm}
                   hidden
                 />
               </label>
+              {fileError && (
+                <p className="submit-error" role="alert" style={{ gridColumn: "1 / -1", margin: 0 }}>
+                  {fileError}
+                </p>
+              )}
               <button
                 className="submit-button"
                 type="submit"

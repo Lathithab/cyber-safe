@@ -200,6 +200,8 @@ export default function FeedPage() {
   const [posts, setPosts] = useState([]);
   const [currentUserName, setCurrentUserName] = useState("Guest");
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [openMenuId, setOpenMenuId] = useState(null);
   const [openShareId, setOpenShareId] = useState(null);
   const [openCommentsId, setOpenCommentsId] = useState(null);
@@ -231,6 +233,8 @@ export default function FeedPage() {
     let cancelled = false;
 
     async function loadPosts() {
+      setLoading(true);
+      setLoadFailed(false);
       const withComments = (list) =>
         list.map((post) => {
           const stored = loadStoredComments(post.id);
@@ -347,6 +351,7 @@ export default function FeedPage() {
         console.error("Error loading community feed:", error);
 
         if (!cancelled) {
+          setLoadFailed(true);
           setPosts(
             withComments([...loadStoredReports(), ...SEED_POSTS])
           );
@@ -363,7 +368,7 @@ export default function FeedPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [reloadKey]);
 
   useEffect(() => {
     async function loadCurrentUser() {
@@ -760,9 +765,26 @@ export default function FeedPage() {
             </form>
 
             {loading && (
-              <p className="loading-state">Loading community feed...</p>
+              <div className="sk-wrap" role="status" aria-label="Loading community feed">
+                <span className="sk sk-card" style={{ height: 150 }} />
+                <span className="sk sk-card" style={{ height: 150 }} />
+                <span className="sk sk-card" style={{ height: 150 }} />
+              </div>
             )}
 
+            {!loading && loadFailed && (
+              <p className="load-error" role="alert">
+                We couldn&apos;t load the latest community posts.{" "}
+                <button type="button" onClick={() => setReloadKey((k) => k + 1)}>
+                  Try again
+                </button>
+              </p>
+            )}
+            {!loading && !posts.length && (
+              <p className="loading-state">
+                No posts yet. Be the first to share a safety alert.
+              </p>
+            )}
             {!loading &&
               posts.map((post, index) => (
                 <article className="post-card" key={post.id || index}>
@@ -1089,6 +1111,7 @@ export default function FeedPage() {
         .category-picker select { border: 0; background: transparent; color: #536179; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
         .post-button { border: 0; border-radius: 9px; padding: 12px 16px; background: #EB630F; color: #00243A; cursor: pointer; font: inherit; font-size: 13px; font-weight: 800; width: 100%; min-height: 42px; }
 
+        .load-error { margin: 0; padding: 12px 14px; border: 1px solid #f3b8b5; border-radius: 10px; background: #fff4f4; color: #b42318; font-size: 13px; } .load-error button { border: 0; background: transparent; color: #C24F0C; font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }
         .loading-state { padding: 22px; text-align: center; color: #65738a; }
         .post-card { padding: 15px; border: 1px solid #dce5ef; border-radius: 12px; background: #fff; box-shadow: 0 8px 24px rgba(36, 56, 87, .035); }
         .post-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
@@ -1221,4 +1244,4 @@ export default function FeedPage() {
       `}</style>
     </main>
   );
-}
+}   

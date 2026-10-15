@@ -155,7 +155,11 @@ export default function LearnPage() {
         </div>
         <div className="module-grid">
           {isLoading && (
-            <p className="module-status">Loading learning modules…</p>
+            <div className="sk-wrap" role="status" aria-label="Loading learning modules" style={{ gridColumn: "1 / -1" }}>
+              <span className="sk sk-card" style={{ height: 96 }} />
+              <span className="sk sk-card" style={{ height: 96 }} />
+              <span className="sk sk-card" style={{ height: 96 }} />
+            </div>
           )}
           {!isLoading && loadError && (
             <p className="module-status error">{loadError}</p>

@@ -129,3 +129,21 @@ html {
     font-size: 16px !important;
   }
 }
+
+/* High contrast mode (Settings > Accessibility) */
+html[data-contrast="high"] body { color: #000; }
+html[data-contrast="high"] small,
+html[data-contrast="high"] p,
+html[data-contrast="high"] span { color: inherit; }
+html[data-contrast="high"] main :where(small, p, label, li) { color: #000 !important; }
+html[data-contrast="high"] main :where(section, article, input, select, textarea) { border-color: #000 !important; }
+html[data-contrast="high"] a { text-decoration: underline; }
+html[data-contrast="high"] :focus-visible { outline: 3px solid #000 !important; outline-offset: 2px; }
+
+
+/* Loading placeholders (grey pulsing blocks) */
+.sk-wrap { display: grid; gap: 12px; width: 100%; }
+.sk { display: block; background: #e6ebf1; border-radius: 12px; animation: sk-pulse 1.3s ease-in-out infinite; }
+.sk-card { width: 100%; }
+@keyframes sk-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .sk { animation: none; } }

@@ -1,4 +1,13 @@
--- CyberSafe database schema
+-- CyberSafe database schema (INITIAL schema only)
+--
+-- Run this first, then the files in supabase/migrations/ in filename order,
+-- then the seed_*.sql files. Later migrations change several tables defined
+-- here (posts, modules, quiz_questions, user_progress, profiles).
+--
+-- KNOWN GAP: the "Quizz" table, the "Tier" type and some columns on modules
+-- were created in the Supabase dashboard and are not defined in these files.
+-- Export the real schema with:  supabase db dump --schema public
+--
 -- Run this once in your Supabase project: Dashboard > SQL Editor > New query > paste > Run
 
 create type user_role as enum ('learner', 'teacher', 'admin');

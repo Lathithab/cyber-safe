@@ -5,8 +5,6 @@ import { useParams, useRouter } from "next/navigation";
 import { isSupabaseConfigured, supabase } from "../../../../../lib/supabase";
 import { getModuleBadge } from "../../../../lib/moduleBadges";
 
-const PASSING_PERCENTAGE = 60;
-
 export default function QuizPage() {
   const params = useParams();
   const router = useRouter();
@@ -23,6 +21,13 @@ export default function QuizPage() {
   const [loadError, setLoadError] = useState("");
   const [completionMessage, setCompletionMessage] = useState("");
   const [isSavingCompletion, setIsSavingCompletion] = useState(false);
+  // Answers the learner has submitted so far, sent to the server for grading.
+  const [answers, setAnswers] = useState([]);
+  // The server's verdict on the current question (correct answer + explanation).
+  const [feedback, setFeedback] = useState(null);
+  // The server's final grade for the whole quiz.
+  const [result, setResult] = useState(null);
+  const [isChecking, setIsChecking] = useState(false);
 
   useEffect(() => {
     async function loadQuiz() {
@@ -31,8 +36,6 @@ export default function QuizPage() {
         setIsLoading(false);
         return;
       }
-
-      console.log("MODULE ID FOR QUIZ:", params.module_id);
 
       // Load the quiz
       const { data: quizData, error: quizError } = await supabase
@@ -53,8 +56,8 @@ export default function QuizPage() {
 
       // Load the questions
       const { data: questionData, error: questionError } = await supabase
-        .from("quiz_questions")
-        .select("*")
+        .from("quiz_questions_public")
+        .select("id, quizz_id, question, options, order_index")
         .eq("quizz_id", quizData.id)
         .order("order_index", { ascending: true });
 
@@ -67,9 +70,6 @@ export default function QuizPage() {
         setIsLoading(false);
         return;
       }
-
-      console.log("QUIZ LOADED:", quizData);
-      console.log("QUESTIONS LOADED:", questionData);
 
       setQuiz(quizData);
       setQuestions(questionData || []);
@@ -88,93 +88,82 @@ export default function QuizPage() {
     }
   }, [params.module_id]);
 
-  useEffect(() => {
-    if (!isComplete || !questions.length) return;
-
-    const percentage = Math.round((score / questions.length) * 100);
-    if (percentage < PASSING_PERCENTAGE) {
-      setCompletionMessage(
-        `Score at least ${PASSING_PERCENTAGE}% to complete this module and earn its badge. Review the module and try again.`
-      );
-      return;
-    }
-
-    let cancelled = false;
-    async function saveCompletion() {
-      if (!isSupabaseConfigured || !supabase) {
-        setCompletionMessage("Sign in to save your module completion and badge.");
-        return;
-      }
-
-      setIsSavingCompletion(true);
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError || !user) {
-        if (!cancelled) {
-          setCompletionMessage("Sign in to save your module completion and badge.");
-          setIsSavingCompletion(false);
-        }
-        return;
-      }
-
-      const { error } = await supabase.from("user_progress").upsert(
-        {
-          user_id: user.id,
-          module_id: params.module_id,
-          status: "completed",
-          quiz_score: percentage,
-          completed_at: new Date().toISOString(),
-        },
-        { onConflict: "user_id,module_id" }
-      );
-
-      if (!cancelled) {
-        setCompletionMessage(
-          error
-            ? "Your quiz is passed, but we could not save the badge. Please try again later."
-            : `Badge earned: ${getModuleBadge({ title: moduleTitle }).title}`
-        );
-        setIsSavingCompletion(false);
-      }
-    }
-
-    saveCompletion();
-    return () => {
-      cancelled = true;
-    };
-  }, [isComplete, moduleTitle, params.module_id, questions.length, score]);
-
   function handleAnswerSelect(index) {
     if (submitted) return;
 
     setSelectedAnswer(index);
   }
 
-  function handleSubmit() {
-    if (selectedAnswer === null) return;
+  // Grading happens in the database: the browser never sees the correct answer
+  // until it has committed to one.
+  async function handleSubmit() {
+    if (selectedAnswer === null || isChecking) return;
 
     const question = questions[currentQuestion];
+    setIsChecking(true);
 
-    if (selectedAnswer === question.correct_index) {
-      setScore((previousScore) => previousScore + 1);
+    const { data, error } = await supabase.rpc("check_quiz_answer", {
+      p_question_id: question.id,
+      p_selected_index: selectedAnswer,
+    });
+
+    setIsChecking(false);
+
+    if (error) {
+      console.error("Error checking answer:", error.message);
+      setLoadError("We could not check your answer. Please sign in and try again.");
+      return;
     }
 
+    setFeedback(data);
+    setAnswers((previous) => [
+      ...previous,
+      { question_id: question.id, selected_index: selectedAnswer },
+    ]);
+    // Display-only running score. The saved score is calculated by the server.
+    if (data.is_correct) setScore((previousScore) => previousScore + 1);
     setSubmitted(true);
   }
 
-  function handleNext() {
+  async function handleNext() {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion((previousQuestion) => previousQuestion + 1);
       setSelectedAnswer(null);
       setSubmitted(false);
-    } else {
-      setIsComplete(true);
+      setFeedback(null);
+      return;
     }
+
+    // Last question: ask the server to grade the quiz and save the result.
+    setIsSavingCompletion(true);
+    const { data, error } = await supabase.rpc("submit_quiz", {
+      p_module_id: params.module_id,
+      p_answers: answers,
+    });
+    setIsSavingCompletion(false);
+
+    if (error) {
+      console.error("Error submitting quiz:", error.message);
+      setCompletionMessage("Sign in to save your module completion and badge.");
+    } else {
+      setResult(data);
+      setCompletionMessage(
+        data.passed
+          ? `Badge earned: ${getModuleBadge({ title: moduleTitle }).title}`
+          : `Score at least ${data.pass_mark}% to complete this module and earn its badge. Review the module and try again.`
+      );
+    }
+    setIsComplete(true);
   }
 
   function handleRestart() {
     setCurrentQuestion(0);
     setSelectedAnswer(null);
     setSubmitted(false);
+    setFeedback(null);
+    setAnswers([]);
+    setResult(null);
+    setCompletionMessage("");
     setScore(0);
     setIsComplete(false);
   }
@@ -204,7 +193,8 @@ export default function QuizPage() {
   }
 
   if (isComplete) {
-    const percentage = Math.round((score / questions.length) * 100);
+    const percentage =
+      result?.score_percent ?? Math.round((score / questions.length) * 100);
 
     return (
       <main style={styles.page}>
@@ -215,14 +205,14 @@ export default function QuizPage() {
 
           <div style={styles.scoreBox}>
             <p style={styles.scoreNumber}>
-              {score}/{questions.length}
+              {result?.correct_count ?? score}/{result?.total_questions ?? questions.length}
             </p>
             <p style={styles.scorePercentage}>{percentage}%</p>
           </div>
 
           <p style={styles.resultText}>
             {percentage >= 80
-              ? "Excellent work! You have a strong understanding of password security."
+              ? "Excellent work! You have a strong understanding of this topic."
               : percentage >= 60
               ? "Good effort! You understand the basics, but there is still room to improve."
               : "Keep practising. Review the module and try the quiz again."}
@@ -289,13 +279,13 @@ export default function QuizPage() {
             let background = "#ffffff";
             let border = "2px solid #d7dee8";
 
-            if (submitted) {
-              if (index === question.correct_index) {
+            if (submitted && feedback) {
+              if (index === feedback.correct_index) {
                 background = "#dff7e8";
                 border = "2px solid #35a85b";
               } else if (
                 index === selectedAnswer &&
-                index !== question.correct_index
+                index !== feedback.correct_index
               ) {
                 background = "#ffe3e3";
                 border = "2px solid #d94b4b";
@@ -326,23 +316,23 @@ export default function QuizPage() {
           })}
         </div>
 
-        {submitted && (
+        {submitted && feedback && (
           <div
             style={{
               ...styles.explanation,
               background:
-                selectedAnswer === question.correct_index
+                feedback.is_correct
                   ? "#dff7e8"
                   : "#fff1d9",
             }}
           >
             <strong>
-              {selectedAnswer === question.correct_index
+              {feedback.is_correct
                 ? "Correct!"
                 : "Not quite."}
             </strong>
 
-            <p>{question.explanation}</p>
+            <p>{feedback.explanation}</p>
           </div>
         )}
 
@@ -351,20 +341,21 @@ export default function QuizPage() {
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={selectedAnswer === null}
+              disabled={selectedAnswer === null || isChecking}
               style={{
                 ...styles.button,
-                opacity: selectedAnswer === null ? 0.5 : 1,
+                opacity: selectedAnswer === null || isChecking ? 0.5 : 1,
                 cursor:
-                  selectedAnswer === null ? "not-allowed" : "pointer",
+                  selectedAnswer === null || isChecking ? "not-allowed" : "pointer",
               }}
             >
-              Submit Answer
+              {isChecking ? "Checking…" : "Submit Answer"}
             </button>
           ) : (
             <button
               type="button"
               onClick={handleNext}
+              disabled={isSavingCompletion}
               style={styles.button}
             >
               {currentQuestion === questions.length - 1

@@ -1,5 +1,4 @@
 require("dotenv").config();
-const crypto = require("crypto");
 const express = require("express");
 const axios = require("axios");
 const {
@@ -7,6 +6,8 @@ const {
   SAFETY_RESOURCES_BY_LANG,
   getAIReply,
 } = require("./bot-logic");
+const { getCommand } = require("./commands");
+const { verifySignature } = require("./security");
 
 const {
   WHATSAPP_TOKEN,
@@ -14,8 +15,21 @@ const {
   VERIFY_TOKEN,
   APP_SECRET,
   STAFF_WHATSAPP,
+  ALLOW_UNSIGNED_WEBHOOKS,
   PORT = 3000,
 } = process.env;
+
+// Fail closed: without APP_SECRET we cannot tell Meta's messages from anyone
+// else's, so refuse to start. For local testing only, set
+// ALLOW_UNSIGNED_WEBHOOKS=true to skip the signature check.
+const allowUnsigned = ALLOW_UNSIGNED_WEBHOOKS === "true";
+if (!APP_SECRET && !allowUnsigned) {
+  console.error(
+    "APP_SECRET is not set. Add it in your host's environment settings (Render), " +
+      "or set ALLOW_UNSIGNED_WEBHOOKS=true for local testing only.",
+  );
+  process.exit(1);
+}
 
 const app = express();
 // Keep an exact copy of each incoming message so we can check Meta's signature.
@@ -27,9 +41,9 @@ app.use(
   }),
 );
 
-// ---------- Memory (cleared when the server restarts) ----------
+// Key constants
 const conversations = {}; // chat history for each learner
-const hasGreeted = {}; // learners we've already welcomed
+const hasGreeted = {}; // learners we've already greeted
 const languagePrefs = {}; // each learner's chosen language, e.g. "xh"
 const lastSeen = {}; // when each learner last sent a message
 const sessionEnded = {}; // learners who tapped "End chat"
@@ -37,8 +51,7 @@ const sessionEnded = {}; // learners who tapped "End chat"
 // If a learner is quiet for this long, their next message starts a new chat.
 const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
 
-// WhatsApp sometimes sends the same message twice. Remember recent message IDs
-// so we only reply once.
+// WhatsApp sometimes sends the same message twice. Remember recent message IDs so we only reply once.
 const seenMessageIds = new Map();
 const MAX_SEEN_MESSAGE_IDS = 1000;
 
@@ -52,7 +65,7 @@ function isDuplicateMessage(messageId) {
   return false;
 }
 
-// ---------- Languages ----------
+// Language
 const LANGUAGES = {
   en: "English",
   af: "Afrikaans",
@@ -60,7 +73,7 @@ const LANGUAGES = {
   xh: "isiXhosa",
 };
 
-// Everything the bot says, in each language. Button labels are 20 characters or fewer.
+// Button text
 const TEXT = {
   en: {
     chooseButton: "Choose language",
@@ -97,7 +110,7 @@ const TEXT = {
   af: {
     chooseButton: "Kies taal",
     welcome:
-      'Lekker, ons gesels in Afrikaans. 👋\n\nEk is hier om jou te help met kuberboelie en aanlyn-swendelary. Vertel my in jou eie woorde wat aangaan, of tik op \'n knoppie hieronder.\n\nJy kan enige tyd "spyskaart", "verander taal" of "praat met iemand" tik.',
+      'Welkom, ons gesels in Afrikaans. 👋\n\nEk is hier om jou te help met kuberboelie en aanlyn-swendelary. Vertel my in jou eie woorde wat aangaan, of tik op \'n knoppie hieronder.\n\nJy kan enige tyd "spyskaart", "verander taal" of "praat met iemand" tik.',
     menu: "Waarmee wil jy hulp hê? Tik op 'n knoppie, of tik net jou vraag.",
     btnCheck: "Kyk na 'n boodskap",
     btnBullying: "Hulp met boelie",
@@ -203,69 +216,6 @@ function t(from, key) {
   return TEXT[lang][key];
 }
 
-// Words learners can type, in all four languages.
-const COMMANDS = {
-  MENU: ["menu", "spyskaart", "menyu", "imenyu"],
-  RESET: [
-    "start over",
-    "restart",
-    "reset",
-    "begin oor",
-    "thoma gape",
-    "qala kwakhona",
-  ],
-  LANGUAGE: [
-    "change language",
-    "language",
-    "verander taal",
-    "taal",
-    "fetola polelo",
-    "polelo",
-    "tshintsha ulwimi",
-    "ulwimi",
-  ],
-  HANDOFF: [
-    "talk to a person",
-    "person",
-    "human",
-    "agent",
-    "praat met iemand",
-    "bolela le motho",
-    "thetha nomntu",
-  ],
-  END: [
-    "bye",
-    "goodbye",
-    "end",
-    "end chat",
-    "done",
-    "i'm done",
-    "im done",
-    "stop",
-    "totsiens",
-    "klaar",
-    "beëindig gesprek",
-    "šala gabotse",
-    "sala gabotse",
-    "ke feditše",
-    "ke fedile",
-    "fetša poledišano",
-    "sala kakuhle",
-    "ndigqibile",
-    "gqiba incoko",
-    "bhayi",
-  ],
-};
-
-function getCommand(text) {
-  const cleaned = text.trim().toLowerCase();
-  return (
-    Object.keys(COMMANDS).find((command) =>
-      COMMANDS[command].includes(cleaned),
-    ) || null
-  );
-}
-
 // Save the learner's language and tell the AI to use it.
 function setLanguage(from, code) {
   languagePrefs[from] = code;
@@ -283,26 +233,15 @@ function clearChat(from) {
 }
 
 // ---------- Checking messages really come from WhatsApp ----------
-// Meta signs every real message with our App Secret. We reject anything else.
-let warnedNoSecret = false;
+// Meta signs every real message with our App Secret (see security.js).
+// We reject anything else.
 function isFromMeta(req) {
-  if (!APP_SECRET) {
-    if (!warnedNoSecret) {
-      console.warn(
-        "APP_SECRET is not set, so messages are not being checked. Add it on Render.",
-      );
-      warnedNoSecret = true;
-    }
-    return true;
-  }
-  const signature = req.get("x-hub-signature-256");
-  if (!signature || !req.rawBody) return false;
-  const expected =
-    "sha256=" +
-    crypto.createHmac("sha256", APP_SECRET).update(req.rawBody).digest("hex");
-  const a = Buffer.from(signature);
-  const b = Buffer.from(expected);
-  return a.length === b.length && crypto.timingSafeEqual(a, b);
+  if (!APP_SECRET) return allowUnsigned; // local testing only
+  return verifySignature(
+    req.rawBody,
+    req.get("x-hub-signature-256"),
+    APP_SECRET,
+  );
 }
 
 // ---------- Sending messages ----------

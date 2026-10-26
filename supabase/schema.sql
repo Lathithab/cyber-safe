@@ -77,6 +77,15 @@ create policy "Authenticated users can read quiz questions"
 create policy "Users can view their own progress"
   on user_progress for select using (auth.uid() = user_id);
 
+create policy "Users can insert their own progress"
+  on user_progress for insert to authenticated
+  with check (auth.uid() = user_id);
+
+create policy "Users can update their own progress"
+  on user_progress for update to authenticated
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
 create table if not exists posts (
   id uuid primary key default gen_random_uuid(),
   author_id uuid references auth.users (id) on delete set null,

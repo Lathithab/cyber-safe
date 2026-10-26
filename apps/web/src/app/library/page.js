@@ -390,6 +390,8 @@ export default function ScamLibraryPage() {
 
   useEffect(() => {
     let isMounted = true;
+    const controller = new AbortController();
+    let timeoutId;
 
     async function loadScamGuides() {
       if (!isSupabaseConfigured || !supabase) {
@@ -398,17 +400,17 @@ export default function ScamLibraryPage() {
         return;
       }
 
-      const { data, error } = await supabase
-        .from("scam_guides")
-        .select("slug, category, title, summary, warning_signs, recommended_action, example_image_path")
-        .eq("published", true)
-        .order("sort_order", { ascending: true });
+      timeoutId = window.setTimeout(() => controller.abort(), 15000);
+      try {
+        const { data, error } = await supabase
+          .from("scam_guides")
+          .select("slug, category, title, summary, warning_signs, recommended_action")
+          .eq("published", true)
+          .order("sort_order", { ascending: true })
+          .abortSignal(controller.signal);
 
-      if (!isMounted) return;
-      if (error) {
-        console.error("Could not load scam guides:", error);
-        setLoadError("We could not load the scam guides. Confirm the scam_guides migration has been run in this Supabase project, then refresh.");
-      } else {
+        if (error) throw error;
+        if (!isMounted) return;
         setScams((data || []).map((guide) => ({
           id: guide.slug,
           category: guide.category,
@@ -416,19 +418,24 @@ export default function ScamLibraryPage() {
           summary: guide.summary,
           signs: guide.warning_signs || [],
           action: guide.recommended_action,
-          example_image_path: guide.example_image_path
-            ? guide.example_image_path.startsWith("/") || /^https?:\/\//i.test(guide.example_image_path)
-              ? guide.example_image_path
-              : supabase.storage.from("scam-examples").getPublicUrl(guide.example_image_path).data.publicUrl
-            : null,
         })));
+      } catch (error) {
+        if (!isMounted) return;
+        console.error("Could not load scam guides:", error);
+        setLoadError(controller.signal.aborted
+          ? "Loading the scam guides timed out. Check your connection and Supabase availability, then retry."
+          : "We could not load the scam guides. Check your connection and confirm the scam_guides migrations have been applied, then retry.");
+      } finally {
+        window.clearTimeout(timeoutId);
+        if (isMounted) setIsLoading(false);
       }
-      setIsLoading(false);
     }
 
     loadScamGuides();
     return () => {
       isMounted = false;
+      window.clearTimeout(timeoutId);
+      controller.abort();
     };
   }, []);
 
@@ -455,18 +462,9 @@ export default function ScamLibraryPage() {
           <button className="scam-title" type="button" aria-expanded={open} onClick={() => setSelected(open ? null : scam.id)}>
             <span><small>{scam.category}</small><strong>{scam.title}</strong></span><b>{open ? "−" : "+"}</b>
           </button>
-          <p>{scam.summary}</p>
+          <p><strong>How this scam may look</strong><br />{scam.summary}</p>
           {open && (
             <div className="scam-detail">
-              {scam.id === "whatsapp" && scam.example_image_path && <WhatsAppExample imageSrc={scam.example_image_path} />}
-              {scam.id === "bank" && scam.example_image_path && <BankSmsExample imageSrc={scam.example_image_path} />}
-              {scam.id === "sim" && scam.example_image_path && <SimSwapExample imageSrc={scam.example_image_path} />}
-              {scam.id === "market" && scam.example_image_path && <PaymentProofExample imageSrc={scam.example_image_path} />}
-              {scam.id === "delivery" && scam.example_image_path && <ParcelNotificationExample imageSrc={scam.example_image_path} />}
-              {scam.id === "job" && scam.example_image_path && <JobOfferExample imageSrc={scam.example_image_path} />}
-              {scam.id === "account-recovery" && scam.example_image_path && <AccountRecoveryExample imageSrc={scam.example_image_path} />}
-              {scam.id === "sars" && scam.example_image_path && <SarsNoticeExample imageSrc={scam.example_image_path} />}
-              {scam.example_image_path && !scamGuidesWithCustomExampleLayout.has(scam.id) && <GenericScamExample imageSrc={scam.example_image_path} category={scam.category} title={scam.title} />}
               <div className="scam-section-card">
                 <h2>Warning signs</h2>
                 <ul>{scam.signs.map((sign) => <li key={sign}>{sign}</li>)}</ul>

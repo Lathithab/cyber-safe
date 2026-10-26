@@ -290,7 +290,7 @@ function AccountRecoveryExample({ imageSrc }) {
 function SarsNoticeExample({ imageSrc }) {
   return (
     <section aria-labelledby="sars-notice-example-title" style={scamExampleRowStyle}>
-      <figure style={{ justifySelf: "center", width: "fit-content", maxWidth: "100%", margin: 0, padding: 16, border: "1px solid #e4ddd4", borderRadius: 16, background: "#f7f4ef" }}>
+      <figure style={{ minWidth: 0, width: "100%", margin: 0, padding: 16, border: "1px solid #e4ddd4", borderRadius: 16, background: "#f7f4ef" }}>
         <figcaption
           id="sars-notice-example-title"
           style={{ margin: "0 0 12px", color: "#536179", fontSize: 13, fontWeight: 800 }}
@@ -319,19 +319,31 @@ function SarsNoticeExample({ imageSrc }) {
   );
 }
 
-function GenericScamExample({ imageSrc, category, title }) {
+function GenericScamExample({ imageSrc, category, title, summary, signs, slug }) {
+  const exampleTitleId = `${slug}-example-title`;
+
   return (
-    <section aria-label={`Example image for ${title}`} style={{ gridColumn: "1 / -1", width: "100%", margin: "0 auto 4px" }}>
-      <figure style={{ margin: 0, padding: 16, border: "1px solid #e4ddd4", borderRadius: 16, background: "#f7f4ef" }}>
-        <figcaption style={{ margin: "0 0 12px", color: "#536179", fontSize: 13, fontWeight: 800, textTransform: "uppercase" }}>
+    <section aria-labelledby={exampleTitleId} style={scamExampleRowStyle}>
+      <figure style={{ minWidth: 0, margin: 0, padding: 16, border: "1px solid #e4ddd4", borderRadius: 16, background: "#f7f4ef" }}>
+        <figcaption id={exampleTitleId} style={{ margin: "0 0 12px", color: "#536179", fontSize: 13, fontWeight: 800, textTransform: "uppercase" }}>
           {category} example · {title}
         </figcaption>
         <img
           src={imageSrc}
           alt={`Example image for the ${title} scam guide`}
-          style={{ display: "block", width: "100%", height: "auto", maxHeight: 620, maxWidth: 760, objectFit: "contain", margin: "0 auto", borderRadius: 8 }}
+          style={{ display: "block", width: "100%", height: "auto", maxHeight: 620, maxWidth: 560, objectFit: "contain", margin: "0 auto", borderRadius: 8 }}
         />
       </figure>
+      <aside style={{ alignSelf: "stretch", padding: 24, border: "1px solid #f1c49f", borderRadius: 18, background: "#fff5eb" }}>
+        <p style={{ margin: "0 0 8px", color: "#c24f0c", fontSize: 12, fontWeight: 800, letterSpacing: ".06em", textTransform: "uppercase" }}>
+          Warning signs
+        </p>
+        <h2 style={{ margin: "0 0 10px", color: "#121a32", fontSize: 18 }}>What to notice in this example</h2>
+        <p style={{ margin: "0 0 14px", color: "#536179", fontSize: 14, lineHeight: 1.55 }}>{summary}</p>
+        <ul style={{ display: "grid", gap: 9, margin: 0, paddingLeft: 19, color: "#536179", fontSize: 14, lineHeight: 1.45 }}>
+          {signs.slice(0, 3).map((sign) => <li key={sign}>{sign}</li>)}
+        </ul>
+      </aside>
     </section>
   );
 }
@@ -404,7 +416,7 @@ export default function ScamLibraryPage() {
       try {
         const { data, error } = await supabase
           .from("scam_guides")
-          .select("slug, category, title, summary, warning_signs, recommended_action")
+          .select("slug, category, title, summary, warning_signs, recommended_action, example_image_path")
           .eq("published", true)
           .order("sort_order", { ascending: true })
           .abortSignal(controller.signal);
@@ -418,6 +430,11 @@ export default function ScamLibraryPage() {
           summary: guide.summary,
           signs: guide.warning_signs || [],
           action: guide.recommended_action,
+          example_image_path: guide.example_image_path
+            ? guide.example_image_path.startsWith("/") || /^https?:\/\//i.test(guide.example_image_path)
+              ? guide.example_image_path
+              : supabase.storage.from("scam-examples").getPublicUrl(guide.example_image_path).data.publicUrl
+            : null,
         })));
       } catch (error) {
         if (!isMounted) return;
@@ -446,7 +463,7 @@ export default function ScamLibraryPage() {
   const results = useMemo(() => scams.filter((scam) => {
     const searchable = `${scam.title} ${scam.summary} ${scam.signs.join(" ")}`.toLowerCase();
     return (category === "All" || scam.category === category) && (!query.trim() || searchable.includes(query.trim().toLowerCase()));
-  }), [scams, query, category]);
+  }).sort((a, b) => Number(Boolean(b.example_image_path)) - Number(Boolean(a.example_image_path))), [scams, query, category]);
 
   return <main className="library-dashboard">
     <DashboardNavBar active="/library" iconSize={19} />
@@ -465,6 +482,15 @@ export default function ScamLibraryPage() {
           <p><strong>How this scam may look</strong><br />{scam.summary}</p>
           {open && (
             <div className="scam-detail">
+              {scam.id === "whatsapp" && scam.example_image_path && <WhatsAppExample imageSrc={scam.example_image_path} />}
+              {scam.id === "bank" && scam.example_image_path && <BankSmsExample imageSrc={scam.example_image_path} />}
+              {scam.id === "sim" && scam.example_image_path && <SimSwapExample imageSrc={scam.example_image_path} />}
+              {scam.id === "market" && scam.example_image_path && <PaymentProofExample imageSrc={scam.example_image_path} />}
+              {scam.id === "delivery" && scam.example_image_path && <ParcelNotificationExample imageSrc={scam.example_image_path} />}
+              {scam.id === "job" && scam.example_image_path && <JobOfferExample imageSrc={scam.example_image_path} />}
+              {scam.id === "account-recovery" && scam.example_image_path && <AccountRecoveryExample imageSrc={scam.example_image_path} />}
+              {scam.id === "sars" && scam.example_image_path && <SarsNoticeExample imageSrc={scam.example_image_path} />}
+              {scam.example_image_path && !scamGuidesWithCustomExampleLayout.has(scam.id) && <GenericScamExample imageSrc={scam.example_image_path} category={scam.category} title={scam.title} summary={scam.summary} signs={scam.signs} slug={scam.id} />}
               <div className="scam-section-card">
                 <h2>Warning signs</h2>
                 <ul>{scam.signs.map((sign) => <li key={sign}>{sign}</li>)}</ul>

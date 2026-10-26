@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { isSupabaseConfigured, supabase } from "../../lib/supabase";
 
 // Pages a guest (anonymous sign-in) may use.
@@ -36,6 +37,22 @@ export function useAuthUser() {
     );
     return () => sub.subscription.unsubscribe();
   }, []);
+
+  return state;
+}
+
+// Same as useAuthUser, but sends visitors who are not signed in to the login
+// page. Guests (anonymous sign-ins) count as signed in. If Supabase is not
+// configured (demo mode) nobody is redirected.
+export function useRequireUser() {
+  const router = useRouter();
+  const state = useAuthUser();
+
+  useEffect(() => {
+    if (isSupabaseConfigured && !state.loading && !state.user) {
+      router.replace("/login");
+    }
+  }, [state.loading, state.user, router]);
 
   return state;
 }

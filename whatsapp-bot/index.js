@@ -4,10 +4,13 @@ const axios = require("axios");
 const {
   SYSTEM_PROMPT,
   SAFETY_RESOURCES_BY_LANG,
+  containsCrisisKeyword,
   getAIReply,
 } = require("./bot-logic");
 const { getCommand } = require("./commands");
 const { verifySignature } = require("./security");
+const { createRateLimiter } = require("./limits");
+const { pruneIdle } = require("./sessions");
 
 const {
   WHATSAPP_TOKEN,
@@ -15,6 +18,9 @@ const {
   VERIFY_TOKEN,
   APP_SECRET,
   STAFF_WHATSAPP,
+  STAFF_TEMPLATE_NAME,
+  STAFF_TEMPLATE_LANG = "en",
+  WHATSAPP_API_BASE = "https://graph.facebook.com/v20.0",
   ALLOW_UNSIGNED_WEBHOOKS,
   PORT = 3000,
 } = process.env;
@@ -48,8 +54,26 @@ const languagePrefs = {}; // each learner's chosen language, e.g. "xh"
 const lastSeen = {}; // when each learner last sent a message
 const sessionEnded = {}; // learners who tapped "End chat"
 
+// At most 30 typed messages per person in any 10 minutes. Buttons, commands and
+// anything mentioning a crisis are never limited, so nobody in trouble is cut off.
+const limiter = createRateLimiter({ max: 30, windowMs: 10 * 60 * 1000 });
+setInterval(() => limiter.prune(), 10 * 60 * 1000).unref();
+
 // If a learner is quiet for this long, their next message starts a new chat.
 const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+
+// Quiet learners are cleared out of memory: chat messages after 30 minutes,
+// everything else (language choice, phone number) after 24 hours.
+const FORGET_AFTER_MS = 24 * 60 * 60 * 1000;
+setInterval(
+  () =>
+    pruneIdle(
+      { conversations, hasGreeted, languagePrefs, lastSeen, sessionEnded },
+      Date.now(),
+      { chatTimeoutMs: SESSION_TIMEOUT_MS, forgetAfterMs: FORGET_AFTER_MS },
+    ),
+  5 * 60 * 1000,
+).unref();
 
 // WhatsApp sometimes sends the same message twice. Remember recent message IDs so we only reply once.
 const seenMessageIds = new Map();
@@ -96,6 +120,8 @@ const TEXT = {
     btnNo: "No thanks",
     handoffDone:
       "Thank you. Someone from C3SA will contact you. You can keep chatting with me in the meantime.",
+    handoffFailed:
+      "I couldn't reach the C3SA team just now, so no one has been told yet. If you need help right away, tap Get help now or call Childline on 116 (free, 24/7). You can also try again a bit later.",
     handoffNo:
       'No problem. I\'m still here if you want to chat. Type "menu" any time.',
     error:
@@ -104,6 +130,8 @@ const TEXT = {
     btnEnd: "End chat",
     welcomeBack:
       "Welcome back! 👋 What would you like help with? Tap a button, or just type your question.",
+    rateLimited:
+      "You're sending messages very quickly, so I need to pause for a few minutes. If you're in danger right now, tap Get help now or call Childline on 116 (free, 24/7).",
     goodbye:
       "Thanks for chatting. 💛 Our chat has ended and I've cleared it. If you need anything, just send a message to start again.\n\nIf you're ever in danger, call Childline on 116 (free, 24/7).",
   },
@@ -128,6 +156,8 @@ const TEXT = {
     btnNo: "Nee dankie",
     handoffDone:
       "Dankie. Iemand van C3SA sal jou kontak. Jy kan intussen verder met my gesels.",
+    handoffFailed:
+      "Ek kon nie nou by die C3SA-span uitkom nie, so niemand is nog ingelig nie. As jy dadelik hulp nodig het, tik op Kry nou hulp of bel Childline by 116 (gratis, 24/7). Jy kan ook later weer probeer.",
     handoffNo:
       'Geen probleem nie. Ek is steeds hier as jy wil gesels. Tik enige tyd "spyskaart".',
     error:
@@ -136,6 +166,8 @@ const TEXT = {
     btnEnd: "Beëindig gesprek",
     welcomeBack:
       "Welkom terug! 👋 Waarmee wil jy hulp hê? Tik op 'n knoppie, of tik net jou vraag.",
+    rateLimited:
+      "Jy stuur boodskappe baie vinnig, so ek moet vir 'n paar minute stilhou. As jy nou in gevaar is, tik op Kry nou hulp of bel Childline by 116 (gratis, 24/7).",
     goodbye:
       "Dankie dat jy met my gesels het. 💛 Ons gesprek is verby en ek het dit uitgevee. Stuur net 'n boodskap as jy weer hulp nodig het.\n\nAs jy ooit in gevaar is, bel Childline by 116 (gratis, 24/7).",
   },
@@ -161,6 +193,8 @@ const TEXT = {
     btnNo: "Aowa, ke a leboga",
     handoffDone:
       "Ke a leboga. Motho wa C3SA o tla ikgokaganya le wena. O ka tšwela pele o bolela le nna ka nako ye.",
+    handoffFailed:
+      "Ga ke a kgona go fihla sehlopha sa C3SA ga bjale, ka gona ga go yo a tsebišitšwego. Ge o hloka thušo ka pela, kgotla Hwetša thušo bjale goba o letšetše Childline go 116 (mahala, 24/7). O ka leka gape ka morago.",
     handoffNo:
       'Ga go na bothata. Ke sa le fa ge o nyaka go bolela. Ngwala "menyu" nako efe goba efe.',
     error:
@@ -169,6 +203,8 @@ const TEXT = {
     btnEnd: "Fetša poledišano",
     welcomeBack:
       "O amogelwa gape! 👋 O nyaka thušo ka eng? Kgotla konopo, goba o ngwale potšišo ya gago.",
+    rateLimited:
+      "O romela melaetša ka lebelo kudu, ka gona ke swanetše go ema metsotso e se mekae. Ge o le kotsing bjale, kgotla Hwetša thušo bjale goba o letšetše Childline go 116 (mahala, 24/7).",
     goodbye:
       "Ke a leboga ge o boletše le nna. 💛 Poledišano ya rena e fedile gomme ke e phumotše. Ge o nyaka thušo gape, romela molaetša fela.\n\nGe o ka ba kotsing, letšetša Childline go 116 (mahala, 24/7).",
   },
@@ -193,6 +229,8 @@ const TEXT = {
     btnNo: "Hayi, enkosi",
     handoffDone:
       "Enkosi. Umntu waseC3SA uza kuqhagamshelana nawe. Ungaqhubeka uncokola nam okwangoku.",
+    handoffFailed:
+      "Andikwazanga ukufikelela iqela le-C3SA ngoku, ngoko akukho mntu ulwazisiweyo okwangoku. Ukuba ufuna uncedo ngokukhawuleza, cofa Fumana uncedo ngoku okanye utsalele iChildline ku-116 (simahla, 24/7). Unokuzama kwakhona kamva.",
     handoffNo:
       'Akukho ngxaki. Ndisekhona ukuba ufuna ukuncokola. Bhala "imenyu" nangaliphi na ixesha.',
     error:
@@ -201,6 +239,8 @@ const TEXT = {
     btnEnd: "Gqiba incoko",
     welcomeBack:
       "Wamkelekile kwakhona! 👋 Ufuna uncedo ngantoni? Cofa iqhosha, okanye ubhale umbuzo wakho.",
+    rateLimited:
+      "Uthumela imiyalezo ngokukhawuleza kakhulu, ngoko kufuneka ndime imizuzu embalwa. Ukuba usengozini ngoku, cofa Fumana uncedo ngoku okanye utsalele iChildline ku-116 (simahla, 24/7).",
     goodbye:
       "Enkosi ngokuncokola nam. 💛 Incoko yethu iphelile kwaye ndiyicimile. Ukuba ufuna uncedo kwakhona, thumela nje umyalezo.\n\nUkuba ukhe usengozini, tsalela iChildline ku-116 (simahla, 24/7).",
   },
@@ -247,7 +287,7 @@ function isFromMeta(req) {
 // ---------- Sending messages ----------
 async function callWhatsApp(payload) {
   await axios.post(
-    `https://graph.facebook.com/v20.0/${PHONE_NUMBER_ID}/messages`,
+    `${WHATSAPP_API_BASE}/${PHONE_NUMBER_ID}/messages`,
     { messaging_product: "whatsapp", ...payload },
     {
       headers: {
@@ -261,6 +301,26 @@ async function callWhatsApp(payload) {
 
 function sendText(to, text) {
   return callWhatsApp({ to, text: { body: text } });
+}
+
+// A pre-approved WhatsApp template message. Meta only delivers plain text to
+// someone who messaged the bot in the last 24 hours, so a staff member who has
+// not chatted with the bot recently can only be reached with a template.
+function sendTemplate(to, name, language, bodyValues) {
+  return callWhatsApp({
+    to,
+    type: "template",
+    template: {
+      name,
+      language: { code: language },
+      components: [
+        {
+          type: "body",
+          parameters: bodyValues.map((value) => ({ type: "text", text: value })),
+        },
+      ],
+    },
+  });
 }
 
 // A message with up to 3 buttons underneath.
@@ -332,17 +392,37 @@ function sendLanguageList(to) {
 }
 
 // Let a C3SA staff member know a learner wants to talk to a person.
+// Returns true only if the message was really sent, so we never tell a
+// learner "someone will contact you" when nobody was told.
 async function notifyStaff(learnerPhone) {
   if (!STAFF_WHATSAPP) {
     console.warn(
       "A learner asked for a person, but STAFF_WHATSAPP is not set on Render.",
     );
-    return;
+    return false;
   }
-  await sendText(
-    STAFF_WHATSAPP,
-    `CyberSafe bot: a learner has asked to speak to a person. Please contact them on WhatsApp: +${learnerPhone}`,
-  );
+
+  try {
+    if (STAFF_TEMPLATE_NAME) {
+      await sendTemplate(STAFF_WHATSAPP, STAFF_TEMPLATE_NAME, STAFF_TEMPLATE_LANG, [
+        `+${learnerPhone}`,
+      ]);
+    } else {
+      await sendText(
+        STAFF_WHATSAPP,
+        `CyberSafe bot: a learner has asked to speak to a person. Please contact them on WhatsApp: +${learnerPhone}`,
+      );
+    }
+    return true;
+  } catch (err) {
+    // Log Meta's error code only (it explains the problem without the number).
+    const meta = err.response?.data?.error;
+    console.error(
+      "Could not notify C3SA staff:",
+      meta ? `code ${meta.code}: ${meta.message}` : err.message,
+    );
+    return false;
+  }
 }
 
 // ---------- What happens for each button, list choice or typed command ----------
@@ -392,9 +472,10 @@ async function handleAction(from, action) {
         { id: "GET_HELP", title: t(from, "btnHelp") },
       ]);
 
-    case "HANDOFF_YES":
-      await notifyStaff(from);
-      return sendText(from, t(from, "handoffDone"));
+    case "HANDOFF_YES": {
+      const notified = await notifyStaff(from);
+      return sendText(from, t(from, notified ? "handoffDone" : "handoffFailed"));
+    }
 
     case "HANDOFF_NO":
       return sendText(from, t(from, "handoffNo"));
@@ -451,6 +532,16 @@ app.post("/webhook", async (req, res) => {
     if (!text && !choice) {
       await sendText(from, t(from, "textOnly"));
       return;
+    }
+
+    // Slow down anyone sending typed messages very fast (see limiter above).
+    if (!choice && !getCommand(text) && !containsCrisisKeyword(text)) {
+      const state = limiter.check(from);
+      if (state === "warn") {
+        await sendText(from, t(from, "rateLimited"));
+        return;
+      }
+      if (state === "blocked") return;
     }
 
     // Is this the start of a new chat? (They tapped "End chat", or were quiet for 30 minutes.)

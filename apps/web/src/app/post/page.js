@@ -1,14 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState, Suspense } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
 import { useSearchParams, useRouter } from "next/navigation";
-import {
-  findSeedPost,
-  loadReportById,
-  loadStoredComments,
-  appendStoredComment,
-} from "../feed/posts";
 
 function initials(name) {
   return (name || "?")
@@ -31,21 +25,6 @@ const HeartIcon = ({ filled }) => (
     strokeLinejoin="round"
   >
     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-  </svg>
-);
-
-const CommentIcon = () => (
-  <svg
-    viewBox="0 0 24 24"
-    width="20"
-    height="20"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
   </svg>
 );
 
@@ -73,11 +52,10 @@ function PostPage() {
   const [post, setPost] = useState(undefined); // undefined = loading, null = not found
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
-  const [comments, setComments] = useState([]);
-  const [commentText, setCommentText] = useState("");
+  const [userId, setUserId] = useState(null);
+  const [likeBusy, setLikeBusy] = useState(false);
   const [openMenu, setOpenMenu] = useState(false);
   const [toast, setToast] = useState("");
-  const commentsRef = useRef(null);
 
   useEffect(() => {
     if (!openMenu) return;
@@ -88,52 +66,54 @@ function PostPage() {
 
   useEffect(() => {
   async function loadPost() {
-    if (!id) {
+    if (!id || !isSupabaseConfigured || !supabase) {
       setPost(null);
       return;
     }
 
-    // First try to find the post in Supabase
-    if (isSupabaseConfigured) {
-      const { data, error } = await supabase
-        .from("posts")
-        .select("*")
-        .eq("id", id)
-        .eq("status", "approved")
-        .single();
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user || null;
+    setUserId(user?.id || null);
 
-      if (!error && data) {
-        const databasePost = {
-          id: data.id,
-          name: data.display_name,
-          handle: data.handle,
-          time: new Date(data.created_at).toLocaleString(),
-          text: data.description,
-          location: data.location,
-          image: data.image_url,
-          likes: 0,
-          comments: 0,
-        };
+    // Only approved posts have a public page.
+    const { data, error } = await supabase
+      .from("posts")
+      .select("*")
+      .eq("id", id)
+      .eq("status", "approved")
+      .maybeSingle();
 
-        setPost(databasePost);
-        setLikeCount(databasePost.likes);
-        setComments(loadStoredComments(id));
-        return;
-      }
-
-      if (error) {
-        console.error("Error loading post:", error);
-      }
+    if (error || !data) {
+      if (error) console.error("Error loading post:", error);
+      setPost(null);
+      return;
     }
 
-    // Fall back to seed posts and locally stored reports
-    const found = findSeedPost(id) || loadReportById(id);
+    setPost({
+      id: data.id,
+      name: data.display_name,
+      handle: data.handle,
+      time: new Date(data.created_at).toLocaleString(),
+      text: data.description,
+      location: data.location,
+      image: data.image_url,
+    });
 
-    setPost(found);
+    const { data: countRow } = await supabase
+      .from("post_like_counts")
+      .select("like_count")
+      .eq("post_id", id)
+      .maybeSingle();
+    setLikeCount(countRow?.like_count ?? 0);
 
-    if (found) {
-      setLikeCount(found.likes || 0);
-      setComments(loadStoredComments(id));
+    if (user) {
+      const { data: mine } = await supabase
+        .from("likes")
+        .select("post_id")
+        .eq("post_id", id)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      setLiked(Boolean(mine));
     }
   }
 
@@ -148,20 +128,38 @@ function PostPage() {
     }
   }
 
-  function handleLike() {
-    setLiked((prev) => !prev);
-    setLikeCount((prev) => (liked ? prev - 1 : prev + 1));
-  }
+  async function handleLike() {
+    if (!userId) {
+      showToast("Please sign in to mark a post as helpful.");
+      return;
+    }
+    if (likeBusy) return;
+    setLikeBusy(true);
 
-  function handleCommentSubmit(e) {
-    e.preventDefault();
-    const text = commentText.trim();
-    if (!text || !id) return;
-
-    const comment = { name: "You", text, time: "Just now" };
-    const updated = appendStoredComment(id, comment);
-    setComments(updated || [...comments, comment]);
-    setCommentText("");
+    try {
+      if (liked) {
+        const { error } = await supabase
+          .from("likes")
+          .delete()
+          .eq("post_id", id)
+          .eq("user_id", userId);
+        if (error) throw error;
+        setLiked(false);
+        setLikeCount((count) => Math.max(0, count - 1));
+      } else {
+        const { error } = await supabase
+          .from("likes")
+          .insert({ post_id: id, user_id: userId });
+        if (error) throw error;
+        setLiked(true);
+        setLikeCount((count) => count + 1);
+      }
+    } catch (error) {
+      console.error("Error updating helpful mark:", error);
+      showToast("Couldn't save that. Please try again.");
+    } finally {
+      setLikeBusy(false);
+    }
   }
 
   function showToast(message) {
@@ -179,13 +177,29 @@ function PostPage() {
     setOpenMenu(false);
   }
 
-  function reportPost() {
+  async function reportPost() {
     setOpenMenu(false);
-    showToast("Post reported. Thank you for keeping the community safe.");
-  }
 
-  function scrollToComments() {
-    commentsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user || user.is_anonymous) {
+      showToast("Sign in with an account to report a post.");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("post_flags")
+      .insert({ post_id: id, user_id: user.id });
+
+    if (error?.code === "23505") {
+      showToast("You have already reported this post.");
+    } else if (error) {
+      console.error("Could not flag post:", error.message);
+      showToast("We could not send your report. Please try again.");
+    } else {
+      showToast("Post reported. An admin will review it.");
+    }
   }
 
   return (
@@ -681,13 +695,6 @@ function PostPage() {
                     <HeartIcon filled={liked} />
                     <span className="action-count">{likeCount}</span>
                   </button>
-
-                  <button className="action-btn" aria-label="Jump to comments" onClick={scrollToComments}>
-                    <CommentIcon />
-                    <span className="action-count">
-                      {(post.comments || 0) + comments.length}
-                    </span>
-                  </button>
                 </div>
               </div>
 
@@ -699,45 +706,10 @@ function PostPage() {
               >
                 Seen something similar? Share your own report →
               </button>
-
-              {/* Comments */}
-              <div className="comments-heading" ref={commentsRef}>Comments</div>
-
-              {[...(post.topComments || []), ...comments].map((c, idx) => (
-                <div className="comment-row" key={idx}>
-                  <div className="comment-avatar">{initials(c.name)}</div>
-                  <div className="comment-body">
-                    <div className="comment-name">{c.name}</div>
-                    <div className="comment-text">{c.text}</div>
-                    <div className="comment-time">{c.time}</div>
-                  </div>
-                </div>
-              ))}
             </>
           )}
         </div>
       </div>
-
-      {post && (
-        <form className="composer" onSubmit={handleCommentSubmit}>
-          <div className="composer-inner">
-            <div className="composer-avatar">YO</div>
-            <input
-              className="composer-input"
-              placeholder="Add a comment…"
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-            />
-            <button
-              type="submit"
-              className="composer-submit"
-              disabled={!commentText.trim()}
-            >
-              Post
-            </button>
-          </div>
-        </form>
-      )}
 
       {toast && <div className="post-toast">{toast}</div>}
     </>

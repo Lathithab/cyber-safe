@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node --test test/bot.test.js",
+    "test": "node --test test/bot.test.js test/sessions.test.js test/handoff.test.js",
     "start": "node index.js"
   },
   "keywords": [],

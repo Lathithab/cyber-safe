@@ -99,3 +99,66 @@ test("a missing signature or missing secret is rejected (fails closed)", () => {
 test("a garbage signature of the wrong length is rejected without throwing", () => {
   assert.equal(verifySignature(body, "sha256=abc", secret), false);
 });
+
+// ---------- Rate limiter ----------
+const { createRateLimiter } = require("../limits");
+
+test("rate limiter allows up to the limit, warns once, then stays quiet", () => {
+  let time = 0;
+  const limiter = createRateLimiter({ max: 3, windowMs: 1000, now: () => time });
+  assert.equal(limiter.check("a"), "ok");
+  assert.equal(limiter.check("a"), "ok");
+  assert.equal(limiter.check("a"), "ok");
+  assert.equal(limiter.check("a"), "warn"); // first message over the limit
+  assert.equal(limiter.check("a"), "blocked");
+  assert.equal(limiter.check("a"), "blocked");
+});
+
+test("rate limiter is per person", () => {
+  let time = 0;
+  const limiter = createRateLimiter({ max: 1, windowMs: 1000, now: () => time });
+  assert.equal(limiter.check("a"), "ok");
+  assert.equal(limiter.check("a"), "warn");
+  assert.equal(limiter.check("b"), "ok"); // someone else is unaffected
+});
+
+test("rate limiter lets people back in once the window has passed", () => {
+  let time = 0;
+  const limiter = createRateLimiter({ max: 1, windowMs: 1000, now: () => time });
+  assert.equal(limiter.check("a"), "ok");
+  assert.equal(limiter.check("a"), "warn");
+  time = 1500;
+  assert.equal(limiter.check("a"), "ok");
+  assert.equal(limiter.check("a"), "warn"); // and they can be warned again
+});
+
+test("rate limiter forgets quiet people when pruned", () => {
+  let time = 0;
+  const limiter = createRateLimiter({ max: 5, windowMs: 1000, now: () => time });
+  limiter.check("a");
+  limiter.check("b");
+  assert.equal(limiter.size(), 2);
+  time = 5000;
+  limiter.prune();
+  assert.equal(limiter.size(), 0);
+});
+
+// ---------- Long messages ----------
+test("long messages are shortened for the AI but crisis words at the end are still caught", async () => {
+  const { getAIReply, MAX_USER_CHARS } = require("../bot-logic");
+  const axios = require("axios");
+  let sentToAI = "";
+  const realPost = axios.post;
+  axios.post = async (_url, body) => {
+    sentToAI = body.messages[body.messages.length - 1].content;
+    return { data: { choices: [{ message: { content: "I'm here for you." } }] } };
+  };
+  try {
+    const long = "x".repeat(MAX_USER_CHARS + 500) + " I want to die";
+    const reply = await getAIReply({}, "user1", long, "en");
+    assert.equal(sentToAI.length, MAX_USER_CHARS); // AI only saw the capped text
+    assert.ok(reply.includes("Childline"), "emergency numbers were still added");
+  } finally {
+    axios.post = realPost;
+  }
+});

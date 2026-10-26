@@ -8,7 +8,7 @@ import C3saLogo from "../../components/C3saLogo";
 import LogoutButton from "../../components/LogoutButton";
 import { DASHBOARD_NAV } from "../../components/dashboardNav";
 
-const FILTERS = ["all", "pending", "approved", "removed"];
+const FILTERS = ["all", "pending", "approved", "removed", "flagged"];
 
 function formatDate(value) {
   if (!value) return "Date unavailable";
@@ -20,6 +20,8 @@ export default function AdminCommunityPage() {
   const [access, setAccess] = useState("checking");
   const [adminId, setAdminId] = useState("");
   const [posts, setPosts] = useState([]);
+  // How many people have reported each post, keyed by post id.
+  const [flagCounts, setFlagCounts] = useState({});
   const [filter, setFilter] = useState("pending");
   const [isLoading, setIsLoading] = useState(false);
   const [updatingId, setUpdatingId] = useState("");
@@ -30,11 +32,30 @@ export default function AdminCommunityPage() {
     if (!supabase) return;
     setIsLoading(true);
     setErrorMessage("");
+    // Reports from readers. If the flags migration has not been applied yet
+    // this simply returns nothing and the page works as before.
+    const { data: flagRows } = await supabase.from("post_flags").select("post_id");
+    const counts = {};
+    (flagRows || []).forEach((row) => {
+      counts[row.post_id] = (counts[row.post_id] || 0) + 1;
+    });
+    setFlagCounts(counts);
+
     let query = supabase
       .from("posts")
       .select("id, display_name, description, location, issues, image_url, status, created_at, moderated_at")
       .order("created_at", { ascending: false });
-    if (filter !== "all") query = query.eq("status", filter);
+    if (filter === "flagged") {
+      const flaggedIds = Object.keys(counts);
+      if (flaggedIds.length === 0) {
+        setPosts([]);
+        setIsLoading(false);
+        return;
+      }
+      query = query.in("id", flaggedIds);
+    } else if (filter !== "all") {
+      query = query.eq("status", filter);
+    }
 
     const { data, error } = await query;
     if (error) {
@@ -160,6 +181,7 @@ export default function AdminCommunityPage() {
             <article className="moderation-card" key={post.id}>
               <div className="post-topline">
                 <span className={`status status-${post.status}`}>{post.status}</span>
+                {flagCounts[post.id] > 0 && <span className="status status-flagged">⚑ {flagCounts[post.id]} {flagCounts[post.id] === 1 ? "report" : "reports"}</span>}
                 <time dateTime={post.created_at}>{formatDate(post.created_at)}</time>
               </div>
               <h2>{post.display_name || "Anonymous"}{post.location ? <span> · {post.location}</span> : null}</h2>
@@ -214,6 +236,7 @@ const styles = `
   .status-pending { background: #fff6df; color: #94630b; }
   .status-approved { background: #e7f8ef; color: #197448; }
   .status-removed { background: #fff0f0; color: #b13e49; }
+  .status-flagged { background: #fff0f0; color: #b13e49; margin-left: 6px; }
   .moderation-card h2 { margin: 13px 0 8px; font-family: "Syne", Arial, sans-serif; font-size: 18px; }
   .moderation-card h2 span { color: #738098; font-family: "DM Sans", Arial, sans-serif; font-size: 14px; font-weight: 500; }
   .tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }

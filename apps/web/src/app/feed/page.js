@@ -1,16 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
 import DashboardNavBar from "../components/DashboardNavBar";
 import PlatformSearch from "../components/PlatformSearch";
-import {
-  SEED_POSTS,
-  loadStoredComments,
-  appendStoredComment,
-} from "./posts";
-import { useAuthUser } from "../../lib/useAuthUser";
+import { useRequireUser } from "../../lib/useAuthUser";
+import { readEvidenceImage } from "../../lib/evidenceImage";
 
 function Icon({ name, size = 22 }) {
   const shared = {
@@ -149,41 +145,33 @@ function initials(name) {
   return (name || "?").trim().slice(0, 1).toUpperCase();
 }
 
-function loadStoredReports() {
+// Saved and hidden posts are bookmarks kept on this device only.
+const SAVED_KEY = "cybersafeSavedPosts";
+const HIDDEN_KEY = "cybersafeHiddenPosts";
+
+function readIdList(key) {
   try {
-    const reports = JSON.parse(
-      localStorage.getItem("cybersafeReports") || "[]"
-    );
-
-    const latest = JSON.parse(
-      sessionStorage.getItem("cybersafeLatestReport") || "null"
-    );
-
-    sessionStorage.removeItem("cybersafeLatestReport");
-
-    return latest ? [latest, ...reports] : reports;
+    const value = JSON.parse(localStorage.getItem(key) || "[]");
+    return Array.isArray(value) ? value : [];
   } catch {
     return [];
   }
 }
 
-const TRENDING = [
-  {
-    tag: "ALERT · GAUTENG",
-    title: "Eskom WhatsApp Bill Refund Scam",
-    meta: "1.2k community members warning",
-  },
-  {
-    tag: "EDUCATION",
-    title: "Cyberbullying resources for schools",
-    meta: "Adopted by 45 SA high schools",
-  },
-  {
-    tag: "BANKING SAFETY",
-    title: "Capitec / FNB OTP Phishing",
-    meta: "Crucial advice for students",
-  },
-];
+function writeIdList(key, ids) {
+  try {
+    localStorage.setItem(key, JSON.stringify(ids));
+  } catch {
+    // Storage can be unavailable (private browsing); the choice just won't last.
+  }
+}
+
+function formatPostTime(value) {
+  return new Date(value).toLocaleString("en-ZA", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+}
 
 const CATEGORIES = [
   "General Tip",
@@ -195,20 +183,23 @@ const CATEGORIES = [
 
 export default function FeedPage() {
   const router = useRouter();
-  const { isGuest } = useAuthUser();
+  const { isGuest } = useRequireUser();
 
   const [posts, setPosts] = useState([]);
-  const [currentUserName, setCurrentUserName] = useState("Guest");
+  const [currentUserName, setCurrentUserName] = useState("");
   const [loading, setLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [openMenuId, setOpenMenuId] = useState(null);
   const [openShareId, setOpenShareId] = useState(null);
-  const [openCommentsId, setOpenCommentsId] = useState(null);
-  const [commentDrafts, setCommentDrafts] = useState({});
   const [draft, setDraft] = useState("");
   const [category, setCategory] = useState(CATEGORIES[0]);
+  const [postAnonymously, setPostAnonymously] = useState(false);
   const [pendingImage, setPendingImage] = useState(null);
+  const [isPosting, setIsPosting] = useState(false);
+  const [showSaved, setShowSaved] = useState(false);
+  const [savedIds, setSavedIds] = useState([]);
+  const [hiddenIds, setHiddenIds] = useState([]);
   const [toast, setToast] = useState(null);
 
   const toastTimer = useRef(null);
@@ -222,144 +213,117 @@ export default function FeedPage() {
     }
   }, [isGuest, router]);
 
+  // Saved and hidden posts are remembered on this device only.
+  useEffect(() => {
+    setSavedIds(readIdList(SAVED_KEY));
+    setHiddenIds(readIdList(HIDDEN_KEY));
+  }, []);
+
   function showToast(message) {
     setToast(message);
     clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(null), 2200);
+    toastTimer.current = setTimeout(() => setToast(null), 4500);
   }
 
-  // Load posts, saved gem counts, and the current user's gem selections.
+  // Load the feed. Everyone sees approved posts. People who are signed in
+  // also see their own posts that are still waiting for an admin to review.
   useEffect(() => {
     let cancelled = false;
 
     async function loadPosts() {
       setLoading(true);
       setLoadFailed(false);
-      const withComments = (list) =>
-        list.map((post) => {
-          const stored = loadStoredComments(post.id);
 
-          return {
-            ...post,
-            likes: Number(post.likes ?? 0),
-            commentsList: [...(post.topComments || []), ...stored],
-            comments: (post.comments || 0) + stored.length,
-            liked: Boolean(post.liked),
-            saved: Boolean(post.saved),
-          };
-        });
-
-      try {
-        const reports = loadStoredReports();
-
-        if (!isSupabaseConfigured || !supabase) {
-          if (!cancelled) {
-            setPosts(withComments([...reports, ...SEED_POSTS]));
-          }
-          return;
-        }
-
-        const { data, error } = await supabase
-          .from("posts")
-          .select("*")
-          .eq("status", "approved")
-          .order("created_at", { ascending: false });
-
-        if (error) throw error;
-
-        const databasePosts = (data || []).map((post) => ({
-          id: post.id,
-          name: post.display_name,
-          time: new Date(post.created_at).toLocaleString(),
-          text: post.description,
-          location: post.location,
-          image: post.image_url,
-          likes: 0,
-          comments: 0,
-          liked: false,
-          saved: false,
-          isDatabasePost: true,
-        }));
-
-        const databasePostIds = databasePosts.map((post) => post.id);
-
-        // Retrieve the actual gem count for each database post.
-        const postsWithCounts = await Promise.all(
-          databasePosts.map(async (post) => {
-            const { count, error: countError } = await supabase
-              .from("likes")
-              .select("post_id", { count: "exact", head: true })
-              .eq("post_id", post.id);
-
-            if (countError) {
-              console.error(
-                `Error loading gems for post ${post.id}:`,
-                countError
-              );
-
-              return post;
-            }
-
-            return {
-              ...post,
-              likes: count ?? 0,
-            };
-          })
-        );
-
-        const {
-          data: authData,
-          error: authError,
-        } = await supabase.auth.getUser();
-
-        if (authError) {
-          console.error("Error checking current user:", authError);
-        }
-
-        let likedPostIds = new Set();
-
-        if (authData?.user && databasePostIds.length > 0) {
-          const {
-            data: userLikes,
-            error: userLikesError,
-          } = await supabase
-            .from("likes")
-            .select("post_id")
-            .eq("user_id", authData.user.id)
-            .in("post_id", databasePostIds);
-
-          if (userLikesError) {
-            console.error("Error loading your gems:", userLikesError);
-          } else {
-            likedPostIds = new Set(
-              (userLikes || []).map((like) => like.post_id)
-            );
-          }
-        }
-
-        const hydratedPosts = postsWithCounts.map((post) => ({
-          ...post,
-          liked: likedPostIds.has(post.id),
-        }));
-
+      if (!isSupabaseConfigured || !supabase) {
         if (!cancelled) {
-          setPosts(
-            withComments([...reports, ...hydratedPosts, ...SEED_POSTS])
-          );
-        }
-      } catch (error) {
-        console.error("Error loading community feed:", error);
-
-        if (!cancelled) {
+          setPosts([]);
           setLoadFailed(true);
-          setPosts(
-            withComments([...loadStoredReports(), ...SEED_POSTS])
-          );
-        }
-      } finally {
-        if (!cancelled) {
           setLoading(false);
         }
+        return;
+      }
+
+      try {
+        const { data: authData } = await supabase.auth.getUser();
+        const user = authData?.user || null;
+
+        let query = supabase
+          .from("posts")
+          .select(
+            "id, author_id, display_name, description, location, issues, image_url, status, created_at",
+          )
+          .order("created_at", { ascending: false });
+
+        query = user
+          ? query.or(
+              `status.eq.approved,and(status.eq.pending,author_id.eq.${user.id})`,
+            )
+          : query.eq("status", "approved");
+
+        const { data, error } = await query;
+        if (error) throw error;
+
+        const rows = data || [];
+        const approvedIds = rows
+          .filter((row) => row.status === "approved")
+          .map((row) => row.id);
+
+        // How many people found each post helpful (one query for all posts).
+        const counts = {};
+        if (approvedIds.length) {
+          const { data: countRows, error: countError } = await supabase
+            .from("post_like_counts")
+            .select("post_id, like_count")
+            .in("post_id", approvedIds);
+
+          if (countError) {
+            console.error("Error loading helpful counts:", countError);
+          } else {
+            (countRows || []).forEach((row) => {
+              counts[row.post_id] = row.like_count;
+            });
+          }
+        }
+
+        // Which posts this person has already marked helpful.
+        let likedIds = new Set();
+        if (user && approvedIds.length) {
+          const { data: mine, error: mineError } = await supabase
+            .from("likes")
+            .select("post_id")
+            .eq("user_id", user.id)
+            .in("post_id", approvedIds);
+
+          if (mineError) {
+            console.error("Error loading your helpful marks:", mineError);
+          } else {
+            likedIds = new Set((mine || []).map((like) => like.post_id));
+          }
+        }
+
+        const loaded = rows.map((row) => ({
+          id: row.id,
+          name: row.display_name,
+          time: formatPostTime(row.created_at),
+          text: row.description,
+          location: row.location,
+          issues: row.issues,
+          image: row.image_url,
+          likes: counts[row.id] ?? 0,
+          liked: likedIds.has(row.id),
+          isPending: row.status === "pending",
+          isOwn: Boolean(user && row.author_id === user.id),
+        }));
+
+        if (!cancelled) setPosts(loaded);
+      } catch (error) {
+        console.error("Error loading community feed:", error);
+        if (!cancelled) {
+          setLoadFailed(true);
+          setPosts([]);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     }
 
@@ -383,67 +347,44 @@ export default function FeedPage() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("username, full_name")
+        .select("username")
         .eq("id", user.id)
         .maybeSingle();
 
-      setCurrentUserName(
-        profile?.full_name || profile?.username || user.email || "Guest"
-      );
+      setCurrentUserName(profile?.username || user.email || "");
     }
 
     loadCurrentUser();
   }, []);
 
-  const unreadTrending = useMemo(() => TRENDING, []);
+  const savedCount = posts.filter((post) => savedIds.includes(post.id)).length;
+  const visiblePosts = posts.filter(
+    (post) =>
+      !hiddenIds.includes(post.id) &&
+      (!showSaved || savedIds.includes(post.id)),
+  );
 
-  // Save or remove a gem in Supabase for database-backed posts.
-  async function likePost(index) {
-    const post = posts[index];
-
-    if (!post) return;
-
-    // Seed posts and locally stored reports remain local.
-    if (!post.isDatabasePost) {
-      setPosts((current) =>
-        current.map((item) =>
-          item.id === post.id
-            ? {
-                ...item,
-                liked: !item.liked,
-                likes: Math.max(
-                  0,
-                  Number(item.likes || 0) + (item.liked ? -1 : 1)
-                ),
-              }
-            : item
-        )
-      );
-
-      return;
-    }
+  // Mark a post helpful (or undo it).
+  async function likePost(id) {
+    const post = posts.find((item) => item.id === id);
+    if (!post || post.isPending) return;
 
     if (!isSupabaseConfigured || !supabase) {
-      showToast("Gem saving is unavailable right now.");
+      showToast("Marking posts helpful is unavailable right now.");
       return;
     }
 
-    if (likeInFlightRef.current.has(post.id)) return;
-
-    likeInFlightRef.current.add(post.id);
+    if (likeInFlightRef.current.has(id)) return;
+    likeInFlightRef.current.add(id);
 
     try {
-      const {
-        data: authData,
-        error: authError,
-      } = await supabase.auth.getUser();
-
+      const { data: authData, error: authError } =
+        await supabase.auth.getUser();
       if (authError) throw authError;
 
       const user = authData?.user;
-
       if (!user) {
-        showToast("Please sign in to give a gem.");
+        showToast("Please sign in to mark a post as helpful.");
         return;
       }
 
@@ -451,97 +392,99 @@ export default function FeedPage() {
         const { error } = await supabase
           .from("likes")
           .delete()
-          .eq("post_id", post.id)
+          .eq("post_id", id)
           .eq("user_id", user.id);
-
         if (error) throw error;
 
         setPosts((current) =>
           current.map((item) =>
-            item.id === post.id
+            item.id === id
               ? {
                   ...item,
                   liked: false,
                   likes: Math.max(0, Number(item.likes || 0) - 1),
                 }
-              : item
-          )
+              : item,
+          ),
         );
       } else {
-        const { error } = await supabase.from("likes").insert({
-          post_id: post.id,
-          user_id: user.id,
-        });
-
+        const { error } = await supabase
+          .from("likes")
+          .insert({ post_id: id, user_id: user.id });
         if (error) throw error;
 
         setPosts((current) =>
           current.map((item) =>
-            item.id === post.id
-              ? {
-                  ...item,
-                  liked: true,
-                  likes: Number(item.likes || 0) + 1,
-                }
-              : item
-          )
+            item.id === id
+              ? { ...item, liked: true, likes: Number(item.likes || 0) + 1 }
+              : item,
+          ),
         );
       }
     } catch (error) {
-      console.error("Error updating gem:", error);
-      showToast("Couldn't save your gem. Please try again.");
+      console.error("Error updating helpful mark:", error);
+      showToast("Couldn't save that. Please try again.");
     } finally {
-      likeInFlightRef.current.delete(post.id);
+      likeInFlightRef.current.delete(id);
     }
   }
 
-  function savePost(index) {
-    setPosts((prev) => {
-      const updated = [...prev];
-      const nowSaved = !updated[index].saved;
+  // Saving a post is a bookmark kept on this device only.
+  function savePost(id) {
+    const nowSaved = !savedIds.includes(id);
+    const updated = nowSaved
+      ? [...savedIds, id]
+      : savedIds.filter((savedId) => savedId !== id);
 
-      updated[index] = {
-        ...updated[index],
-        saved: nowSaved,
-      };
-
-      showToast(nowSaved ? "Post saved" : "Removed from saved posts");
-
-      return updated;
-    });
+    setSavedIds(updated);
+    writeIdList(SAVED_KEY, updated);
+    showToast(
+      nowSaved
+        ? "Post saved on this device"
+        : "Removed from saved posts",
+    );
   }
 
-  function deleteReport(id) {
-    if (!window.confirm("Remove this report from your feed?")) return;
-
-    setPosts((current) => current.filter((post) => post.id !== id));
-    setOpenMenuId(null);
-
-    try {
-      const reports = JSON.parse(
-        localStorage.getItem("cybersafeReports") || "[]"
-      );
-
-      localStorage.setItem(
-        "cybersafeReports",
-        JSON.stringify(reports.filter((report) => report.id !== id))
-      );
-    } catch {
-      // Feed state is already updated; storage may be unavailable.
-    }
-
-    showToast("Report deleted");
-  }
-
+  // Hiding a post removes it from this device's feed only.
   function hidePost(id) {
-    setPosts((current) => current.filter((post) => post.id !== id));
+    const updated = [...hiddenIds, id];
+    setHiddenIds(updated);
+    writeIdList(HIDDEN_KEY, updated);
     setOpenMenuId(null);
-    showToast("Post hidden");
+    showToast("Post hidden on this device");
   }
 
-  function reportPost(id) {
+  // Send a post to the admins for review. After 3 reports from different
+  // people the database sends the post back to moderation automatically.
+  async function reportPost(id) {
     setOpenMenuId(null);
-    showToast("Post reported. Thank you for keeping the community safe.");
+
+    const post = posts.find((item) => item.id === id);
+    if (!post || post.isOwn || !supabase) {
+      showToast("This post can't be reported.");
+      return;
+    }
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user || user.is_anonymous) {
+      showToast("Sign in with an account to report a post.");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("post_flags")
+      .insert({ post_id: id, user_id: user.id });
+
+    if (error?.code === "23505") {
+      showToast("You have already reported this post.");
+    } else if (error) {
+      console.error("Could not flag post:", error.message);
+      showToast("We could not send your report. Please try again.");
+    } else {
+      showToast("Post reported. An admin will review it.");
+    }
   }
 
   function copyPostLink(id) {
@@ -561,55 +504,29 @@ export default function FeedPage() {
     setOpenShareId(null);
   }
 
-  function sharePost(destination) {
+  function shareToWhatsApp(post) {
+    const link = `${window.location.origin}/post?id=${encodeURIComponent(post.id)}`;
+    const summary =
+      post.text.length > 200 ? `${post.text.slice(0, 200)}…` : post.text;
+
+    window.open(
+      `https://wa.me/?text=${encodeURIComponent(`${summary}\n\nCyberSafe: ${link}`)}`,
+      "_blank",
+      "noopener,noreferrer",
+    );
     setOpenShareId(null);
-    showToast(`Shared to ${destination}`);
   }
 
-  function toggleComments(id) {
-    setOpenCommentsId((current) => (current === id ? null : id));
-  }
-
-  function submitComment(index) {
-    const post = posts[index];
-    const text = (commentDrafts[post.id] || "").trim();
-
-    if (!text) return;
-
-    const comment = {
-      name: currentUserName,
-      text,
-      time: "Just now",
-    };
-
-    appendStoredComment(post.id, comment);
-
-    setPosts((current) => {
-      const updated = [...current];
-
-      updated[index] = {
-        ...updated[index],
-        commentsList: [...updated[index].commentsList, comment],
-        comments: updated[index].comments + 1,
-      };
-
-      return updated;
-    });
-
-    setCommentDrafts((current) => ({
-      ...current,
-      [post.id]: "",
-    }));
-  }
-
-  function handleImageAttach(event) {
+  async function handleImageAttach(event) {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-
-    reader.onload = () => setPendingImage(reader.result);
-    reader.readAsDataURL(file);
+    try {
+      setPendingImage(await readEvidenceImage(file));
+    } catch {
+      showToast("That image could not be read. Please try a different one.");
+      removeImageAttachment();
+    }
   }
 
   function removeImageAttachment() {
@@ -620,49 +537,86 @@ export default function FeedPage() {
     }
   }
 
-  function submitPost(event) {
+  // Posts are saved as "pending". Only the author sees them until an admin
+  // approves them in /admin/community.
+  async function submitPost(event) {
     event.preventDefault();
+    if (isPosting) return;
 
     const trimmed = draft.trim();
 
-    if (!trimmed && !pendingImage) {
-      showToast("Write something or attach an image first");
+    if (trimmed.length < 10) {
+      showToast("Please write at least 10 characters so people understand your post.");
       return;
     }
 
-    const newPost = {
-      id: `report-${Date.now()}`,
-      name: "You",
-      time: "Just now",
-      text: trimmed || "(shared an image)",
-      issues: category === "General Tip" ? undefined : [category],
-      image: pendingImage,
-      likes: 0,
-      comments: 0,
-      commentsList: [],
-      liked: false,
-      saved: false,
-    };
-
-    setPosts((current) => [newPost, ...current]);
-
-    try {
-      const reports = JSON.parse(
-        localStorage.getItem("cybersafeReports") || "[]"
-      );
-
-      localStorage.setItem(
-        "cybersafeReports",
-        JSON.stringify([newPost, ...reports])
-      );
-    } catch {
-      // The post remains visible in this session if storage fails.
+    if (!isSupabaseConfigured || !supabase) {
+      showToast("Posting is unavailable right now.");
+      return;
     }
 
-    setDraft("");
-    setCategory(CATEGORIES[0]);
-    removeImageAttachment();
-    showToast("Posted to the community feed");
+    setIsPosting(true);
+
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user || user.is_anonymous) {
+        showToast("Sign in with an account to post.");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("posts")
+        .insert({
+          author_id: user.id,
+          // The database replaces this with your username unless it is "Anonymous".
+          display_name: postAnonymously ? "Anonymous" : "member",
+          description: trimmed,
+          issues: [category],
+          image_url: pendingImage,
+          status: "pending",
+        })
+        .select("id, display_name, description, issues, image_url, created_at")
+        .single();
+
+      if (error) {
+        console.error("Could not submit post:", error);
+        showToast(
+          error.code === "23514"
+            ? "Posts must be between 10 and 2000 characters."
+            : "We couldn't submit your post. Please try again.",
+        );
+        return;
+      }
+
+      setPosts((current) => [
+        {
+          id: data.id,
+          name: data.display_name,
+          time: formatPostTime(data.created_at),
+          text: data.description,
+          issues: data.issues,
+          image: data.image_url,
+          likes: 0,
+          liked: false,
+          isPending: true,
+          isOwn: true,
+        },
+        ...current,
+      ]);
+
+      setDraft("");
+      setCategory(CATEGORIES[0]);
+      setPostAnonymously(false);
+      removeImageAttachment();
+      showToast(
+        "Submitted for review. It will appear for everyone once an admin approves it.",
+      );
+    } finally {
+      setIsPosting(false);
+    }
   }
 
   return (
@@ -706,6 +660,7 @@ export default function FeedPage() {
 
                 <input
                   value={draft}
+                  maxLength={2000}
                   onChange={(event) => setDraft(event.target.value)}
                   placeholder="Share a warning, question, or cyber safety tip with your community..."
                   aria-label="Share a post"
@@ -756,13 +711,51 @@ export default function FeedPage() {
                       ))}
                     </select>
                   </label>
+
+                  <label className="tool anon-toggle">
+                    <input
+                      type="checkbox"
+                      checked={postAnonymously}
+                      onChange={(event) =>
+                        setPostAnonymously(event.target.checked)
+                      }
+                    />
+                    Post anonymously
+                  </label>
                 </div>
 
-                <button type="submit" className="post-button">
-                  Post Safety Alert
+                <button
+                  type="submit"
+                  className="post-button"
+                  disabled={isPosting}
+                >
+                  {isPosting ? "Submitting…" : "Submit for review"}
                 </button>
               </div>
+
+              <p className="composer-note">
+                Posts are checked by the C3SA team before they appear for
+                everyone. Anonymous posts hide your username from other
+                learners.
+              </p>
             </form>
+
+            <div className="feed-filter" role="group" aria-label="Feed view">
+              <button
+                type="button"
+                className={!showSaved ? "selected" : ""}
+                onClick={() => setShowSaved(false)}
+              >
+                All posts
+              </button>
+              <button
+                type="button"
+                className={showSaved ? "selected" : ""}
+                onClick={() => setShowSaved(true)}
+              >
+                Saved ({savedCount})
+              </button>
+            </div>
 
             {loading && (
               <div className="sk-wrap" role="status" aria-label="Loading community feed">
@@ -780,14 +773,19 @@ export default function FeedPage() {
                 </button>
               </p>
             )}
-            {!loading && !posts.length && (
+            {!loading && !loadFailed && !visiblePosts.length && (
               <p className="loading-state">
-                No posts yet. Be the first to share a safety alert.
+                {showSaved
+                  ? "No saved posts yet. Tap Save on a post to keep it here."
+                  : "No posts yet. Be the first to share a safety alert. It will appear once it has been approved."}
               </p>
             )}
             {!loading &&
-              posts.map((post, index) => (
-                <article className="post-card" key={post.id || index}>
+              visiblePosts.map((post) => (
+                <article
+                  className={`post-card ${post.isPending ? "pending-post" : ""}`}
+                  key={post.id}
+                >
                   <div className="post-header">
                     <div className="post-user">
                       {post.profile ? (
@@ -805,6 +803,12 @@ export default function FeedPage() {
                       <div>
                         <div className="name-row">
                           <strong>{post.name}</strong>
+
+                          {post.isPending && (
+                            <span className="badge pending-badge">
+                              PENDING REVIEW
+                            </span>
+                          )}
 
                           {post.issues?.[0] && (
                             <span className="badge">
@@ -836,12 +840,14 @@ export default function FeedPage() {
 
                       {openMenuId === post.id && (
                         <div className="menu-popup">
-                          <button
-                            type="button"
-                            onClick={() => reportPost(post.id)}
-                          >
-                            Report post
-                          </button>
+                          {!post.isOwn && (
+                            <button
+                              type="button"
+                              onClick={() => reportPost(post.id)}
+                            >
+                              Report post
+                            </button>
+                          )}
 
                           <button
                             type="button"
@@ -849,16 +855,6 @@ export default function FeedPage() {
                           >
                             Hide post
                           </button>
-
-                          {post.id?.startsWith("report-") && (
-                            <button
-                              type="button"
-                              className="delete-button"
-                              onClick={() => deleteReport(post.id)}
-                            >
-                              Delete report
-                            </button>
-                          )}
                         </div>
                       )}
                     </div>
@@ -883,132 +879,70 @@ export default function FeedPage() {
                     <img src={post.image} alt="" className="post-image" />
                   )}
 
-                  <div className="post-actions">
-                    <div className="left-actions">
-                      <button
-                        type="button"
-                        className={`action-button ${post.liked ? "liked" : ""}`}
-                        onClick={() => likePost(index)}
-                        aria-pressed={Boolean(post.liked)}
-                      >
-                        <Icon name="gem" size={14} />
-                        {post.likes} Helpful
-                      </button>
-
-                      <button
-                        type="button"
-                        className="action-button"
-                        onClick={() => toggleComments(post.id)}
-                      >
-                        <Icon name="comment" size={14} />
-                        {post.comments} Comments
-                      </button>
-
-                      <div className="share-wrap">
+                  {post.isPending ? (
+                    <p className="pending-note">
+                      Only you can see this post until an admin approves it.
+                    </p>
+                  ) : (
+                    <div className="post-actions">
+                      <div className="left-actions">
                         <button
                           type="button"
-                          className="action-button"
-                          onClick={() =>
-                            setOpenShareId((current) =>
-                              current === post.id ? null : post.id
-                            )
-                          }
+                          className={`action-button ${post.liked ? "liked" : ""}`}
+                          onClick={() => likePost(post.id)}
+                          aria-pressed={Boolean(post.liked)}
                         >
-                          <Icon name="share" size={14} />
-                          Share
+                          <Icon name="gem" size={14} />
+                          {post.likes} Helpful
                         </button>
 
-                        {openShareId === post.id && (
-                          <div className="menu-popup share-popup">
-                            <button
-                              type="button"
-                              onClick={() => copyPostLink(post.id)}
-                            >
-                              Copy link
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => sharePost("WhatsApp")}
-                            >
-                              Share to WhatsApp
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => sharePost("Community Feed")}
-                            >
-                              Repost to feed
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      className={`save-button ${post.saved ? "saved" : ""}`}
-                      onClick={() => savePost(index)}
-                      aria-label="Save post"
-                    >
-                      <Icon name="bookmark" size={14} />
-                      {post.saved ? "Saved" : "Save"}
-                    </button>
-                  </div>
-
-                  {openCommentsId === post.id && (
-                    <div className="comments-panel">
-                      <div className="comments-list">
-                        {post.commentsList.map((comment, cIndex) => (
-                          <div className="comment-item" key={cIndex}>
-                            <div className="comment-avatar">
-                              {initials(comment.name)}
-                            </div>
-
-                            <div className="comment-bubble">
-                              <span className="c-name">{comment.name}</span>
-                              <span className="c-time">{comment.time}</span>
-                              <p>{comment.text}</p>
-                            </div>
-                          </div>
-                        ))}
-
-                        {!post.commentsList.length && (
-                          <p className="no-comments">
-                            Be the first to comment.
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="comment-input-row">
-                        <div className="comment-avatar">
-                          {initials(currentUserName)}
-                        </div>
-
-                        <input
-                          placeholder="Write a comment..."
-                          value={commentDrafts[post.id] || ""}
-                          onChange={(event) =>
-                            setCommentDrafts((current) => ({
-                              ...current,
-                              [post.id]: event.target.value,
-                            }))
-                          }
-                          onKeyDown={(event) => {
-                            if (event.key === "Enter") {
-                              event.preventDefault();
-                              submitComment(index);
+                        <div className="share-wrap">
+                          <button
+                            type="button"
+                            className="action-button"
+                            onClick={() =>
+                              setOpenShareId((current) =>
+                                current === post.id ? null : post.id
+                              )
                             }
-                          }}
-                        />
+                          >
+                            <Icon name="share" size={14} />
+                            Share
+                          </button>
 
-                        <button
-                          type="button"
-                          onClick={() => submitComment(index)}
-                        >
-                          Post
-                        </button>
+                          {openShareId === post.id && (
+                            <div className="menu-popup share-popup">
+                              <button
+                                type="button"
+                                onClick={() => copyPostLink(post.id)}
+                              >
+                                Copy link
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => shareToWhatsApp(post)}
+                              >
+                                Share to WhatsApp
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </div>
+
+                      <button
+                        type="button"
+                        className={`save-button ${savedIds.includes(post.id) ? "saved" : ""}`}
+                        onClick={() => savePost(post.id)}
+                        aria-label={
+                          savedIds.includes(post.id)
+                            ? "Remove from saved posts"
+                            : "Save post"
+                        }
+                      >
+                        <Icon name="bookmark" size={14} />
+                        {savedIds.includes(post.id) ? "Saved" : "Save"}
+                      </button>
                     </div>
                   )}
                 </article>
@@ -1035,17 +969,22 @@ export default function FeedPage() {
             </section>
 
             <section className="trending-card">
-              <h2>Trending in South Africa</h2>
+              <h2>Scam Library</h2>
 
               <div className="trending-list">
-                {unreadTrending.map((item) => (
-                  <div className="trending-item" key={item.title}>
-                    <small>{item.tag}</small>
-                    <strong>{item.title}</strong>
-                    <p>{item.meta}</p>
-                  </div>
-                ))}
+                <div className="trending-item">
+                  <small>LEARN</small>
+                  <strong>Step-by-step guides to common scams</strong>
+                  <p>
+                    See what each scam looks like and what to do if you were
+                    targeted.
+                  </p>
+                </div>
               </div>
+
+              <button type="button" onClick={() => router.push("/library")}>
+                Browse the library
+              </button>
             </section>
           </aside>
         </div>
@@ -1055,6 +994,18 @@ export default function FeedPage() {
 
       <style>{`
         * { box-sizing: border-box; }
+        .composer-note { margin: 10px 2px 0; color: #6b7a90; font-size: 12px; line-height: 1.45; }
+        .anon-toggle { cursor: pointer; }
+        .anon-toggle input { margin-right: 6px; accent-color: #EB630F; }
+        .post-button:disabled { opacity: .6; cursor: not-allowed; }
+        .feed-filter { display: flex; gap: 8px; margin: 4px 0 2px; }
+        .feed-filter button { padding: 8px 14px; border: 1px solid #d9dee8; border-radius: 999px; background: #fff; color: #536179; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+        .feed-filter button.selected { background: #00243A; border-color: #00243A; color: #fff; }
+        .badge.pending-badge { background: #fff6df; color: #94630b; }
+        .pending-post { border-style: dashed; }
+        .pending-post .menu-wrap { display: none; }
+        .pending-note { margin: 12px 0 0; padding: 10px 12px; border-radius: 10px; background: #fff6df; color: #94630b; font-size: 13px; font-weight: 600; }
+        .trending-card > button { margin-top: 14px; width: 100%; padding: 11px 14px; border: 0; border-radius: 12px; background: #EB630F; color: #fff; font: inherit; font-weight: 800; cursor: pointer; }
         .visually-hidden { position: absolute; width: 16px; height: 16px; padding: 0; margin: 2px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 
         /* Base mobile layout */

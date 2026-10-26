@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import DashboardNavBar from "../components/DashboardNavBar";
 import PlatformSearch from "../components/PlatformSearch";
+import { useRequireUser } from "../../lib/useAuthUser";
 
 function Icon({ name, size = 22 }) {
   const shared = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true };
@@ -31,6 +32,7 @@ const NOTIFICATIONS = [
 const TABS = ["All", "Alerts", "Community", "Learning", "Reports"];
 
 export default function NotificationsPage() {
+  useRequireUser();
   const router = useRouter();
   const [tab, setTab] = useState("Alerts");
   const [read, setRead] = useState({});
@@ -72,7 +74,7 @@ export default function NotificationsPage() {
         <header className="page-header">
           <div className="page-intro">
             <div className="title-row"><h1>Notification Center</h1><span>{unreadCount} Unread Alerts</span></div>
-            <p>View threat advisories, emergency escalation reports, and community support metrics.</p>
+            <p>View threat advisories, emergency escalation reports, and community support metrics. <strong>These are sample alerts for demonstration; live alerts are not connected yet.</strong></p>
           </div>
           <div className="header-actions">
             <PlatformSearch />

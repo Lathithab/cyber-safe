@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
 import DashboardNavBar from "../components/DashboardNavBar";
+import { useRequireUser } from "../../lib/useAuthUser";
 
 const FILTERS = [
   "All modules",
@@ -61,6 +62,7 @@ function ShieldIcon() {
 }
 
 export default function LearnPage() {
+  useRequireUser();
   const router = useRouter();
   const [databaseModules, setDatabaseModules] = useState([]);
   const [isLoading, setIsLoading] = useState(true);

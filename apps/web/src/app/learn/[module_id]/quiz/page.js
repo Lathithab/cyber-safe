@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { isSupabaseConfigured, supabase } from "../../../../../lib/supabase";
 import { getModuleBadge } from "../../../../lib/moduleBadges";
+import { useRequireUser } from "../../../../lib/useAuthUser";
 
 export default function QuizPage() {
+  useRequireUser();
   const params = useParams();
   const router = useRouter();
 

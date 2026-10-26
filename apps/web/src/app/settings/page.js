@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import DashboardNavBar from "../components/DashboardNavBar";
 import PlatformSearch from "../components/PlatformSearch";
 import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
+import { useRequireUser } from "../../lib/useAuthUser";
 
 function Icon({ name, size = 22 }) {
   const shared = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true };
@@ -16,24 +17,12 @@ function Icon({ name, size = 22 }) {
   return <svg {...shared}><path d="M12 5v14M5 12h14" /></svg>;
 }
 
-function Toggle({ checked, onChange, label }) {
-  return (
-    <label className="toggle">
-      <input type="checkbox" checked={checked} onChange={onChange} aria-label={label} />
-      <i />
-    </label>
-  );
-}
-
 export default function SettingsPage() {
+  useRequireUser();
   const router = useRouter();
   const [email, setEmail] = useState("");
-  const [twoFA, setTwoFA] = useState(true);
-  const [smsAdvisories, setSmsAdvisories] = useState(true);
-  const [emailReminders, setEmailReminders] = useState(false);
-  const [pushAlerts, setPushAlerts] = useState(true);
-  const [highContrast, setHighContrast] = useState(false);
-  const [screenReader, setScreenReader] = useState(false);
+  const [resetState, setResetState] = useState("idle");
+  const [resetMessage, setResetMessage] = useState("");
 
   useEffect(() => {
     async function loadCurrentUser() {
@@ -43,6 +32,25 @@ export default function SettingsPage() {
     }
     loadCurrentUser();
   }, []);
+
+  // Emails a link that lets the person choose a new password.
+  async function sendResetLink() {
+    if (!email || !supabase) return;
+    setResetState("sending");
+    setResetMessage("");
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+
+    if (error) {
+      setResetState("error");
+      setResetMessage("We couldn't send the email. Please try again later.");
+    } else {
+      setResetState("sent");
+      setResetMessage(`We sent a password reset link to ${email}.`);
+    }
+  }
 
   return (
     <main className="settings-dashboard">
@@ -64,36 +72,35 @@ export default function SettingsPage() {
           <div className="main-col">
             <section className="settings-card">
               <h2>Account Settings</h2>
-              <div className="row"><div><strong>Email Address</strong><small>{email || "Guest"}</small></div><button type="button" className="modify" disabled title="Coming soon">Modify</button></div>
-              <div className="row"><div><strong>Security Password</strong><small>Last updated 4 months ago</small></div><button type="button" className="modify" disabled title="Coming soon">Modify</button></div>
-              <div className="row"><div><strong>Two-Factor Authentication (2FA)</strong><small>Secure verification using an authenticator app.</small></div><Toggle checked={twoFA} onChange={() => setTwoFA((v) => !v)} label="Two-factor authentication" /></div>
+              <div className="row"><div><strong>Email Address</strong><small>{email || "Guest (no email)"}</small></div><span className="value-pill">Can&apos;t be changed yet</span></div>
+              <div className="row"><div><strong>Password</strong><small>{email ? "We will email you a link to choose a new password." : "Guests do not have a password."}</small></div><button type="button" className="modify" disabled={!email || resetState === "sending"} onClick={sendResetLink}>{resetState === "sending" ? "Sending…" : "Send reset link"}</button></div>
+              {resetMessage && <p className="settings-note" role="status">{resetMessage}</p>}
+              <div className="row"><div><strong>Two-Factor Authentication (2FA)</strong><small>Not available yet. Use a strong password that you do not use anywhere else.</small></div><span className="value-pill">Coming soon</span></div>
             </section>
 
             <section className="settings-card">
               <h2>Threat Notification Settings</h2>
-              <div className="row"><div><strong>SMS Scam Advisories</strong><small>Direct, region-locked SMS warnings from the SAPS alliance.</small></div><Toggle checked={smsAdvisories} onChange={() => setSmsAdvisories((v) => !v)} label="SMS scam advisories" /></div>
-              <div className="row"><div><strong>Email Learning Reminders</strong><small>Get updates when new Academy badges are available.</small></div><Toggle checked={emailReminders} onChange={() => setEmailReminders((v) => !v)} label="Email learning reminders" /></div>
-              <div className="row"><div><strong>Push Incident Alerts</strong><small>Instant system updates about local outages or billing fraud.</small></div><Toggle checked={pushAlerts} onChange={() => setPushAlerts((v) => !v)} label="Push incident alerts" /></div>
+              <div className="row"><div><strong>SMS Scam Advisories</strong><small>Scam warnings by SMS.</small></div><span className="value-pill">Coming soon</span></div>
+              <div className="row"><div><strong>Email Learning Reminders</strong><small>Updates when new Academy badges are available.</small></div><span className="value-pill">Coming soon</span></div>
+              <div className="row"><div><strong>Push Incident Alerts</strong><small>Instant updates about scams and fraud.</small></div><span className="value-pill">Coming soon</span></div>
             </section>
 
             <section className="settings-card">
               <h2>Language &amp; Translation Preferences</h2>
-              <div className="row"><div><strong>Primary Language Selection</strong><small>Choose active dialect: English, Afrikaans, Zulu, Xhosa, Sotho.</small></div><button type="button" className="modify" disabled title="Coming soon">Modify</button></div>
+              <div className="row"><div><strong>Primary Language Selection</strong><small>You can already choose English, Afrikaans, Sepedi or isiXhosa in the CyberBot on WhatsApp. App language options are coming soon.</small></div><span className="value-pill">Coming soon</span></div>
             </section>
           </div>
 
           <aside className="side-col">
             <section className="settings-card">
               <h2>Accessibility Settings</h2>
-              <div className="row"><div><strong>Text Scaling Size</strong></div><span className="value-pill">Standard (100%)</span></div>
-              <div className="row"><div><strong>High Contrast Mode</strong></div><Toggle checked={highContrast} onChange={() => setHighContrast((v) => !v)} label="High contrast mode" /></div>
-              <div className="row"><div><strong>Screen Reader Support</strong></div><Toggle checked={screenReader} onChange={() => setScreenReader((v) => !v)} label="Screen reader support" /></div>
+              <div className="row"><div><strong>Text Scaling Size</strong><small>For now, use your phone or browser&apos;s text size setting.</small></div><span className="value-pill">Coming soon</span></div>
+              <div className="row"><div><strong>High Contrast Mode</strong></div><span className="value-pill">Coming soon</span></div>
             </section>
 
             <section className="popia-card">
               <h2>POPIA Compliance Hub</h2>
-              <p>Under South Africa&apos;s Protection of Personal Information Act, you maintain full control of your threat reports and user logs. Request data deletion instantly at any time.</p>
-              <button type="button" className="popia-link" disabled title="Coming soon">Request POPIA Data Extract →</button>
+              <p>Under South Africa&apos;s Protection of Personal Information Act (POPIA) you can ask to see or delete the personal information held about you. Requests cannot be made in the app yet, so please ask the C3SA team directly.</p>
             </section>
           </aside>
         </div>
@@ -146,6 +153,7 @@ export default function SettingsPage() {
         .settings-card { padding: 22px; border: 1px solid #e4ddd4; border-radius: 11px; background: #fff; box-shadow: 0 8px 24px rgba(36, 56, 87, .035); } .settings-card h2 { margin: 0 0 18px; font-size: 16px; }
         .row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 13px 0; border-top: 1px solid #eee8e0; } .row:first-of-type { border-top: 0; padding-top: 0; } .row strong { display: block; font-size: 12px; font-weight: 700; } .row small { display: block; margin-top: 5px; color: #8996a8; font-size: 11px; line-height: 1.4; max-width: 380px; }
         .modify { flex: 0 0 auto; padding: 8px 14px; border: 1px solid #e4ddd4; border-radius: 7px; background: #fff; color: #26324a; cursor: pointer; font: inherit; font-size: 11px; font-weight: 800; } .modify:disabled { opacity: .5; cursor: not-allowed; }
+        .settings-note { margin: 8px 0 0; padding: 10px 12px; border-radius: 8px; background: #f0f7f1; color: #1d6a3c; font-size: 13px; font-weight: 600; }
         .value-pill { padding: 5px 10px; border-radius: 999px; background: #FCE0D0; color: #C24F0C; font-size: 11px; font-weight: 800; }
         .toggle { position: relative; flex: 0 0 auto; width: 39px; height: 22px; } .toggle input { position: absolute; opacity: 0; } .toggle i { position: absolute; inset: 0; border-radius: 999px; background: #cfd8e3; transition: background .15s; } .toggle i::after { content: ""; position: absolute; top: 3px; left: 3px; width: 17px; height: 17px; border-radius: 50%; background: #fff; transition: transform .15s; } .toggle input:checked + i { background: #EB630F; } .toggle input:checked + i::after { transform: translateX(22px); }
 

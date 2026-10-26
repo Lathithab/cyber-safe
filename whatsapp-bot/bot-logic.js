@@ -118,6 +118,11 @@ function containsCrisisKeyword(text) {
   return CRISIS_KEYWORDS.some((keyword) => lower.includes(keyword));
 }
 
+// Longest message we send to the AI. Longer ones are shortened so one huge
+// paste cannot run up the bill. (The safety check below still reads the whole
+// message, so a crisis phrase at the very end is never missed.)
+const MAX_USER_CHARS = 1500;
+
 // ---------- Ask the AI (Groq) for a reply ----------
 async function getAIReply(conversations, userId, userMessage, chosenLanguage) {
   // Start a new conversation with the AI's instructions.
@@ -125,7 +130,10 @@ async function getAIReply(conversations, userId, userMessage, chosenLanguage) {
     conversations[userId] = [{ role: "system", content: SYSTEM_PROMPT }];
   }
 
-  conversations[userId].push({ role: "user", content: userMessage });
+  conversations[userId].push({
+    role: "user",
+    content: userMessage.slice(0, MAX_USER_CHARS),
+  });
 
   const response = await axios.post(
     "https://api.groq.com/openai/v1/chat/completions",
@@ -167,6 +175,7 @@ async function getAIReply(conversations, userId, userMessage, chosenLanguage) {
 }
 
 module.exports = {
+  MAX_USER_CHARS,
   SYSTEM_PROMPT,
   SAFETY_RESOURCES,
   SAFETY_RESOURCES_BY_LANG,

@@ -23,7 +23,7 @@ function Icon({ name, size = 22 }) {
   return <svg {...shared}><path d="M12 5v14M5 12h14" /></svg>;
 }
 
-const TABS = ["Earned Badges", "My Posts", "Enrolled Courses", "Incident History"];
+const TABS = ["Earned Badges", "My Posts"];
 function getInitials(name, username) {
   return (name || username || "User")
     .split(" ")
@@ -230,7 +230,6 @@ export default function ProfilePage() {
             )}
           </section>
         )}
-        {tab !== "Earned Badges" && tab !== "My Posts" && <p className="empty-tab">Nothing to show here yet.</p>}
       </section>
 
       <style>{`

@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { isSupabaseConfigured, supabase } from "../../../lib/supabase";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 function ShieldIcon({ size = 22, color = "currentColor" }) {
@@ -79,6 +79,42 @@ export default function LoginPage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Someone who is already signed in with an account does not need this page.
+  // (Guests stay, because they come here to create an account.)
+  useEffect(() => {
+    if (!isSupabaseConfigured || !supabase) return;
+    supabase.auth.getUser().then(({ data }) => {
+      const user = data?.user;
+      if (user && !user.is_anonymous) router.replace("/feed");
+    });
+  }, [router]);
+
+  async function handleForgotPassword() {
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    if (!email.trim()) {
+      setErrorMessage("Enter your email address above, then tap Forgot?");
+      return;
+    }
+    if (!isSupabaseConfigured || !supabase) {
+      setErrorMessage("Authentication is not configured.");
+      return;
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+
+    if (error) {
+      setErrorMessage("We couldn't send the reset email. Please try again later.");
+    } else {
+      setSuccessMessage(
+        "If an account exists for that email, we've sent a link to reset your password.",
+      );
+    }
+  }
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -298,8 +334,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 className="forgot"
-                disabled
-                title="Coming soon"
+                onClick={handleForgotPassword}
               >
                 Forgot?
               </button>
@@ -363,8 +398,9 @@ export default function LoginPage() {
 </button>
 
 <p className="demo-note">
-  Guests can learn and take quizzes. You can add an email or Google
-  account later to keep your progress.
+  Guests can learn, take quizzes and browse the Scam Library. Guest
+  progress belongs to this browser and is not carried over if you create an
+  account later.
 </p> 
         </div>
       </section>

@@ -108,6 +108,13 @@ export default function PlatformAdminPage() {
               <p>Review pending incident reports, approve posts for the public feed, or remove content that should not remain visible.</p>
               <button type="button" onClick={() => router.push("/admin/community")}>Moderate community feed <span aria-hidden="true">→</span></button>
             </article>
+            <article className="admin-card">
+              <span className="card-icon"><DashboardNavIcon name="admin" size={24} /></span>
+              <p className="card-kicker">Platform Insights</p>
+              <h3>Usage dashboard</h3>
+              <p>See totals for registered accounts, community posts, published modules, and completed modules.</p>
+              <button type="button" onClick={() => router.push("/admin/dashboard")}>View platform insights <span aria-hidden="true">→</span></button>
+            </article>
           </div>
         </section>
       </section>

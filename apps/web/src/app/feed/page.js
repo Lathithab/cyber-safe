@@ -285,6 +285,23 @@ export default function FeedPage() {
           }
         }
 
+        // How many visible comments each post has.
+        const commentCounts = {};
+        if (approvedIds.length) {
+          const { data: commentRows, error: commentCountError } = await supabase
+            .from("post_comment_counts")
+            .select("post_id, comment_count")
+            .in("post_id", approvedIds);
+
+          if (commentCountError) {
+            console.error("Error loading comment counts:", commentCountError);
+          } else {
+            (commentRows || []).forEach((row) => {
+              commentCounts[row.post_id] = row.comment_count;
+            });
+          }
+        }
+
         // Which posts this person has already marked helpful.
         let likedIds = new Set();
         if (user && approvedIds.length) {
@@ -310,6 +327,7 @@ export default function FeedPage() {
           issues: row.issues,
           image: row.image_url,
           likes: counts[row.id] ?? 0,
+          comments: commentCounts[row.id] ?? 0,
           liked: likedIds.has(row.id),
           isPending: row.status === "pending",
           isOwn: Boolean(user && row.author_id === user.id),
@@ -894,6 +912,15 @@ export default function FeedPage() {
                         >
                           <Icon name="gem" size={14} />
                           {post.likes} Helpful
+                        </button>
+
+                        <button
+                          type="button"
+                          className="action-button"
+                          onClick={() => router.push(`/post?id=${encodeURIComponent(post.id)}`)}
+                        >
+                          <Icon name="comment" size={14} />
+                          {post.comments} {post.comments === 1 ? "Comment" : "Comments"}
                         </button>
 
                         <div className="share-wrap">

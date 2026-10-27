@@ -56,6 +56,11 @@ function PostPage() {
   const [likeBusy, setLikeBusy] = useState(false);
   const [openMenu, setOpenMenu] = useState(false);
   const [toast, setToast] = useState("");
+  const [comments, setComments] = useState([]);
+  const [commentText, setCommentText] = useState("");
+  const [commentBusy, setCommentBusy] = useState(false);
+  // Guests and signed-out visitors can read comments but not write them.
+  const [canComment, setCanComment] = useState(false);
 
   useEffect(() => {
     if (!openMenu) return;
@@ -74,6 +79,7 @@ function PostPage() {
     const { data: authData } = await supabase.auth.getUser();
     const user = authData?.user || null;
     setUserId(user?.id || null);
+    setCanComment(Boolean(user && !user.is_anonymous));
 
     // Only approved posts have a public page.
     const { data, error } = await supabase
@@ -105,6 +111,18 @@ function PostPage() {
       .eq("post_id", id)
       .maybeSingle();
     setLikeCount(countRow?.like_count ?? 0);
+
+    const { data: commentRows, error: commentError } = await supabase
+      .from("comments")
+      .select("id, author_id, display_name, content, created_at")
+      .eq("post_id", id)
+      .eq("status", "visible")
+      .order("created_at", { ascending: true });
+    if (commentError) {
+      console.error("Error loading comments:", commentError);
+    } else {
+      setComments(commentRows || []);
+    }
 
     if (user) {
       const { data: mine } = await supabase
@@ -199,6 +217,60 @@ function PostPage() {
       showToast("We could not send your report. Please try again.");
     } else {
       showToast("Post reported. An admin will review it.");
+    }
+  }
+
+  async function submitComment(event) {
+    event.preventDefault();
+    const content = commentText.trim();
+    if (!content || commentBusy) return;
+    if (!canComment || !userId) {
+      showToast("Sign in with an account to comment.");
+      return;
+    }
+    if (content.length > 500) {
+      showToast("Comments can be up to 500 characters.");
+      return;
+    }
+    setCommentBusy(true);
+    const { data, error } = await supabase
+      .from("comments")
+      .insert({ post_id: id, author_id: userId, content })
+      .select("id, author_id, display_name, content, created_at")
+      .single();
+    setCommentBusy(false);
+
+    if (error) {
+      console.error("Could not save comment:", error.message);
+      if (error.code === "P0001") {
+        showToast("You are commenting too quickly. Please wait a few minutes.");
+      } else if (error.code === "23514") {
+        showToast("Comments must be between 1 and 500 characters.");
+      } else {
+        showToast("We could not post your comment. Please try again.");
+      }
+      return;
+    }
+    setComments((current) => [...current, data]);
+    setCommentText("");
+  }
+
+  async function reportComment(comment) {
+    if (!canComment || !userId) {
+      showToast("Sign in with an account to report a comment.");
+      return;
+    }
+    const { error } = await supabase
+      .from("comment_flags")
+      .insert({ comment_id: comment.id, user_id: userId });
+
+    if (error?.code === "23505") {
+      showToast("You have already reported this comment.");
+    } else if (error) {
+      console.error("Could not flag comment:", error.message);
+      showToast("We could not send your report. Please try again.");
+    } else {
+      showToast("Comment reported. An admin will review it.");
     }
   }
 
@@ -486,6 +558,19 @@ function PostPage() {
           margin-top: 3px;
         }
 
+        .comments-section { margin: 4px 0 0; }
+        .comments-empty, .comments-note { margin: 0 18px 10px; font-size: 12.5px; color: #6b7c86; line-height: 1.45; }
+        .comment-login { background: none; border: 0; padding: 0; font: inherit; color: #c24f0c; font-weight: 700; cursor: pointer; text-decoration: underline; }
+        .comment-report { margin-left: 10px; background: none; border: 0; color: #6b7c86; font: inherit; font-size: 11.5px; cursor: pointer; text-decoration: underline; padding: 2px 4px; }
+        .comment-form { margin: 8px 14px 0; padding: 12px; border-radius: 14px; background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+        .comment-form textarea { width: 100%; resize: vertical; border: 1px solid #dce5ef; border-radius: 10px; padding: 10px; font: inherit; font-size: 14px; color: #0e1b24; }
+        .comment-form-row { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+        .comment-form-row small { color: #9aa7b0; }
+        .comment-form-row button { background: #eb630f; border: 0; color: #fff; padding: 9px 18px; border-radius: 999px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13.5px; cursor: pointer; }
+        .comment-form-row button:disabled { opacity: 0.4; cursor: not-allowed; }
+        .comment-form .comments-note { margin: 8px 0 0; }
+        .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
         .report-cta {
           margin: 18px 14px 0;
           display: block;
@@ -697,6 +782,58 @@ function PostPage() {
                   </button>
                 </div>
               </div>
+
+              {/* Comments */}
+              <section className="comments-section" aria-label="Comments">
+                <h2 className="comments-heading">Comments ({comments.length})</h2>
+
+                {comments.length === 0 && (
+                  <p className="comments-empty">No comments yet. Add useful advice, not personal details.</p>
+                )}
+
+                {comments.map((comment) => (
+                  <div className="comment-row" key={comment.id}>
+                    <div className="comment-avatar">{initials(comment.display_name)}</div>
+                    <div className="comment-body">
+                      <div className="comment-name">{comment.display_name || "CyberSafe member"}</div>
+                      <p className="comment-text">{comment.content}</p>
+                      <div className="comment-time">
+                        {new Date(comment.created_at).toLocaleString()}
+                        {comment.author_id !== userId && (
+                          <button type="button" className="comment-report" onClick={() => reportComment(comment)}>
+                            Report
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {canComment ? (
+                  <form className="comment-form" onSubmit={submitComment}>
+                    <label className="sr-only" htmlFor="comment-input">Add a comment</label>
+                    <textarea
+                      id="comment-input"
+                      value={commentText}
+                      onChange={(event) => setCommentText(event.target.value)}
+                      maxLength={500}
+                      rows={3}
+                      placeholder="Add a comment"
+                    />
+                    <div className="comment-form-row">
+                      <small>{commentText.length}/500</small>
+                      <button type="submit" disabled={commentBusy || !commentText.trim()}>
+                        {commentBusy ? "Posting…" : "Comment"}
+                      </button>
+                    </div>
+                    <p className="comments-note">Comments appear straight away. Readers can report them, and an admin can remove them.</p>
+                  </form>
+                ) : (
+                  <p className="comments-note comments-signin">
+                    <button type="button" className="comment-login" onClick={() => router.push("/login")}>Log in with an account</button> to comment. Guests can read comments only.
+                  </p>
+                )}
+              </section>
 
               {/* CTA to post your own report */}
               <button

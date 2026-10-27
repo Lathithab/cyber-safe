@@ -46,6 +46,15 @@ database enforces who may do what:
 
 The server enforces this, not just the screens: signed-out visitors cannot insert posts, nobody can approve their own post, and the public name is set from the author's username by the database (or "Anonymous" if they ticked that box). Admins can still see who wrote an anonymous post.
 
+### How comments are moderated
+
+Comments work differently from posts, on purpose. A review queue for every reply would make a conversation unusable, so comments appear straight away and safety comes from other controls:
+
+1. Only signed-in members (not guests or signed-out visitors) can comment, on approved posts only. Comments are 1 to 500 characters, and a person can post at most 10 in 10 minutes.
+2. The public name is set by the database from the member's username, so it cannot be faked.
+3. Readers can report a comment. When 3 different people have reported it, it is hidden automatically until an admin looks at it. When an admin restores it, only *new* reports count.
+4. Admins moderate comments on the same page as posts: `/admin/community`, **Comments** tab. The default view is "Reported". They can restore, hide or remove a comment. Removed comments stay in the database for records.
+
 ## Repository layout
 
 | Path | What it is |
@@ -128,7 +137,7 @@ Webhook URL for Meta: `https://<your-render-url>/webhook`.
 - **Bot memory is per-process.** A restart clears active chats, and the bot cannot run on more than one instance. Moving sessions into Supabase or Redis is the next step.
 - **Crisis detection is keyword-based**, so it will miss misspellings and slang. It is a safety net behind the AI's own judgement, not a replacement for human follow-up.
 - **The bot's languages** are English, Afrikaans, Sepedi and isiXhosa. Other languages get a best-effort AI reply.
-- **The feed has no comments.** The old comment box only saved to the commenter's own browser, so it was removed. The `comments` table exists; real comments would need their own moderation.
+- **Comments are not reviewed before they appear.** They are checked afterwards (reports, auto-hide at 3, admin removal). A post's comments disappear when the post is sent back to review.
 - **The Notification Center shows sample alerts**, and the page says so. Live notifications are not built.
 - **Several Settings options say "Coming soon"** (2FA, SMS/email/push alerts, language, text size, high contrast). Password reset by email works.
 - **Guests cannot turn their progress into an account.** Linking a guest to an email or Google login needs Supabase's manual identity linking to be switched on and tested.

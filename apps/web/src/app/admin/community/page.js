@@ -7,6 +7,7 @@ import DashboardNavIcon from "../../components/DashboardNavIcon";
 import C3saLogo from "../../components/C3saLogo";
 import LogoutButton from "../../components/LogoutButton";
 import { DASHBOARD_NAV } from "../../components/dashboardNav";
+import CommentModeration from "./CommentModeration";
 
 const FILTERS = ["all", "pending", "approved", "removed", "flagged"];
 
@@ -22,6 +23,8 @@ export default function AdminCommunityPage() {
   const [posts, setPosts] = useState([]);
   // How many people have reported each post, keyed by post id.
   const [flagCounts, setFlagCounts] = useState({});
+  // Posts and comments are moderated on the same page.
+  const [section, setSection] = useState("posts");
   const [filter, setFilter] = useState("pending");
   const [isLoading, setIsLoading] = useState(false);
   const [updatingId, setUpdatingId] = useState("");
@@ -159,8 +162,17 @@ export default function AdminCommunityPage() {
           <button className="back-link" type="button" onClick={() => router.push("/admin")}>← Platform Admin</button>
           <p className="eyebrow">Community safety</p>
           <h1>Feed moderation</h1>
-          <p>Review Supabase posts, approve appropriate reports for the public feed, or remove posts that should not remain visible.</p>
+          <p>Review posts and comments, approve appropriate reports for the public feed, and handle anything readers have reported.</p>
         </header>
+
+        <div className="filters section-tabs" role="group" aria-label="Choose what to moderate">
+          <button type="button" className={section === "posts" ? "filter active" : "filter"} onClick={() => setSection("posts")}>Posts</button>
+          <button type="button" className={section === "comments" ? "filter active" : "filter"} onClick={() => setSection("comments")}>Comments</button>
+        </div>
+
+        {section === "comments" && <CommentModeration adminId={adminId} />}
+        {section === "posts" && (
+        <>
 
         <div className="moderation-note"><DashboardNavIcon name="admin" size={20} /><span>New database-backed feed posts and incident reports are held for review. Removed posts are hidden from the public feed and retained in the database.</span></div>
 
@@ -197,6 +209,8 @@ export default function AdminCommunityPage() {
             </article>
           ))}
         </section>
+        </>
+        )}
       </section>
       <style>{styles}</style>
     </main>
@@ -235,6 +249,9 @@ const styles = `
   .status { padding: 5px 9px; border-radius: 999px; background: #f1f4f8; color: #536179; font-size: 11px; font-weight: 800; text-transform: uppercase; }
   .status-pending { background: #fff6df; color: #94630b; }
   .status-approved { background: #e7f8ef; color: #197448; }
+  .status-visible { background: #e7f8ef; color: #197448; }
+  .status-hidden { background: #fff6df; color: #94630b; }
+  .section-tabs { margin-top: 20px; }
   .status-removed { background: #fff0f0; color: #b13e49; }
   .status-flagged { background: #fff0f0; color: #b13e49; margin-left: 6px; }
   .moderation-card h2 { margin: 13px 0 8px; font-family: "Syne", Arial, sans-serif; font-size: 18px; }

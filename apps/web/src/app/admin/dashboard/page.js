@@ -80,7 +80,7 @@ export default function AdminDashboardPage() {
 
       // Request counts instead of downloading every database record.
       const results = await Promise.all([
-        supabase.from("profiles").select("id", { count: "exact", head: true }),
+        supabase.rpc("admin_registered_account_count"),
 
         supabase.from("posts").select("id", { count: "exact", head: true }),
 
@@ -101,7 +101,7 @@ export default function AdminDashboardPage() {
         results;
 
       setStats({
-        users: usersResult.error ? null : (usersResult.count ?? 0),
+        users: usersResult.error ? null : (usersResult.data ?? 0),
         posts: postsResult.error ? null : (postsResult.count ?? 0),
         modules: modulesResult.error ? null : (modulesResult.count ?? 0),
         completions: completionsResult.error
